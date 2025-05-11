@@ -10,9 +10,11 @@
 		"format": "prettier --write .",
 		"prettier": "prettier --check .",
 		"prettier:write": "prettier --write .",
-		"eslint": "eslint .",
-		"eslint:fix": "eslint . --fix",
-		"tscheck": "tsc --noEmit"
+		"eslint": "eslint ./src",
+		"eslint:fix": "eslint ./src --fix",
+		"tscheck": "tsc --noEmit",
+		"commitlint": "commitlint --edit",
+		"prepare": "husky"
 	},
 	"dependencies": {
 		"next": "15.3.2",
@@ -32,6 +34,7 @@
 		"eslint": "^9.26.0",
 		"eslint-config-next": "15.3.2",
 		"eslint-config-prettier": "^10.1.5",
+		"husky": "^9.1.7",
 		"prettier": "3.5.3",
 		"prettier-plugin-tailwindcss": "^0.6.11",
 		"tailwindcss": "^4",
