@@ -34,6 +34,7 @@ export default tseslint.config(
 			"src/components/magicui",
 			"tailwind.config.ts",
 			"eslint.config.mjs",
+			"commitlint.config.mjs",
 			".prettierrc.js",
 		],
 	},
