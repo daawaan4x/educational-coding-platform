@@ -1,6 +1,15 @@
 # Educational Coding Platform
 
-## Scripts
+## Development
+
+After cloning the repository, run the following commands to initialize the repo.
+
+```bash
+pnpm install		# install project dependencies
+pnpm run prepare	# initializes husky, for git hooks
+```
+
+The following is a list of the primary scripts for the project.
 
 ```bash
 pnpm run dev		# start development server
