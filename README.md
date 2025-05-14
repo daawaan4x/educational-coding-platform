@@ -29,3 +29,7 @@ This project uses the following tools to enforce consistent coding conventions, 
 - [ESLint](https://eslint.org/): Enforces best practices on coding conventions.
 - [Typescript](http://typescriptlang.org/): Provides static typing and checks.
 - [CommitLint](https://commitlint.js.org/): Standardizes commit messages based on [Conventional Commits](https://www.conventionalcommits.org/).
+
+### Automation
+
+- [Github Actions](https://github.com/features/actions): Automates CI workflows, including formatting & linting.
