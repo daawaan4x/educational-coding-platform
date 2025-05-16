@@ -19,6 +19,19 @@ pnpm run lint		# lint codebase with ESLint & Typescript
 pnpm run format		# format codebase with Prettier
 ```
 
+## API
+
+This project uses the following tech for the API.
+
+- [tRPC](https://trpc.io/): End-to-end type-safe client-server communication
+- [Zod](https://zod.dev/): Declarative data validation with user-defined schemas
+
+An interactive documentation page for the tRPC API can be found at `/api/trpc` _during **development** only_.
+
+```
+http://localhost:3000/api/trpc
+```
+
 ## Database
 
 ```bash
