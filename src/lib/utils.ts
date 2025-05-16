@@ -5,4 +5,4 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
-export const foo=1;
+export const foo = 1;
