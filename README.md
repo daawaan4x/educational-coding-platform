@@ -19,6 +19,16 @@ pnpm run lint		# lint codebase with ESLint & Typescript
 pnpm run format		# format codebase with Prettier
 ```
 
+## Database
+
+```bash
+pnpm exec drizzle-kit studio		# start database gui client
+pnpm exec drizzle-kit generate		# generate migration files
+pnpm exec drizzle-kit migrate		# apply migration files
+```
+
+- See [Drizzle Studio](https://orm.drizzle.team/docs/drizzle-kit-studio): quickly viewing contents of the database.
+
 ## Tooling
 
 This project uses the following tools to enforce consistent coding conventions, formatting, and automated workflows:
