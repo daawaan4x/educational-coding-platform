@@ -8,7 +8,7 @@
 		"start": "next start",
 		"lint": "next lint",
 		"format": "prettier --write .",
-		"prettier": "prettier --check --write .",
+		"prettier": "prettier --check .",
 		"prettier:write": "prettier --write .",
 		"eslint": "eslint ./src",
 		"eslint:fix": "eslint ./src --fix",
