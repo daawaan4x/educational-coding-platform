@@ -1,0 +1,19 @@
+version: "3.8"
+name: educational-coding-platform
+
+services:
+  postgres:
+    image: postgres:17.4
+    command: postgres -c 'log_statement=all'
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=main
+    ports:
+      - 5432:5432
+    volumes:
+      - "postgres_data:/var/lib/postgresql/data"
+
+volumes:
+  postgres_data:
