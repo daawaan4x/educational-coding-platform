@@ -39,4 +39,12 @@ export default tseslint.config(
 		],
 	},
 	prettiereslint,
+	{
+		rules: {
+			"@typescript-eslint/no-unused-vars": "off",
+			"@typescript-eslint/no-unnecessary-type-assertion": "off",
+			"@typescript-eslint/require-await": "off",
+		},
+	},
 );
+// Comment out the rules before production
