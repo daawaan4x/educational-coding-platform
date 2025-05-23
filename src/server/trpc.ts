@@ -1,23 +1,7 @@
-import { UserSchema } from "@/db/validation";
 import { Permission } from "@/lib/permissions";
-import { Role } from "@/lib/roles";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { z } from "zod/v4";
-
-export interface TRPCContext {
-	user?: {
-		id: string;
-		data: Omit<UserSchema.Select, "id">;
-		permissions: Permission[];
-		roles: Role[];
-		can(...permissions: Permission[]): boolean;
-		is(...roles: Role[]): boolean;
-	};
-}
-
-export interface AuthedTRPCContext {
-	user: NonNullable<TRPCContext["user"]>;
-}
+import { TRPCContext } from "./context";
 
 const t = initTRPC.context<TRPCContext>().create();
 
@@ -27,37 +11,18 @@ export const publicProcedure = t.procedure;
 
 export function authedProcedure() {
 	return publicProcedure.use(async (opts) => {
-		// if (!opts.ctx.user) {
-		// 	throw new TRPCError({ code: "UNAUTHORIZED" });
-		// }
+		if (!opts.ctx.user) {
+			throw new TRPCError({ code: "UNAUTHORIZED" });
+		}
 
 		return opts.next({
-			ctx: {
-				// TODO: Replace with real implementation
-				user: {
-					id: "",
-					data: {
-						date_created: new Date(),
-						date_modified: new Date(),
-						email: "",
-						first_name: "",
-						last_name: "",
-						is_deleted: false,
-					},
-
-					roles: ["admin"],
-					is() {
-						return true;
-					},
-
-					permissions: ["users:read"],
-					can() {
-						return true;
-					},
-				},
-			} satisfies TRPCContext,
+			ctx: { user: opts.ctx.user },
 		});
 	});
+}
+
+export interface AuthedTRPCContext {
+	user: NonNullable<TRPCContext["user"]>;
 }
 
 export interface AuthedFn<TInput extends z.core.$ZodType, TReturn> {
