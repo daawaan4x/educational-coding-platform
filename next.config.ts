@@ -5,8 +5,8 @@ const nextConfig: NextConfig = {
 		// No domains needed for local images, but include for completeness
 		domains: [],
 		// Optional: Specify formats for optimization
-		formats: ['image/webp'],
-	  },
+		formats: ["image/webp"],
+	},
 };
 
 export default nextConfig;
