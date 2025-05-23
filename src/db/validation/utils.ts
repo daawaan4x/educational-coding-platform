@@ -10,4 +10,5 @@ export const metafields = {
 	id: true,
 	date_created: true,
 	date_modified: true,
+	is_deleted: true,
 } as const;
