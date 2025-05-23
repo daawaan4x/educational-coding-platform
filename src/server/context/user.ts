@@ -19,6 +19,7 @@ export class UserContext {
 	 * Checks if the user can do any of the permissions
 	 */
 	can(...permissions: Permission[]) {
+		if (this.is("admin")) return true;
 		return permissions.some((permission) => this.permissions.includes(permission));
 	}
 

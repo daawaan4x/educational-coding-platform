@@ -45,8 +45,10 @@ export function authed<TInput extends z.core.$ZodType, TReturn>(args: {
 	fn = (opts) => {
 		// Check if User has all Claims
 		const { ctx } = opts;
+		const { user } = ctx;
+
 		for (const claim of require) {
-			if (!ctx.user.can(claim)) throw new TRPCError({ code: "FORBIDDEN" });
+			if (!user.can(claim)) throw new TRPCError({ code: "FORBIDDEN" });
 		}
 
 		return args.fn(opts);
