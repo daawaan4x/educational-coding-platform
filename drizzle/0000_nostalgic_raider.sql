@@ -1,3 +1,4 @@
+CREATE TYPE "public"."roles" AS ENUM('admin', 'teacher', 'student');--> statement-breakpoint
 CREATE TABLE "classes" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"date_created" timestamp DEFAULT now() NOT NULL,
@@ -38,7 +39,8 @@ CREATE TABLE "users" (
 	"is_deleted" boolean DEFAULT false NOT NULL,
 	"email" varchar(255) NOT NULL,
 	"last_name" varchar(255) NOT NULL,
-	"first_name" varchar(255) NOT NULL
+	"first_name" varchar(255) NOT NULL,
+	"role" "roles"
 );
 --> statement-breakpoint
 CREATE TABLE "users_classes" (

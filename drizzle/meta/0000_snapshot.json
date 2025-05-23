@@ -1,5 +1,5 @@
 {
-	"id": "712079cb-e6eb-45b9-8b1f-2ef3fce74b6a",
+	"id": "f248ab14-8cec-4218-a2b0-ffe70615bc7a",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"version": "7",
 	"dialect": "postgresql",
@@ -289,6 +289,13 @@
 					"type": "varchar(255)",
 					"primaryKey": false,
 					"notNull": true
+				},
+				"role": {
+					"name": "role",
+					"type": "roles",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": false
 				}
 			},
 			"indexes": {},
@@ -344,7 +351,13 @@
 			"isRLSEnabled": false
 		}
 	},
-	"enums": {},
+	"enums": {
+		"public.roles": {
+			"name": "roles",
+			"schema": "public",
+			"values": ["admin", "teacher", "student"]
+		}
+	},
 	"schemas": {},
 	"sequences": {},
 	"roles": {},

@@ -1,4 +1,4 @@
-export const resources = ["classes", "problems", "problems.solutions", "solutions", "users", "users.classes"] as const;
+export const resources = ["classes", "classes.users", "problems", "problems.solutions", "solutions", "users"] as const;
 export type Resource = (typeof resources)[number];
 
 export const actions = ["create", "read", "update", "delete", "manage"] as const;
@@ -10,6 +10,7 @@ export const permissions = [
 	"classes:read",
 	"classes:update",
 	"classes:delete",
+	"classes.users:manage",
 
 	"problems:create",
 	"problems:read",
@@ -25,8 +26,6 @@ export const permissions = [
 	"users:read",
 	"users:update",
 	"users:delete",
-
-	"users.classes:manage",
 ] satisfies BasePermission[];
 
 export type Permission = (typeof permissions)[number];

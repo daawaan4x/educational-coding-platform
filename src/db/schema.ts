@@ -1,5 +1,6 @@
+import { roles } from "@/lib/roles";
 import { relations } from "drizzle-orm";
-import { boolean, integer, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { boolean, integer, pgEnum, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 
 const baseFields = {
 	id: uuid().primaryKey().notNull().defaultRandom(),
@@ -8,6 +9,8 @@ const baseFields = {
 	is_deleted: boolean().notNull().default(false),
 };
 
+export const rolesEnum = pgEnum("roles", roles);
+
 // MARK: TABLES
 
 export const users = pgTable("users", {
@@ -15,6 +18,7 @@ export const users = pgTable("users", {
 	email: varchar({ length: 255 }).notNull(),
 	last_name: varchar({ length: 255 }).notNull(),
 	first_name: varchar({ length: 255 }).notNull(),
+	role: rolesEnum(),
 });
 
 export const classes = pgTable("classes", {
