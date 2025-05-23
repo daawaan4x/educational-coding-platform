@@ -101,7 +101,8 @@ const list = authed({
 			.leftJoin(classes, eq(users_to_classes.class_id, classes.id))
 			.leftJoinLateral(subquery_problems, sql`true`)
 			.leftJoinLateral(subquery_users, sql`true`)
-			.where(eq(users_to_classes.user_id, user.id))
+			// Run Where Clause if User not Admin
+			.where(user.is("admin") ? undefined : eq(users_to_classes.user_id, user.id))
 			.limit(input.size)
 			.offset((input.page - 1) * input.size);
 
