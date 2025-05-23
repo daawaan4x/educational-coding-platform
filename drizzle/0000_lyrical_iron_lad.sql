@@ -2,6 +2,7 @@ CREATE TABLE "classes" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"date_created" timestamp DEFAULT now() NOT NULL,
 	"date_modified" timestamp DEFAULT now() NOT NULL,
+	"is_deleted" boolean DEFAULT false NOT NULL,
 	"name" varchar(255) NOT NULL
 );
 --> statement-breakpoint
@@ -9,6 +10,7 @@ CREATE TABLE "problems" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"date_created" timestamp DEFAULT now() NOT NULL,
 	"date_modified" timestamp DEFAULT now() NOT NULL,
+	"is_deleted" boolean DEFAULT false NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"description" text NOT NULL,
 	"deadline" timestamp NOT NULL,
@@ -21,6 +23,7 @@ CREATE TABLE "solutions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"date_created" timestamp DEFAULT now() NOT NULL,
 	"date_modified" timestamp DEFAULT now() NOT NULL,
+	"is_deleted" boolean DEFAULT false NOT NULL,
 	"submitted" boolean DEFAULT false NOT NULL,
 	"code" text DEFAULT '' NOT NULL,
 	"score" integer,
@@ -32,6 +35,7 @@ CREATE TABLE "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"date_created" timestamp DEFAULT now() NOT NULL,
 	"date_modified" timestamp DEFAULT now() NOT NULL,
+	"is_deleted" boolean DEFAULT false NOT NULL,
 	"email" varchar(255) NOT NULL,
 	"last_name" varchar(255) NOT NULL,
 	"first_name" varchar(255) NOT NULL

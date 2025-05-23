@@ -1,5 +1,5 @@
 {
-	"id": "7ed3b2ba-16a3-48e8-ada5-0bae039d4750",
+	"id": "712079cb-e6eb-45b9-8b1f-2ef3fce74b6a",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"version": "7",
 	"dialect": "postgresql",
@@ -28,6 +28,13 @@
 					"primaryKey": false,
 					"notNull": true,
 					"default": "now()"
+				},
+				"is_deleted": {
+					"name": "is_deleted",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
 				},
 				"name": {
 					"name": "name",
@@ -68,6 +75,13 @@
 					"primaryKey": false,
 					"notNull": true,
 					"default": "now()"
+				},
+				"is_deleted": {
+					"name": "is_deleted",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
 				},
 				"name": {
 					"name": "name",
@@ -159,6 +173,13 @@
 					"notNull": true,
 					"default": "now()"
 				},
+				"is_deleted": {
+					"name": "is_deleted",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
 				"submitted": {
 					"name": "submitted",
 					"type": "boolean",
@@ -243,6 +264,13 @@
 					"primaryKey": false,
 					"notNull": true,
 					"default": "now()"
+				},
+				"is_deleted": {
+					"name": "is_deleted",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
 				},
 				"email": {
 					"name": "email",

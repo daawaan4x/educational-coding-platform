@@ -5,6 +5,7 @@ const baseFields = {
 	id: uuid().primaryKey().notNull().defaultRandom(),
 	date_created: timestamp().notNull().defaultNow(),
 	date_modified: timestamp().notNull().defaultNow(),
+	is_deleted: boolean().notNull().default(false),
 };
 
 // MARK: TABLES
@@ -19,6 +20,15 @@ export const users = pgTable("users", {
 export const classes = pgTable("classes", {
 	...baseFields,
 	name: varchar({ length: 255 }).notNull(),
+});
+
+export const users_to_classes = pgTable("users_classes", {
+	user_id: uuid()
+		.notNull()
+		.references(() => users.id),
+	class_id: uuid()
+		.notNull()
+		.references(() => classes.id),
 });
 
 export const problems = pgTable("problems", {
@@ -60,15 +70,6 @@ export const class_relations = relations(classes, ({ many }) => ({
 	users: many(users_to_classes),
 	problems: many(problems),
 }));
-
-export const users_to_classes = pgTable("users_classes", {
-	user_id: uuid()
-		.notNull()
-		.references(() => users.id),
-	class_id: uuid()
-		.notNull()
-		.references(() => classes.id),
-});
 
 export const users_to_classes_relations = relations(users_to_classes, ({ one }) => ({
 	user: one(users, { fields: [users_to_classes.user_id], references: [users.id] }),
