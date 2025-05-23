@@ -10,7 +10,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, VariantProps } from "class-variance-authority";
-import { type ClassValue } from "clsx";
 import { PanelLeftIcon } from "lucide-react";
 import * as React from "react";
 
@@ -20,12 +19,6 @@ const SIDEBAR_WIDTH = "16rem";
 const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
-
-// Fix 'className' prop type error in 'cn' function use
-// Explicitly type SidebarTrigger props
-interface SidebarTriggerProps extends Omit<React.ComponentProps<typeof Button>, "className"> {
-	className?: ClassValue; // Use ClassValue for compatibility with cn
-}
 
 interface SidebarContextProps {
 	state: "expanded" | "collapsed";
@@ -233,7 +226,7 @@ function Sidebar({
 	);
 }
 
-function SidebarTrigger({ className, onClick, ...props }: SidebarTriggerProps) {
+function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<typeof Button>) {
 	const { toggleSidebar } = useSidebar();
 
 	return (
@@ -672,4 +665,6 @@ export {
 	SidebarSeparator,
 	SidebarTrigger,
 	useSidebar,
+	SIDEBAR_WIDTH_MOBILE,
+	SIDEBAR_WIDTH,
 };

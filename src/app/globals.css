@@ -114,9 +114,105 @@
 
 @layer base {
 	* {
-		@apply border-border outline-ring/50;
+		@apply border-border outline-ring/50 box-border;
 	}
 	body {
 		@apply bg-background text-foreground;
 	}
+}
+
+* {
+	box-sizing: border-box;
+}
+
+/* Typography From shadcn */
+
+h1 {
+	font-size: 2.25rem;
+	line-height: 2.5rem;
+	font-weight: 800;
+	letter-spacing: -0.025em;
+	scroll-margin: 5rem;
+
+	@media (min-width: 1024px) {
+		font-size: 3rem;
+		line-height: 1;
+	}
+}
+
+h2 {
+	padding-bottom: 0.5rem;
+	border-bottom-width: 1px;
+	font-size: 1.875rem;
+	line-height: 2.25rem;
+	font-weight: 600;
+	letter-spacing: -0.025em;
+	scroll-margin: 5rem;
+}
+
+h3 {
+	font-size: 1.5rem;
+	line-height: 2rem;
+	font-weight: 600;
+	letter-spacing: -0.025em;
+	scroll-margin: 5rem;
+}
+
+h4 {
+	font-size: 1.25rem;
+	line-height: 1.75rem;
+	font-weight: 600;
+	letter-spacing: -0.025em;
+	scroll-margin: 5rem;
+}
+
+p {
+	line-height: 1.75rem;
+	:not(:first-child) {
+		margin-top: 1.5rem;
+	}
+}
+
+blockquote {
+	padding-left: 1.5rem;
+	margin-top: 1.5rem;
+	border-left-width: 2px;
+	font-style: italic;
+}
+
+/* ul {
+	margin-top: 1.5rem;
+	margin-bottom: 1.5rem;
+	margin-left: 1.5rem;
+	list-style-type: disc;
+  }
+  
+ul > li {
+	margin-top: 0.5rem;
+}
+
+ol {
+	margin-top: 1.5rem;
+	margin-bottom: 1.5rem;
+	margin-left: 1.5rem;
+  }
+  
+ol > li {
+	margin-top: 0.5rem;
+} */
+
+code {
+	position: relative;
+	border-radius: 0.25rem;
+	font-family: Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+	font-size: 0.875rem;
+	line-height: 1.25rem;
+	font-weight: 600;
+}
+
+small {
+	font-size: 0.875rem;
+	line-height: 1.25rem;
+	font-weight: 500;
+	line-height: 1;
 }
