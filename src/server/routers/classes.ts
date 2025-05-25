@@ -149,8 +149,19 @@ const delete_ = authed({
 	}),
 
 	async fn({ ctx, input }) {
+		const { user } = ctx;
+
 		// Check if User has access to Class
 		const record = await find({ ctx, input });
+
+		// Run Checks if User is not Admin
+		if (!user.is("admin")) {
+			// Error if Class still has users
+			if (record.users.length > 0) throw new TRPCError({ code: "CONFLICT", message: "Class still has users" });
+		}
+
+		// Soft-delete Class Problems
+		await db.update(problems).set({ is_deleted: true }).where(eq(problems.class_id, input.id));
 
 		// Soft-delete Class
 		await db.update(classes).set({ is_deleted: true }).where(eq(classes.id, input.id));
