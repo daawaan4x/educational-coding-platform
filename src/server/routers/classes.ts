@@ -135,7 +135,14 @@ const update = authed({
 		await find({ ctx, input });
 
 		// Update Class
-		const [record] = await db.update(classes).set(input.data).where(eq(classes.id, input.id)).returning();
+		const [record] = await db
+			.update(classes)
+			.set({
+				...input.data,
+				date_modified: sql`now()`,
+			})
+			.where(eq(classes.id, input.id))
+			.returning();
 		return record;
 	},
 });
