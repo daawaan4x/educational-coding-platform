@@ -5,8 +5,15 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema, metafields 
 export const Select = createSelectSchema(problems);
 export type Select = z.output<typeof Select>;
 
-export const Insert = createInsertSchema(problems).omit(metafields);
+export const Insert = createInsertSchema(problems).omit({
+	...metafields,
+	author_id: true,
+});
 export type Insert = z.output<typeof Insert>;
 
-export const Update = createUpdateSchema(problems).omit(metafields);
+export const Update = createUpdateSchema(problems).omit({
+	...metafields,
+	author_id: true,
+	class_id: true,
+});
 export type Update = z.output<typeof Update>;

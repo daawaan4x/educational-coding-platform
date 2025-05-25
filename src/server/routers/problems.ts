@@ -1,7 +1,11 @@
+import { db } from "@/db";
+import { classes, problems, users, users_to_classes } from "@/db/schema";
 import { ProblemSchema } from "@/db/validation";
 import { TRPCError } from "@trpc/server";
+import { and, desc, eq, getTableColumns, sql } from "drizzle-orm";
 import { z } from "zod/v4";
 import { authed, authedProcedure, router } from "../trpc";
+import { userService } from "./users";
 
 const find = authed({
 	require: ["problems:read"],
@@ -9,8 +13,37 @@ const find = authed({
 		id: ProblemSchema.Select.shape.id,
 	}),
 
-	fn() {
-		throw new TRPCError({ code: "NOT_IMPLEMENTED" });
+	async fn({ ctx, input }) {
+		const { user } = ctx;
+
+		// Get Problem w/ User and Class
+		const query_problem = db
+			.select({
+				...getTableColumns(problems),
+				author: getTableColumns(users),
+				class: getTableColumns(classes),
+			})
+			.from(problems)
+			.innerJoin(users, eq(problems.author_id, users.id))
+			.innerJoin(classes, eq(problems.class_id, classes.id))
+			.where(
+				and(
+					eq(problems.id, input.id),
+
+					// If Problem Author | Class is deleted, consider Problem as deleted
+					eq(problems.is_deleted, false),
+					eq(users.is_deleted, false),
+					eq(classes.is_deleted, false),
+				),
+			);
+
+		const [record] = await query_problem;
+		if (!record) throw new TRPCError({ code: "NOT_FOUND" });
+
+		// Check if User is in Class
+		await userService.requireClass(user, record.class_id);
+
+		return record;
 	},
 });
 
@@ -21,8 +54,35 @@ const list = authed({
 		page: z.int().gte(1).default(1),
 	}),
 
-	fn() {
-		throw new TRPCError({ code: "NOT_IMPLEMENTED" });
+	async fn({ ctx, input }) {
+		const { user } = ctx;
+
+		// Get list of Problems from all Classes where User has access
+		const records = await db
+			.select({
+				...getTableColumns(problems),
+				author: getTableColumns(users),
+				class: getTableColumns(classes),
+			})
+			.from(users_to_classes)
+			.innerJoin(problems, eq(users_to_classes.class_id, problems.class_id))
+			.innerJoin(users, eq(problems.author_id, users.id))
+			.innerJoin(classes, eq(problems.class_id, classes.id))
+			.where(
+				and(
+					eq(users_to_classes.user_id, user.id),
+
+					// If Problem Author | Class is deleted, consider Problem as deleted
+					eq(problems.is_deleted, false),
+					eq(users.is_deleted, false),
+					eq(classes.is_deleted, false),
+				),
+			)
+			.orderBy(desc(problems.date_modified))
+			.limit(input.size)
+			.offset((input.page - 1) * input.size);
+
+		return records;
 	},
 });
 
@@ -32,8 +92,21 @@ const create = authed({
 		data: ProblemSchema.Insert,
 	}),
 
-	fn() {
-		throw new TRPCError({ code: "NOT_IMPLEMENTED" });
+	async fn({ ctx, input }) {
+		const { user } = ctx;
+
+		// Check if User has access to Class
+		await userService.requireClass(user, input.data.class_id);
+
+		// Create Problem
+		const [record] = await db
+			.insert(problems)
+			.values({
+				...input.data,
+				author_id: user.id,
+			})
+			.returning();
+		return record;
 	},
 });
 
@@ -44,8 +117,29 @@ const update = authed({
 		data: ProblemSchema.Update,
 	}),
 
-	fn() {
-		return false;
+	async fn({ ctx, input }) {
+		const { user } = ctx;
+
+		const record_old = await find({ ctx, input });
+
+		// Skip checks if Admin
+		if (!user.is("admin")) {
+			// Check if User is author of Problem
+			if (record_old.author_id != user.id)
+				throw new TRPCError({ code: "FORBIDDEN", message: "User is not the author of the Problem." });
+		}
+
+		// Update Problem
+		const [record] = await db
+			.update(problems)
+			.set({
+				...input.data,
+				author_id: user.id,
+				date_modified: sql`now()`,
+			})
+			.where(eq(problems.id, input.id))
+			.returning();
+		return record;
 	},
 });
 
@@ -55,8 +149,23 @@ const delete_ = authed({
 		id: ProblemSchema.Select.shape.id,
 	}),
 
-	fn() {
-		throw new TRPCError({ code: "NOT_IMPLEMENTED" });
+	async fn({ ctx, input }) {
+		const { user } = ctx;
+
+		const record = await find({ ctx, input });
+
+		// Run checks if User is not Admin
+		if (!user.is("admin")) {
+			// Check if User is author of Problem
+			if (record.author_id != user.id)
+				throw new TRPCError({ code: "FORBIDDEN", message: "User is not the author of the Problem." });
+		}
+
+		// Soft-delete Problem
+		await db.update(problems).set({ is_deleted: true }).where(eq(problems.id, input.id));
+		record.is_deleted = true;
+
+		return record;
 	},
 });
 
