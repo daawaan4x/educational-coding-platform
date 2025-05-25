@@ -96,11 +96,17 @@ const list = authed({
 				users_count: sql<{ count: number }>`users.count`.as("users_count"),
 			})
 			.from(users_to_classes)
-			.leftJoin(classes, eq(users_to_classes.class_id, classes.id))
+			.innerJoin(classes, eq(users_to_classes.class_id, classes.id))
 			.leftJoinLateral(subquery_problems, sql`true`)
 			.leftJoinLateral(subquery_users, sql`true`)
-			// Run Where Clause if User not Admin
-			.where(user.is("admin") ? undefined : eq(users_to_classes.user_id, user.id))
+			.where(
+				and(
+					eq(classes.is_deleted, false),
+
+					// Remove filter if User is Admin
+					user.is("admin") ? undefined : eq(users_to_classes.user_id, user.id),
+				),
+			)
 			.limit(input.size)
 			.offset((input.page - 1) * input.size);
 
