@@ -16,7 +16,7 @@ const find = authed({
 	async fn({ ctx, input }) {
 		const { user } = ctx;
 
-		// Get Class w/ list of Problems and Users
+		// Get list of Problems in Class
 		const subquery_problems = db
 			.select({
 				data: jsonb_agg(jsonb_build_object({ ...getTableColumns(problems) })).as("data"),
@@ -25,15 +25,17 @@ const find = authed({
 			.where(and(eq(problems.class_id, classes.id), eq(problems.is_deleted, false)))
 			.as("problems");
 
+		// Get list of Users in Class
 		const subquery_users = db
 			.select({
 				data: jsonb_agg(jsonb_build_object({ ...getTableColumns(users) })).as("data"),
 			})
 			.from(users_to_classes)
-			.leftJoin(users, eq(users_to_classes.user_id, users.id))
+			.innerJoin(users, eq(users_to_classes.user_id, users.id))
 			.where(and(eq(users_to_classes.class_id, classes.id), eq(users.is_deleted, false)))
 			.as("users");
 
+		// Get Class w/ list of Problems and Users
 		const query_class = db
 			.select({
 				...getTableColumns(classes),
@@ -43,18 +45,14 @@ const find = authed({
 			.from(classes)
 			.leftJoinLateral(subquery_problems, sql`true`)
 			.leftJoinLateral(subquery_users, sql`true`)
-			.limit(1);
+			.where(and(eq(classes.id, input.id), eq(classes.is_deleted, false)));
 
 		const [record] = await query_class;
 
 		if (!record) throw new TRPCError({ code: "NOT_FOUND" });
 
 		// Check if User is in Class
-		const [user_in_class] = await db
-			.select()
-			.from(users_to_classes)
-			.where(and(eq(users_to_classes.user_id, user.id), eq(users_to_classes.class_id, input.id)))
-			.limit(1);
+		const user_in_class = record.users.some((u) => u.id == user.id);
 
 		// Run checks if User not Admin
 		if (!user.is("admin")) {
@@ -68,7 +66,7 @@ const find = authed({
 });
 
 const list = authed({
-	require: ["classes:read"], // user must have "classes:read" permission to access endpoint
+	require: ["classes:read"],
 	input: z.object({
 		size: z.int().gte(1).lte(50).default(1),
 		page: z.int().gte(1).default(1),
@@ -87,7 +85,7 @@ const list = authed({
 		const subquery_users = db
 			.select({ count: sql<number>`count(*)::int`.as("count") })
 			.from(users_to_classes)
-			.leftJoin(users, eq(users_to_classes.user_id, users.id))
+			.innerJoin(users, eq(users_to_classes.user_id, users.id))
 			.where(and(eq(users_to_classes.class_id, classes.id), eq(users.is_deleted, false)))
 			.as("users");
 
@@ -159,9 +157,6 @@ const delete_ = authed({
 			// Error if Class still has users
 			if (record.users.length > 0) throw new TRPCError({ code: "CONFLICT", message: "Class still has users" });
 		}
-
-		// Soft-delete Class Problems
-		await db.update(problems).set({ is_deleted: true }).where(eq(problems.class_id, input.id));
 
 		// Soft-delete Class
 		await db.update(classes).set({ is_deleted: true }).where(eq(classes.id, input.id));
