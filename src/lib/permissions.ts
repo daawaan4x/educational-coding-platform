@@ -17,6 +17,8 @@ export const permissions = [
 	"problems:update",
 	"problems:delete",
 
+	"problems.solutions:read",
+
 	"solutions:create",
 	"solutions:read",
 	"solutions:update",

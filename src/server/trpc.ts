@@ -48,7 +48,8 @@ export function authed<TInput extends z.core.$ZodType, TReturn>(args: {
 		const { user } = ctx;
 
 		for (const claim of require) {
-			if (!user.can(claim)) throw new TRPCError({ code: "FORBIDDEN" });
+			if (!user.can(claim))
+				throw new TRPCError({ code: "FORBIDDEN", message: "User does not have access to perform the action." });
 		}
 
 		return args.fn(opts);
