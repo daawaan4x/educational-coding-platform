@@ -66,11 +66,16 @@ const create = authed({
 const update = authed({
 	require: ["users:update"],
 	input: z.object({
-		id: UserSchema.Select.shape.id,
+		id: UserSchema.Select.shape.id.optional(),
 		data: UserSchema.Update,
 	}),
 
-	async fn({ input }) {
+	async fn({ ctx, input }) {
+		const { user } = ctx;
+
+		if (!user.is("admin") && input.id && user.id != input.id)
+			throw new TRPCError({ code: "FORBIDDEN", message: "User cannot modify other's info." });
+
 		// Update User
 		const [record] = await db
 			.update(users)
@@ -78,7 +83,7 @@ const update = authed({
 				...input.data,
 				date_modified: sql`now()`,
 			})
-			.where(eq(users.id, input.id))
+			.where(eq(users.id, input.id ?? user.id))
 			.returning();
 
 		return record;
