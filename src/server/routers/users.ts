@@ -1,8 +1,8 @@
 import { db } from "@/db";
-import { classes, users_to_classes } from "@/db/schema";
+import { classes, users, users_to_classes } from "@/db/schema";
 import { ClassSchema, UserSchema } from "@/db/validation";
 import { TRPCError } from "@trpc/server";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod/v4";
 import { UserContext } from "../context/user";
 import { authed, authedProcedure, router } from "../trpc";
@@ -14,8 +14,17 @@ const find = authed({
 		id: UserSchema.Select.shape.id,
 	}),
 
-	fn() {
-		throw new TRPCError({ code: "NOT_IMPLEMENTED" });
+	async fn({ input }) {
+		// Get User
+		const query_user = db
+			.select()
+			.from(users)
+			.where(and(eq(users.id, input.id), eq(users.is_deleted, false)));
+
+		const [record] = await query_user;
+		if (!record) throw new TRPCError({ code: "NOT_FOUND" });
+
+		return record;
 	},
 });
 
@@ -26,8 +35,18 @@ const list = authed({
 		page: z.int().gte(1).default(1),
 	}),
 
-	fn() {
-		throw new TRPCError({ code: "NOT_IMPLEMENTED" });
+	async fn({ input }) {
+		// Get list of User
+		const query_user = db
+			.select()
+			.from(users)
+			.where(eq(users.is_deleted, false))
+			.limit(input.size)
+			.offset((input.page - 1) * input.size);
+
+		const records = await query_user;
+
+		return records;
 	},
 });
 
@@ -37,8 +56,10 @@ const create = authed({
 		data: UserSchema.Insert,
 	}),
 
-	fn() {
-		throw new TRPCError({ code: "NOT_IMPLEMENTED" });
+	async fn({ input }) {
+		// Create User
+		const [record] = await db.insert(users).values(input.data).returning();
+		return record;
 	},
 });
 
@@ -49,8 +70,18 @@ const update = authed({
 		data: UserSchema.Update,
 	}),
 
-	fn() {
-		return false;
+	async fn({ input }) {
+		// Update User
+		const [record] = await db
+			.update(users)
+			.set({
+				...input.data,
+				date_modified: sql`now()`,
+			})
+			.where(eq(users.id, input.id))
+			.returning();
+
+		return record;
 	},
 });
 
@@ -60,8 +91,16 @@ const delete_ = authed({
 		id: UserSchema.Select.shape.id,
 	}),
 
-	fn() {
-		throw new TRPCError({ code: "NOT_IMPLEMENTED" });
+	async fn({ input }) {
+		// Soft-delete User
+		const [record] = await db
+			.update(users)
+			.set({
+				is_deleted: true,
+			})
+			.where(eq(users.id, input.id));
+
+		return record;
 	},
 });
 
