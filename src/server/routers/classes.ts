@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { classes, problems, users, users_to_classes } from "@/db/schema";
+import { classes, users_to_classes } from "@/db/schema";
 import { ClassSchema } from "@/db/validation";
 import { TRPCError } from "@trpc/server";
 import { and, eq, getTableColumns, sql } from "drizzle-orm";
@@ -46,29 +46,12 @@ const list = authed({
 		const { user } = ctx;
 
 		// Get list of Classes where User has access
-		const subquery_problems = db
-			.select({ count: sql<number>`count(*)::int`.as("count") })
-			.from(problems)
-			.where(and(eq(problems.class_id, classes.id), eq(problems.is_deleted, false)))
-			.as("problems");
-
-		const subquery_users = db
-			.select({ count: sql<number>`count(*)::int`.as("count") })
-			.from(users_to_classes)
-			.innerJoin(users, eq(users_to_classes.user_id, users.id))
-			.where(and(eq(users_to_classes.class_id, classes.id), eq(users.is_deleted, false)))
-			.as("users");
-
 		const query_user_classes = db
 			.select({
 				...getTableColumns(classes),
-				problems_count: sql<{ count: number }>`problems.count`.as("problems_count"),
-				users_count: sql<{ count: number }>`users.count`.as("users_count"),
 			})
 			.from(users_to_classes)
 			.innerJoin(classes, eq(users_to_classes.class_id, classes.id))
-			.leftJoinLateral(subquery_problems, sql`true`)
-			.leftJoinLateral(subquery_users, sql`true`)
 			.where(
 				and(
 					eq(classes.is_deleted, false),
