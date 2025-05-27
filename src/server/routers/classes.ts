@@ -1,11 +1,11 @@
 import { db } from "@/db";
 import { classes, problems, users, users_to_classes } from "@/db/schema";
 import { ClassSchema } from "@/db/validation";
-import { jsonb_agg, jsonb_build_object } from "@/lib/sql";
 import { TRPCError } from "@trpc/server";
 import { and, eq, getTableColumns, sql } from "drizzle-orm";
 import { z } from "zod/v4";
 import { authed, authedProcedure, router } from "../trpc";
+import { userService } from "./users";
 
 const find = authed({
 	require: ["classes:read"],
@@ -16,35 +16,12 @@ const find = authed({
 	async fn({ ctx, input }) {
 		const { user } = ctx;
 
-		// Get list of Problems in Class
-		const subquery_problems = db
-			.select({
-				data: jsonb_agg(jsonb_build_object({ ...getTableColumns(problems) })).as("data"),
-			})
-			.from(problems)
-			.where(and(eq(problems.class_id, classes.id), eq(problems.is_deleted, false)))
-			.as("problems");
-
-		// Get list of Users in Class
-		const subquery_users = db
-			.select({
-				data: jsonb_agg(jsonb_build_object({ ...getTableColumns(users) })).as("data"),
-			})
-			.from(users_to_classes)
-			.innerJoin(users, eq(users_to_classes.user_id, users.id))
-			.where(and(eq(users_to_classes.class_id, classes.id), eq(users.is_deleted, false)))
-			.as("users");
-
-		// Get Class w/ list of Problems and Users
+		// Get Class
 		const query_class = db
 			.select({
 				...getTableColumns(classes),
-				problems: sql<typeof subquery_problems.data._.type>`problems.data`.as("problems"),
-				users: sql<typeof subquery_users.data._.type>`users.data`.as("users"),
 			})
 			.from(classes)
-			.leftJoinLateral(subquery_problems, sql`true`)
-			.leftJoinLateral(subquery_users, sql`true`)
 			.where(and(eq(classes.id, input.id), eq(classes.is_deleted, false)));
 
 		const [record] = await query_class;
@@ -52,14 +29,7 @@ const find = authed({
 		if (!record) throw new TRPCError({ code: "NOT_FOUND" });
 
 		// Check if User is in Class
-		const user_in_class = record.users.some((u) => u.id == user.id);
-
-		// Run checks if User not Admin
-		if (!user.is("admin")) {
-			// Error if User not in Class
-			if (!user_in_class)
-				throw new TRPCError({ code: "FORBIDDEN", message: "User does not have access to the class." });
-		}
+		await userService.requireClass(user, record.id);
 
 		return record;
 	},
@@ -168,7 +138,8 @@ const delete_ = authed({
 		// Run Checks if User is not Admin
 		if (!user.is("admin")) {
 			// Error if Class still has users
-			if (record.users.length > 0) throw new TRPCError({ code: "CONFLICT", message: "Class still has users" });
+			const users = await userService.list({ ctx, input: { class_id: input.id } });
+			if (users.length > 0) throw new TRPCError({ code: "CONFLICT", message: "Class still has users" });
 		}
 
 		// Soft-delete Class

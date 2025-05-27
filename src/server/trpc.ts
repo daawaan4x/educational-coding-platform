@@ -26,7 +26,7 @@ export interface AuthedTRPCContext {
 }
 
 export interface AuthedFn<TInput extends z.core.$ZodType, TReturn> {
-	(opts: { ctx: AuthedTRPCContext; input: z.output<TInput> }): TReturn;
+	(opts: { ctx: AuthedTRPCContext; input: z.input<TInput> }): TReturn;
 	require: Permission[];
 	input: TInput;
 }
@@ -34,7 +34,7 @@ export interface AuthedFn<TInput extends z.core.$ZodType, TReturn> {
 /**
  * Utility function to define procedures for `authedProcedure`
  */
-export function authed<TInput extends z.core.$ZodType, TReturn>(args: {
+export function authed<TInput extends z.ZodType, TReturn>(args: {
 	require: Permission[];
 	input: TInput;
 	fn: (opts: { ctx: AuthedTRPCContext; input: z.output<TInput> }) => TReturn;
@@ -44,7 +44,7 @@ export function authed<TInput extends z.core.$ZodType, TReturn>(args: {
 
 	fn = (opts) => {
 		// Check if User has all Claims
-		const { ctx } = opts;
+		const { ctx, input } = opts;
 		const { user } = ctx;
 
 		for (const claim of require) {
@@ -52,7 +52,10 @@ export function authed<TInput extends z.core.$ZodType, TReturn>(args: {
 				throw new TRPCError({ code: "FORBIDDEN", message: "User does not have access to perform the action." });
 		}
 
-		return args.fn(opts);
+		return args.fn({
+			ctx,
+			input: args.input.parse(input),
+		});
 	};
 
 	return Object.assign(fn, { require, input });

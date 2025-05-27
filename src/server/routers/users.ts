@@ -2,11 +2,10 @@ import { db } from "@/db";
 import { classes, users, users_to_classes } from "@/db/schema";
 import { ClassSchema, UserSchema } from "@/db/validation";
 import { TRPCError } from "@trpc/server";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, sql } from "drizzle-orm";
 import { z } from "zod/v4";
 import { UserContext } from "../context/user";
 import { authed, authedProcedure, router } from "../trpc";
-import { exists } from "./utils";
 
 const find = authed({
 	require: ["users:read"],
@@ -17,7 +16,9 @@ const find = authed({
 	async fn({ input }) {
 		// Get User
 		const query_user = db
-			.select()
+			.select({
+				...getTableColumns(users),
+			})
 			.from(users)
 			.where(and(eq(users.id, input.id), eq(users.is_deleted, false)));
 
@@ -33,14 +34,24 @@ const list = authed({
 	input: z.object({
 		size: z.int().gte(1).lte(50).default(1),
 		page: z.int().gte(1).default(1),
+		class_id: ClassSchema.Select.shape.id.optional(),
 	}),
 
 	async fn({ input }) {
-		// Get list of User
+		// Get list of User (Optional: for a Class)
 		const query_user = db
-			.select()
+			.selectDistinctOn([users.id], { ...getTableColumns(users) })
 			.from(users)
-			.where(eq(users.is_deleted, false))
+			.leftJoin(users_to_classes, eq(users.id, users_to_classes.user_id))
+			.leftJoin(classes, eq(users_to_classes.class_id, classes.id))
+			.where(
+				and(
+					eq(users.is_deleted, false),
+					input.class_id ? eq(users_to_classes.class_id, input.class_id) : undefined,
+					input.class_id ? eq(classes.is_deleted, false) : undefined,
+				),
+			)
+			.orderBy(users.id) // order-by is required by distinct-on
 			.limit(input.size)
 			.offset((input.page - 1) * input.size);
 
@@ -111,14 +122,21 @@ const delete_ = authed({
 
 async function requireClass(user: UserContext, id: ClassSchema.Select["id"]) {
 	// Check if Class exists
-	if (!(await exists(classes.id, id))) throw new TRPCError({ code: "NOT_FOUND", message: "Class does not exist" });
+	const [class_] = await db
+		.select({})
+		.from(classes)
+		.where(and(eq(classes.id, id), eq(classes.is_deleted, false)))
+		.limit(1);
+	if (!class_) throw new TRPCError({ code: "NOT_FOUND", message: "Class does not exist" });
 
 	// Skip check if admin
 	if (user.is("admin")) return;
 
 	// Check if User is in class
 	const [user_in_class] = await db
-		.select()
+		.select({
+			...getTableColumns(users_to_classes),
+		})
 		.from(users_to_classes)
 		.where(and(eq(users_to_classes.user_id, user.id), eq(users_to_classes.class_id, id)))
 		.limit(1);

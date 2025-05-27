@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { classes, problems, users, users_to_classes } from "@/db/schema";
-import { ProblemSchema } from "@/db/validation";
+import { ClassSchema, ProblemSchema } from "@/db/validation";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, getTableColumns, sql } from "drizzle-orm";
 import { z } from "zod/v4";
@@ -52,12 +52,13 @@ const list = authed({
 	input: z.object({
 		size: z.int().gte(1).lte(50).default(1),
 		page: z.int().gte(1).default(1),
+		class_id: ClassSchema.Select.shape.id.optional(),
 	}),
 
 	async fn({ ctx, input }) {
 		const { user } = ctx;
 
-		// Get list of Problems from all Classes where User has access
+		// Get list of Problems from all Classes where User has access (Optional: for a Class)
 		const records = await db
 			.select({
 				...getTableColumns(problems),
@@ -71,6 +72,7 @@ const list = authed({
 			.where(
 				and(
 					eq(users_to_classes.user_id, user.id),
+					input.class_id ? eq(users_to_classes.class_id, input.class_id) : undefined,
 
 					// If Problem Author | Class is deleted, consider Problem as deleted
 					eq(problems.is_deleted, false),
