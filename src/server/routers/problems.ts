@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { classes, problems, users, users_to_classes } from "@/db/schema";
 import { ClassSchema, ProblemSchema } from "@/db/validation";
+import { pagination } from "@/lib/server/pagination";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, getTableColumns, sql } from "drizzle-orm";
 import { z } from "zod/v4";
@@ -59,30 +60,31 @@ const list = authed({
 		const { user } = ctx;
 
 		// Get list of Problems from all Classes where User has access (Optional: for a Class)
-		const records = await db
-			.select({
-				...getTableColumns(problems),
-				author: getTableColumns(users),
-				class: getTableColumns(classes),
-			})
-			.from(users_to_classes)
-			.innerJoin(problems, eq(users_to_classes.class_id, problems.class_id))
-			.innerJoin(users, eq(problems.author_id, users.id))
-			.innerJoin(classes, eq(problems.class_id, classes.id))
-			.where(
-				and(
-					eq(users_to_classes.user_id, user.id),
-					input.class_id ? eq(users_to_classes.class_id, input.class_id) : undefined,
+		const records = await pagination(() =>
+			db
+				.select({
+					...getTableColumns(problems),
+					author: getTableColumns(users),
+					class: getTableColumns(classes),
+				})
+				.from(users_to_classes)
+				.innerJoin(problems, eq(users_to_classes.class_id, problems.class_id))
+				.innerJoin(users, eq(problems.author_id, users.id))
+				.innerJoin(classes, eq(problems.class_id, classes.id))
+				.where(
+					and(
+						eq(users_to_classes.user_id, user.id),
+						input.class_id ? eq(users_to_classes.class_id, input.class_id) : undefined,
 
-					// If Problem Author | Class is deleted, consider Problem as deleted
-					eq(problems.is_deleted, false),
-					eq(users.is_deleted, false),
-					eq(classes.is_deleted, false),
-				),
-			)
-			.orderBy(desc(problems.date_modified))
-			.limit(input.size)
-			.offset((input.page - 1) * input.size);
+						// If Problem Author | Class is deleted, consider Problem as deleted
+						eq(problems.is_deleted, false),
+						eq(users.is_deleted, false),
+						eq(classes.is_deleted, false),
+					),
+				)
+				.orderBy(desc(problems.date_modified))
+				.$dynamic(),
+		)(input);
 
 		return records;
 	},

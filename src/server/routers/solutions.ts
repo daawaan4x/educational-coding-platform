@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { classes, problems, solutions, users } from "@/db/schema";
 import { ProblemSchema, SolutionSchema, UserSchema } from "@/db/validation";
+import { pagination } from "@/lib/server/pagination";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, getTableColumns } from "drizzle-orm";
 import { z } from "zod/v4";
@@ -123,32 +124,31 @@ const list = authed({
 			throw new TRPCError({ code: "FORBIDDEN", message: "User cannot read other's solutions." });
 
 		// List Authored Solutions w/ Class (Optional: for a Problem)
-		const query_solution = db
-			.select({
-				...getTableColumns(solutions),
-				class: getTableColumns(classes),
-			})
-			.from(solutions)
-			.innerJoin(users, eq(solutions.author_id, users.id))
-			.innerJoin(problems, eq(solutions.problem_id, problems.id))
-			.innerJoin(classes, eq(problems.class_id, classes.id))
-			.where(
-				and(
-					input.problem_id ? eq(solutions.problem_id, input.problem_id) : undefined,
-					eq(solutions.author_id, input.author_id ?? user.id),
+		const records = await pagination(() =>
+			db
+				.select({
+					...getTableColumns(solutions),
+					class: getTableColumns(classes),
+				})
+				.from(solutions)
+				.innerJoin(users, eq(solutions.author_id, users.id))
+				.innerJoin(problems, eq(solutions.problem_id, problems.id))
+				.innerJoin(classes, eq(problems.class_id, classes.id))
+				.where(
+					and(
+						input.problem_id ? eq(solutions.problem_id, input.problem_id) : undefined,
+						eq(solutions.author_id, input.author_id ?? user.id),
 
-					// If Solution Author | Problem | Class is deleted, consider Solution as deleted
-					eq(solutions.is_deleted, false),
-					eq(users.is_deleted, false),
-					eq(problems.is_deleted, false),
-					eq(classes.is_deleted, false),
-				),
-			)
-			.orderBy(desc(solutions.date_modified))
-			.limit(input.size)
-			.offset((input.page - 1) * input.size);
-
-		const records = await query_solution;
+						// If Solution Author | Problem | Class is deleted, consider Solution as deleted
+						eq(solutions.is_deleted, false),
+						eq(users.is_deleted, false),
+						eq(problems.is_deleted, false),
+						eq(classes.is_deleted, false),
+					),
+				)
+				.orderBy(desc(solutions.date_modified))
+				.$dynamic(),
+		)(input);
 
 		return records;
 	},
@@ -164,31 +164,30 @@ const list_latest = authed({
 
 	async fn({ input }) {
 		// List Latest Solutions by all Users for a Problem
-		const query_solution = db
-			.selectDistinctOn([solutions.author_id], {
-				...getTableColumns(solutions),
-				author: getTableColumns(users),
-			})
-			.from(solutions)
-			.innerJoin(users, eq(solutions.author_id, users.id))
-			.innerJoin(problems, eq(solutions.problem_id, problems.id))
-			.innerJoin(classes, eq(problems.class_id, classes.id))
-			.where(
-				and(
-					eq(solutions.problem_id, input.problem_id),
+		const records = await pagination(() =>
+			db
+				.selectDistinctOn([solutions.author_id], {
+					...getTableColumns(solutions),
+					author: getTableColumns(users),
+				})
+				.from(solutions)
+				.innerJoin(users, eq(solutions.author_id, users.id))
+				.innerJoin(problems, eq(solutions.problem_id, problems.id))
+				.innerJoin(classes, eq(problems.class_id, classes.id))
+				.where(
+					and(
+						eq(solutions.problem_id, input.problem_id),
 
-					// If Solution Author | Problem | Class is deleted, consider Solution as deleted
-					eq(solutions.is_deleted, false),
-					eq(users.is_deleted, false),
-					eq(problems.is_deleted, false),
-					eq(classes.is_deleted, false),
-				),
-			)
-			.orderBy(desc(solutions.date_modified))
-			.limit(input.size)
-			.offset((input.page - 1) * input.size);
-
-		const records = await query_solution;
+						// If Solution Author | Problem | Class is deleted, consider Solution as deleted
+						eq(solutions.is_deleted, false),
+						eq(users.is_deleted, false),
+						eq(problems.is_deleted, false),
+						eq(classes.is_deleted, false),
+					),
+				)
+				.orderBy(desc(solutions.date_modified))
+				.$dynamic(),
+		)(input);
 
 		return records;
 	},

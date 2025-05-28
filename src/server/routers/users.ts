@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { classes, users, users_to_classes } from "@/db/schema";
 import { ClassSchema, UserSchema } from "@/db/validation";
+import { pagination } from "@/lib/server/pagination";
 import { TRPCError } from "@trpc/server";
 import { and, eq, getTableColumns, sql } from "drizzle-orm";
 import { z } from "zod/v4";
@@ -39,23 +40,23 @@ const list = authed({
 
 	async fn({ input }) {
 		// Get list of User (Optional: for a Class)
-		const query_user = db
-			.selectDistinctOn([users.id], { ...getTableColumns(users) })
-			.from(users)
-			.leftJoin(users_to_classes, eq(users.id, users_to_classes.user_id))
-			.leftJoin(classes, eq(users_to_classes.class_id, classes.id))
-			.where(
-				and(
-					eq(users.is_deleted, false),
-					input.class_id ? eq(users_to_classes.class_id, input.class_id) : undefined,
-					input.class_id ? eq(classes.is_deleted, false) : undefined,
-				),
-			)
-			.orderBy(users.id) // order-by is required by distinct-on
-			.limit(input.size)
-			.offset((input.page - 1) * input.size);
+		const query_users = () =>
+			db
+				.selectDistinctOn([users.id], { ...getTableColumns(users) })
+				.from(users)
+				.leftJoin(users_to_classes, eq(users.id, users_to_classes.user_id))
+				.leftJoin(classes, eq(users_to_classes.class_id, classes.id))
+				.where(
+					and(
+						eq(users.is_deleted, false),
+						input.class_id ? eq(users_to_classes.class_id, input.class_id) : undefined,
+						input.class_id ? eq(classes.is_deleted, false) : undefined,
+					),
+				)
+				.orderBy(users.id) // order-by is required by distinct-on
+				.$dynamic();
 
-		const records = await query_user;
+		const records = await pagination(query_users)(input);
 
 		return records;
 	},
@@ -125,8 +126,7 @@ async function requireClass(user: UserContext, id: ClassSchema.Select["id"]) {
 	const [class_] = await db
 		.select({})
 		.from(classes)
-		.where(and(eq(classes.id, id), eq(classes.is_deleted, false)))
-		.limit(1);
+		.where(and(eq(classes.id, id), eq(classes.is_deleted, false)));
 	if (!class_) throw new TRPCError({ code: "NOT_FOUND", message: "Class does not exist" });
 
 	// Skip check if admin
@@ -138,8 +138,7 @@ async function requireClass(user: UserContext, id: ClassSchema.Select["id"]) {
 			...getTableColumns(users_to_classes),
 		})
 		.from(users_to_classes)
-		.where(and(eq(users_to_classes.user_id, user.id), eq(users_to_classes.class_id, id)))
-		.limit(1);
+		.where(and(eq(users_to_classes.user_id, user.id), eq(users_to_classes.class_id, id)));
 
 	if (!user_in_class) throw new TRPCError({ code: "FORBIDDEN", message: "User does not have access to the class." });
 }

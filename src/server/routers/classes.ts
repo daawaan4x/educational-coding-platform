@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { classes, users_to_classes } from "@/db/schema";
 import { ClassSchema } from "@/db/validation";
+import { pagination } from "@/lib/server/pagination";
 import { TRPCError } from "@trpc/server";
 import { and, eq, getTableColumns, sql } from "drizzle-orm";
 import { z } from "zod/v4";
@@ -46,24 +47,23 @@ const list = authed({
 		const { user } = ctx;
 
 		// Get list of Classes where User has access
-		const query_user_classes = db
-			.select({
-				...getTableColumns(classes),
-			})
-			.from(users_to_classes)
-			.innerJoin(classes, eq(users_to_classes.class_id, classes.id))
-			.where(
-				and(
-					eq(classes.is_deleted, false),
+		const records = await pagination(() =>
+			db
+				.select({
+					...getTableColumns(classes),
+				})
+				.from(users_to_classes)
+				.innerJoin(classes, eq(users_to_classes.class_id, classes.id))
+				.where(
+					and(
+						eq(classes.is_deleted, false),
 
-					// Remove filter if User is Admin
-					user.is("admin") ? undefined : eq(users_to_classes.user_id, user.id),
-				),
-			)
-			.limit(input.size)
-			.offset((input.page - 1) * input.size);
-
-		const records = await query_user_classes;
+						// Remove filter if User is Admin
+						user.is("admin") ? undefined : eq(users_to_classes.user_id, user.id),
+					),
+				)
+				.$dynamic(),
+		)(input);
 
 		return records;
 	},
@@ -122,7 +122,7 @@ const delete_ = authed({
 		if (!user.is("admin")) {
 			// Error if Class still has users
 			const users = await userService.list({ ctx, input: { class_id: input.id } });
-			if (users.length > 0) throw new TRPCError({ code: "CONFLICT", message: "Class still has users" });
+			if (users.data.length > 0) throw new TRPCError({ code: "CONFLICT", message: "Class still has users" });
 		}
 
 		// Soft-delete Class
