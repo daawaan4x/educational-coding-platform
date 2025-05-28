@@ -1,27 +1,31 @@
 import { db } from "@/db";
 import { classes, users, users_to_classes } from "@/db/schema";
 import { ClassSchema, UserSchema } from "@/db/validation";
+import { UserColumns } from "@/db/validation/schemas/user";
 import { pagination } from "@/lib/server/pagination";
 import { TRPCError } from "@trpc/server";
 import { and, eq, getTableColumns, sql } from "drizzle-orm";
 import { z } from "zod/v4";
 import { UserContext } from "../context/user";
 import { authed, authedProcedure, router } from "../trpc";
+import { hashPassword, verifyPassword } from "./users/password";
 
 const find = authed({
 	require: ["users:read"],
 	input: z.object({
-		id: UserSchema.Select.shape.id,
+		id: UserSchema.Select.shape.id.optional(),
 	}),
 
-	async fn({ input }) {
+	async fn({ ctx, input }) {
+		const { user } = ctx;
+
 		// Get User
 		const query_user = db
 			.select({
-				...getTableColumns(users),
+				...UserColumns,
 			})
 			.from(users)
-			.where(and(eq(users.id, input.id), eq(users.is_deleted, false)));
+			.where(and(eq(users.id, input.id ?? user.id), eq(users.is_deleted, false)));
 
 		const [record] = await query_user;
 		if (!record) throw new TRPCError({ code: "NOT_FOUND" });
@@ -42,7 +46,7 @@ const list = authed({
 		// Get list of User (Optional: for a Class)
 		const query_users = () =>
 			db
-				.selectDistinctOn([users.id], { ...getTableColumns(users) })
+				.selectDistinctOn([users.id], UserColumns)
 				.from(users)
 				.leftJoin(users_to_classes, eq(users.id, users_to_classes.user_id))
 				.leftJoin(classes, eq(users_to_classes.class_id, classes.id))
@@ -70,7 +74,16 @@ const create = authed({
 
 	async fn({ input }) {
 		// Create User
-		const [record] = await db.insert(users).values(input.data).returning();
+		const [record] = await db
+			.insert(users)
+			.values({
+				email: input.data.email,
+				password_hash: await hashPassword(input.data.password),
+				last_name: input.data.last_name,
+				first_name: input.data.first_name,
+				role: input.data.role,
+			})
+			.returning(UserColumns);
 		return record;
 	},
 });
@@ -96,7 +109,7 @@ const update = authed({
 				date_modified: sql`now()`,
 			})
 			.where(eq(users.id, input.id ?? user.id))
-			.returning();
+			.returning(UserColumns);
 
 		return record;
 	},
@@ -115,7 +128,8 @@ const delete_ = authed({
 			.set({
 				is_deleted: true,
 			})
-			.where(eq(users.id, input.id));
+			.where(eq(users.id, input.id))
+			.returning(UserColumns);
 
 		return record;
 	},
@@ -143,6 +157,24 @@ async function requireClass(user: UserContext, id: ClassSchema.Select["id"]) {
 	if (!user_in_class) throw new TRPCError({ code: "FORBIDDEN", message: "User does not have access to the class." });
 }
 
+async function authenticate(email: string, password: string) {
+	const error = new Error("Incorrect Username or Password.");
+
+	// Get User
+	const query_user = db
+		.select()
+		.from(users)
+		.where(and(eq(users.email, email), eq(users.is_deleted, false)));
+
+	const [record] = await query_user;
+	if (!record) throw error;
+
+	const match = await verifyPassword(password, record.password_hash ?? "");
+	if (!match) throw error;
+
+	return UserSchema.Select.parse(record);
+}
+
 export const userService = {
 	find,
 	list,
@@ -151,6 +183,7 @@ export const userService = {
 	delete: delete_,
 
 	requireClass,
+	authenticate,
 };
 
 export const usersRouter = router({

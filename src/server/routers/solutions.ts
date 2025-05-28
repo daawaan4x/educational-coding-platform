@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { classes, problems, solutions, users } from "@/db/schema";
 import { ProblemSchema, SolutionSchema, UserSchema } from "@/db/validation";
+import { UserColumns } from "@/db/validation/schemas/user";
 import { pagination } from "@/lib/server/pagination";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, getTableColumns } from "drizzle-orm";
@@ -22,7 +23,7 @@ const find = authed({
 		const query_solution = db
 			.select({
 				...getTableColumns(solutions),
-				author: getTableColumns(users),
+				author: UserColumns,
 				class: getTableColumns(classes),
 			})
 			.from(solutions)
@@ -74,7 +75,7 @@ const find_latest = authed({
 		const query_solution = db
 			.select({
 				...getTableColumns(solutions),
-				author: getTableColumns(users),
+				author: UserColumns,
 				class: getTableColumns(classes),
 			})
 			.from(solutions)
@@ -168,7 +169,7 @@ const list_latest = authed({
 			db
 				.selectDistinctOn([solutions.author_id], {
 					...getTableColumns(solutions),
-					author: getTableColumns(users),
+					author: UserColumns,
 				})
 				.from(solutions)
 				.innerJoin(users, eq(solutions.author_id, users.id))

@@ -8,6 +8,13 @@
 			"when": 1748001079255,
 			"tag": "0000_nostalgic_raider",
 			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1748422449851,
+			"tag": "0001_thick_elektra",
+			"breakpoints": true
 		}
 	]
 }

@@ -15,7 +15,8 @@ export const rolesEnum = pgEnum("roles", roles);
 
 export const users = pgTable("users", {
 	...baseFields,
-	email: varchar({ length: 255 }).notNull(),
+	email: varchar({ length: 255 }).unique().notNull(),
+	password_hash: text(),
 	last_name: varchar({ length: 255 }).notNull(),
 	first_name: varchar({ length: 255 }).notNull(),
 	role: rolesEnum(),

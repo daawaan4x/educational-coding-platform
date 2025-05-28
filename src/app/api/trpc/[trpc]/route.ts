@@ -1,7 +1,21 @@
+import { auth } from "@/auth";
 import { TRPCContext } from "@/server/context";
 import { UserContext } from "@/server/context/user";
+import { userService } from "@/server/routers/users";
+import { SYSTEM_CONTEXT } from "@/server/trpc";
 import { appRouter } from "@/server/trpc-router";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
+
+async function createUserContext() {
+	const session = await auth();
+	const user_id = session?.user?.id;
+	if (!user_id) return;
+
+	const user = await userService.find({ ctx: SYSTEM_CONTEXT, input: { id: user_id } }).catch(() => undefined);
+	if (!user) return;
+
+	return new UserContext(user);
+}
 
 const handler = (req: Request) =>
 	fetchRequestHandler({
@@ -9,21 +23,10 @@ const handler = (req: Request) =>
 		req,
 		router: appRouter,
 
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		createContext: (opts) => {
+		async createContext(): Promise<TRPCContext> {
 			return {
-				// TODO: Replace with real implementation
-				user: new UserContext({
-					id: "",
-					date_created: new Date(),
-					date_modified: new Date(),
-					email: "",
-					first_name: "",
-					last_name: "",
-					role: null,
-					is_deleted: false,
-				}),
-			} as TRPCContext;
+				user: await createUserContext(),
+			};
 		},
 	});
 

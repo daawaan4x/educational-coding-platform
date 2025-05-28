@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { classes, problems, users, users_to_classes } from "@/db/schema";
 import { ClassSchema, ProblemSchema } from "@/db/validation";
+import { UserColumns } from "@/db/validation/schemas/user";
 import { pagination } from "@/lib/server/pagination";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, getTableColumns, sql } from "drizzle-orm";
@@ -21,7 +22,7 @@ const find = authed({
 		const query_problem = db
 			.select({
 				...getTableColumns(problems),
-				author: getTableColumns(users),
+				author: UserColumns,
 				class: getTableColumns(classes),
 			})
 			.from(problems)
@@ -64,7 +65,7 @@ const list = authed({
 			db
 				.select({
 					...getTableColumns(problems),
-					author: getTableColumns(users),
+					author: UserColumns,
 					class: getTableColumns(classes),
 				})
 				.from(users_to_classes)

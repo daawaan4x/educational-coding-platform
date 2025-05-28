@@ -2,6 +2,7 @@ import { Permission } from "@/lib/permissions";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { z } from "zod/v4";
 import { TRPCContext } from "./context";
+import { UserContext } from "./context/user";
 
 const t = initTRPC.context<TRPCContext>().create();
 
@@ -24,6 +25,19 @@ export function authedProcedure() {
 export interface AuthedTRPCContext {
 	user: NonNullable<TRPCContext["user"]>;
 }
+
+export const SYSTEM_CONTEXT: AuthedTRPCContext = {
+	user: new UserContext({
+		id: "",
+		date_created: new Date(),
+		date_modified: new Date(),
+		email: "",
+		first_name: "System",
+		last_name: "Admin",
+		is_deleted: false,
+		role: "admin",
+	}),
+};
 
 export interface AuthedFn<TInput extends z.core.$ZodType, TReturn> {
 	(opts: { ctx: AuthedTRPCContext; input: z.input<TInput> }): TReturn;
