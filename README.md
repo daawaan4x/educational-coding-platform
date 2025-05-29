@@ -15,7 +15,8 @@ The following is a list of the primary scripts for the project.
 pnpm run dev		# start development server
 pnpm run build		# build project
 pnpm run start		# start server for production
-pnpm run lint		# lint codebase with ESLint & Typescript
+pnpm run lint		# lint codebase with ESLint
+pnpm run tscheck	# typecheck codebase with Typescript
 pnpm run format		# format codebase with Prettier
 ```
 
@@ -28,8 +29,35 @@ This project uses the following tech for the API.
 
 An interactive documentation page for the tRPC API can be found at `/api/trpc` _during **development** only_.
 
+**tRPC API** (formatted with [tree.nathanfriend.com](https://tree.nathanfriend.com/)):
+
 ```
-http://localhost:3000/api/trpc
+.
+├── ping: healthcheck server
+├── users/
+│   ├── find: 1 user
+│   ├── list: many users
+│   ├── create
+│   ├── update
+│   └── remove
+├── classes/
+│   ├── find: 1 class
+│   ├── list: classes where user has access
+│   ├── create
+│   ├── update
+│   └── remove
+├── problems/
+│   ├── find: 1 class
+│   ├── list: problems from all classes where user has access
+│   ├── create
+│   ├── update
+│   └── remove
+└── solutions/
+    ├── find: 1 solution
+    ├── find_latest: latest solution for problem
+    ├── list: authored solutions (? for a problem)
+    ├── list_latest: latest solutions from all users for a problem
+    └── create
 ```
 
 ## Database
@@ -41,6 +69,9 @@ pnpm exec drizzle-kit migrate		# apply migration files
 ```
 
 - See [Drizzle Studio](https://orm.drizzle.team/docs/drizzle-kit-studio): quickly viewing contents of the database.
+
+**Database Schema** (formatted with [Jetbrains DataGrip](https://www.jetbrains.com/datagrip/))
+<img src="./static/db-schema.png" height=640>
 
 ## Tooling
 
