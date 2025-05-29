@@ -4,38 +4,60 @@ import { UserService } from "@/server/services/users";
 import { SYSTEM_CONTEXT } from "@/server/trpc/auth";
 import "dotenv/config";
 import { and, eq } from "drizzle-orm";
+import symbols from "log-symbols";
+import ora, { Ora } from "ora";
 
+/**
+ * Creates the initial Admin using the credentials from the environment variables
+ */
 async function main() {
-	console.log("Creating Admin ...");
+	let spinner: Ora;
+	console.log(`\n--- CREATE ADMIN USER ---\n`);
 
 	const email = process.env.ADMIN_EMAIL;
-	console.log(`Parsed Email: ${email}`);
+	console.log(symbols.info, `Parsed Email: ${email}`);
 
 	const password = process.env.ADMIN_PASSWORD;
-	console.log(`Parsed Password: ${password}`);
+	console.log(symbols.info, `Parsed Password: ${password}`);
 
 	// Find Admin
-	console.log("Checking preexisting Admin Account ...");
+
+	spinner = ora("Checking preexisting Admin user").start();
 	const [record_old] = await db
 		.select()
 		.from(users)
-		.where(and(eq(users.email, email)));
+		.where(and(eq(users.email, email)))
+		.catch((error) => {
+			spinner.fail();
+			throw error;
+		});
+	spinner.succeed();
 
 	if (record_old) {
-		console.log("Found old Admin Account.");
-
 		// Revert Admin if deleted
 		if (record_old.is_deleted) {
-			console.log("Account was deleted, restoring ...");
-			await db.update(users).set({ is_deleted: true }).where(eq(users.id, record_old.id));
-			console.log("Account has been restored.");
+			spinner = ora("Account was deleted, restoring").start();
+			const record = await db
+				.update(users)
+				.set({ is_deleted: true })
+				.where(eq(users.id, record_old.id))
+				.returning()
+				.catch((error) => {
+					spinner.fail();
+					throw error;
+				});
+			spinner.succeed();
+			console.log(record);
+		} else {
+			console.log(symbols.info, "Admin user already exists.");
+			console.log(record_old);
 		}
 
 		return;
 	}
 
 	// Create Admin
-	console.log("Creating Admin Account ...");
+	spinner = ora("Creating Admin Account").start();
 	const record = await UserService.create({
 		ctx: SYSTEM_CONTEXT,
 		input: {
@@ -47,10 +69,13 @@ async function main() {
 				role: "admin",
 			},
 		},
+	}).catch((error) => {
+		spinner.fail();
+		throw error;
 	});
+	spinner.succeed();
 
-	console.log("Account has been created.");
 	console.log(record);
 }
 
-void main().finally(() => process.exit(0));
+void main().then(() => process.exit(0));
