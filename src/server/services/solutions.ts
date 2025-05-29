@@ -6,11 +6,14 @@ import { pagination } from "@/lib/server/pagination";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, getTableColumns } from "drizzle-orm";
 import { z } from "zod/v4";
-import { authed, authedProcedure, router } from "../trpc";
-import { problemService } from "./problems";
-import { userService } from "./users";
+import { t } from "../trpc";
+import { authed, authedProcedure } from "../trpc/auth";
+import { ProblemService } from "./problems";
+import { UserService } from "./users";
 
-const find = authed({
+export * as SolutionService from "./solutions";
+
+export const find = authed({
 	require: ["solutions:read"],
 	input: z.object({
 		id: SolutionSchema.Select.shape.id,
@@ -51,13 +54,13 @@ const find = authed({
 			throw new TRPCError({ code: "FORBIDDEN", message: "User did not author solution." });
 
 		// Check if User is in Class
-		await userService.requireClass(user, record.class.id);
+		await UserService.requireClass(user, record.class.id);
 
 		return record;
 	},
 });
 
-const find_latest = authed({
+export const find_latest = authed({
 	require: ["solutions:read"],
 	input: z.object({
 		problem_id: ProblemSchema.Select.shape.id,
@@ -102,13 +105,13 @@ const find_latest = authed({
 		if (!record) throw new TRPCError({ code: "NOT_FOUND" });
 
 		// Check if User is in Class
-		await userService.requireClass(user, record.class.id);
+		await UserService.requireClass(user, record.class.id);
 
 		return record;
 	},
 });
 
-const list = authed({
+export const list = authed({
 	require: ["solutions:read"],
 	input: z.object({
 		problem_id: ProblemSchema.Select.shape.id.optional(),
@@ -155,7 +158,7 @@ const list = authed({
 	},
 });
 
-const list_latest = authed({
+export const list_latest = authed({
 	require: ["problems.solutions:read", "solutions:read"],
 	input: z.object({
 		problem_id: ProblemSchema.Select.shape.id,
@@ -194,7 +197,7 @@ const list_latest = authed({
 	},
 });
 
-const create = authed({
+export const create = authed({
 	require: ["solutions:create"],
 	input: z.object({
 		data: SolutionSchema.Insert,
@@ -204,7 +207,7 @@ const create = authed({
 		const { user } = ctx;
 
 		// Check if User has access to Problem
-		await problemService.find({ ctx, input: { id: input.data.problem_id } });
+		await ProblemService.find({ ctx, input: { id: input.data.problem_id } });
 
 		// Create Solution
 		const [record] = await db
@@ -233,7 +236,7 @@ const update = authed({
 	},
 });
 
-const delete_ = authed({
+const remove = authed({
 	require: ["solutions:delete"],
 	input: z.object({
 		id: SolutionSchema.Select.shape.id,
@@ -245,15 +248,7 @@ const delete_ = authed({
 });
 */
 
-export const solutionService = {
-	find,
-	find_latest,
-	list,
-	list_latest,
-	create,
-};
-
-export const solutionsRouter = router({
+export const routers = t.router({
 	find: authedProcedure().input(find.input).query(find),
 	find_latest: authedProcedure().input(find_latest.input).query(find_latest),
 	list: authedProcedure().input(list.input).query(list),

@@ -1,9 +1,8 @@
 import { auth } from "@/auth";
-import { TRPCContext } from "@/server/context";
-import { UserContext } from "@/server/context/user";
-import { userService } from "@/server/routers/users";
-import { SYSTEM_CONTEXT } from "@/server/trpc";
-import { appRouter } from "@/server/trpc-router";
+import { UserService } from "@/server/services/users";
+import { appRouter } from "@/server/trpc/app";
+import { SYSTEM_CONTEXT } from "@/server/trpc/auth";
+import { TRPCContext, UserContext } from "@/server/trpc/context";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
 async function createUserContext() {
@@ -11,7 +10,7 @@ async function createUserContext() {
 	const user_id = session?.user?.id;
 	if (!user_id) return;
 
-	const user = await userService.find({ ctx: SYSTEM_CONTEXT, input: { id: user_id } }).catch(() => undefined);
+	const user = await UserService.find({ ctx: SYSTEM_CONTEXT, input: { id: user_id } }).catch(() => undefined);
 	if (!user) return;
 
 	return new UserContext(user);

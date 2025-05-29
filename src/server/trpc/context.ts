@@ -30,3 +30,7 @@ export class UserContext {
 		return roles.some((role) => this.role === role);
 	}
 }
+
+export interface TRPCContext {
+	user?: UserContext;
+}

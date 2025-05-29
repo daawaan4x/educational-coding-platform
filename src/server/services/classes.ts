@@ -5,10 +5,13 @@ import { pagination } from "@/lib/server/pagination";
 import { TRPCError } from "@trpc/server";
 import { and, eq, getTableColumns, sql } from "drizzle-orm";
 import { z } from "zod/v4";
-import { authed, authedProcedure, router } from "../trpc";
-import { userService } from "./users";
+import { t } from "../trpc";
+import { authed, authedProcedure } from "../trpc/auth";
+import { UserService } from "./users";
 
-const find = authed({
+export * as ClassService from "./classes";
+
+export const find = authed({
 	require: ["classes:read"],
 	input: z.object({
 		id: ClassSchema.Select.shape.id,
@@ -30,13 +33,13 @@ const find = authed({
 		if (!record) throw new TRPCError({ code: "NOT_FOUND" });
 
 		// Check if User is in Class
-		await userService.requireClass(user, record.id);
+		await UserService.requireClass(user, record.id);
 
 		return record;
 	},
 });
 
-const list = authed({
+export const list = authed({
 	require: ["classes:read"],
 	input: z.object({
 		size: z.int().gte(1).lte(50).default(1),
@@ -69,7 +72,7 @@ const list = authed({
 	},
 });
 
-const create = authed({
+export const create = authed({
 	require: ["classes:create"],
 	input: z.object({
 		data: ClassSchema.Insert,
@@ -82,7 +85,7 @@ const create = authed({
 	},
 });
 
-const update = authed({
+export const update = authed({
 	require: ["classes:update"],
 	input: z.object({
 		id: ClassSchema.Select.shape.id,
@@ -106,7 +109,7 @@ const update = authed({
 	},
 });
 
-const delete_ = authed({
+export const remove = authed({
 	require: ["classes:delete"],
 	input: z.object({
 		id: ClassSchema.Select.shape.id,
@@ -121,7 +124,7 @@ const delete_ = authed({
 		// Run Checks if User is not Admin
 		if (!user.is("admin")) {
 			// Error if Class still has users
-			const users = await userService.list({ ctx, input: { class_id: input.id } });
+			const users = await UserService.list({ ctx, input: { class_id: input.id } });
 			if (users.data.length > 0) throw new TRPCError({ code: "CONFLICT", message: "Class still has users" });
 		}
 
@@ -133,18 +136,10 @@ const delete_ = authed({
 	},
 });
 
-export const classService = {
-	find,
-	list,
-	create,
-	update,
-	delete: delete_,
-};
-
-export const classesRouter = router({
+export const routers = t.router({
 	find: authedProcedure().input(find.input).query(find),
 	list: authedProcedure().input(list.input).query(list),
 	create: authedProcedure().input(create.input).mutation(create),
 	update: authedProcedure().input(update.input).mutation(update),
-	delete: authedProcedure().input(delete_.input).mutation(delete_),
+	remove: authedProcedure().input(remove.input).mutation(remove),
 });

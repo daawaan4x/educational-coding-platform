@@ -1,17 +1,11 @@
 import { Permission } from "@/lib/permissions";
-import { initTRPC, TRPCError } from "@trpc/server";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod/v4";
-import { TRPCContext } from "./context";
-import { UserContext } from "./context/user";
-
-const t = initTRPC.context<TRPCContext>().create();
-
-export const router = t.router;
-
-export const publicProcedure = t.procedure;
+import { t } from ".";
+import { TRPCContext, UserContext } from "./context";
 
 export function authedProcedure() {
-	return publicProcedure.use(async (opts) => {
+	return t.procedure.use(async (opts) => {
 		if (!opts.ctx.user) {
 			throw new TRPCError({ code: "UNAUTHORIZED" });
 		}

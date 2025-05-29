@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { userService } from "@/server/routers/users";
-import { SYSTEM_CONTEXT } from "@/server/trpc";
+import { UserService } from "@/server/services/users";
+import { SYSTEM_CONTEXT } from "@/server/trpc/auth";
 import "dotenv/config";
 import { and, eq } from "drizzle-orm";
 
@@ -36,7 +36,7 @@ async function main() {
 
 	// Create Admin
 	console.log("Creating Admin Account ...");
-	const record = await userService.create({
+	const record = await UserService.create({
 		ctx: SYSTEM_CONTEXT,
 		input: {
 			data: {

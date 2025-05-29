@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { UserSchema } from "./db/validation";
-import { userService } from "./server/routers/users";
+import { UserService } from "./server/services/users";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
 	providers: [
@@ -23,7 +23,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 					const email = UserSchema.Insert.shape.email.parse(credentials.email);
 					const password = UserSchema.Insert.shape.password.parse(credentials.password);
 
-					const user = await userService.authenticate(email, password);
+					const user = await UserService.authenticate(email, password);
 					return {
 						id: user.id,
 					};

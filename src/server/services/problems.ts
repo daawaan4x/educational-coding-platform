@@ -6,10 +6,13 @@ import { pagination } from "@/lib/server/pagination";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, getTableColumns, sql } from "drizzle-orm";
 import { z } from "zod/v4";
-import { authed, authedProcedure, router } from "../trpc";
-import { userService } from "./users";
+import { t } from "../trpc";
+import { authed, authedProcedure } from "../trpc/auth";
+import { UserService } from "./users";
 
-const find = authed({
+export * as ProblemService from "./problems";
+
+export const find = authed({
 	require: ["problems:read"],
 	input: z.object({
 		id: ProblemSchema.Select.shape.id,
@@ -43,13 +46,13 @@ const find = authed({
 		if (!record) throw new TRPCError({ code: "NOT_FOUND" });
 
 		// Check if User is in Class
-		await userService.requireClass(user, record.class_id);
+		await UserService.requireClass(user, record.class_id);
 
 		return record;
 	},
 });
 
-const list = authed({
+export const list = authed({
 	require: ["problems:read"],
 	input: z.object({
 		size: z.int().gte(1).lte(50).default(1),
@@ -91,7 +94,7 @@ const list = authed({
 	},
 });
 
-const create = authed({
+export const create = authed({
 	require: ["problems:create"],
 	input: z.object({
 		data: ProblemSchema.Insert,
@@ -101,7 +104,7 @@ const create = authed({
 		const { user } = ctx;
 
 		// Check if User has access to Class
-		await userService.requireClass(user, input.data.class_id);
+		await UserService.requireClass(user, input.data.class_id);
 
 		// Create Problem
 		const [record] = await db
@@ -115,7 +118,7 @@ const create = authed({
 	},
 });
 
-const update = authed({
+export const update = authed({
 	require: ["problems:update"],
 	input: z.object({
 		id: ProblemSchema.Select.shape.id,
@@ -148,7 +151,7 @@ const update = authed({
 	},
 });
 
-const delete_ = authed({
+export const remove = authed({
 	require: ["problems:delete"],
 	input: z.object({
 		id: ProblemSchema.Select.shape.id,
@@ -174,18 +177,10 @@ const delete_ = authed({
 	},
 });
 
-export const problemService = {
-	find,
-	list,
-	create,
-	update,
-	delete: delete_,
-};
-
-export const problemsRouter = router({
+export const routers = t.router({
 	find: authedProcedure().input(find.input).query(find),
 	list: authedProcedure().input(list.input).query(list),
 	create: authedProcedure().input(create.input).mutation(create),
 	update: authedProcedure().input(update.input).mutation(update),
-	delete: authedProcedure().input(delete_.input).mutation(delete_),
+	delete: authedProcedure().input(remove.input).mutation(remove),
 });

@@ -1,4 +1,4 @@
-import { appRouter } from "@/server/trpc-router";
+import { appRouter } from "@/server/trpc/app";
 import { NextResponse } from "next/server";
 import { renderTrpcPanel } from "trpc-ui";
 

@@ -6,11 +6,14 @@ import { pagination } from "@/lib/server/pagination";
 import { TRPCError } from "@trpc/server";
 import { and, eq, getTableColumns, sql } from "drizzle-orm";
 import { z } from "zod/v4";
-import { UserContext } from "../context/user";
-import { authed, authedProcedure, router } from "../trpc";
+import { t } from "../trpc";
+import { authed, authedProcedure } from "../trpc/auth";
+import { UserContext } from "../trpc/context";
 import { hashPassword, verifyPassword } from "./users/password";
 
-const find = authed({
+export * as UserService from "./users";
+
+export const find = authed({
 	require: ["users:read"],
 	input: z.object({
 		id: UserSchema.Select.shape.id.optional(),
@@ -34,7 +37,7 @@ const find = authed({
 	},
 });
 
-const list = authed({
+export const list = authed({
 	require: ["users:read"],
 	input: z.object({
 		size: z.int().gte(1).lte(50).default(1),
@@ -66,7 +69,7 @@ const list = authed({
 	},
 });
 
-const create = authed({
+export const create = authed({
 	require: ["users:create"],
 	input: z.object({
 		data: UserSchema.Insert,
@@ -88,7 +91,7 @@ const create = authed({
 	},
 });
 
-const update = authed({
+export const update = authed({
 	require: ["users:update"],
 	input: z.object({
 		id: UserSchema.Select.shape.id.optional(),
@@ -115,7 +118,7 @@ const update = authed({
 	},
 });
 
-const delete_ = authed({
+export const remove = authed({
 	require: ["users:delete"],
 	input: z.object({
 		id: UserSchema.Select.shape.id,
@@ -135,7 +138,7 @@ const delete_ = authed({
 	},
 });
 
-async function requireClass(user: UserContext, id: ClassSchema.Select["id"]) {
+export async function requireClass(user: UserContext, id: ClassSchema.Select["id"]) {
 	// Check if Class exists
 	const [class_] = await db
 		.select({})
@@ -157,7 +160,7 @@ async function requireClass(user: UserContext, id: ClassSchema.Select["id"]) {
 	if (!user_in_class) throw new TRPCError({ code: "FORBIDDEN", message: "User does not have access to the class." });
 }
 
-async function authenticate(email: string, password: string) {
+export async function authenticate(email: string, password: string) {
 	const error = new Error("Incorrect Username or Password.");
 
 	// Get User
@@ -175,21 +178,10 @@ async function authenticate(email: string, password: string) {
 	return UserSchema.Select.parse(record);
 }
 
-export const userService = {
-	find,
-	list,
-	create,
-	update,
-	delete: delete_,
-
-	requireClass,
-	authenticate,
-};
-
-export const usersRouter = router({
+export const routers = t.router({
 	find: authedProcedure().input(find.input).query(find),
 	list: authedProcedure().input(list.input).query(list),
 	create: authedProcedure().input(create.input).mutation(create),
 	update: authedProcedure().input(update.input).mutation(update),
-	delete: authedProcedure().input(delete_.input).mutation(delete_),
+	delete: authedProcedure().input(remove.input).mutation(remove),
 });
