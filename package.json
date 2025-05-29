@@ -8,7 +8,7 @@
 		"start": "next start",
 		"lint": "next lint",
 		"format": "prettier --write .",
-		"prettier": "prettier --check --write .",
+		"prettier": "prettier --check .",
 		"prettier:write": "prettier --write .",
 		"eslint": "eslint ./src",
 		"eslint:fix": "eslint ./src --fix",
@@ -22,6 +22,8 @@
 		"@trpc/react-query": "^11.1.2",
 		"@trpc/server": "^11.1.2",
 		"bcrypt": "^6.0.0",
+		"@radix-ui/react-checkbox": "^1.3.2",
+		"@radix-ui/react-slot": "^1.2.3",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"dotenv": "^16.5.0",
@@ -34,7 +36,8 @@
 		"react": "^19.0.0",
 		"react-dom": "^19.0.0",
 		"tailwind-merge": "^3.3.0",
-		"zod": "^3.25.20"
+		"zod": "^3.25.20",
+		"react-icons": "^5.5.0"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^19.8.1",
