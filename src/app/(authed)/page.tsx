@@ -1,14 +1,14 @@
-import { Account } from "@/lib/types";
-import { accounts } from "./accounts-columns";
-import AccountsTableWrapper from "./accounts-table-wrapper";
+import { ProblemItem } from "@/lib/types";
+import { problems } from "./problems-columns";
+import StudentDashboardWrapper from "./student-dashboard-wrapper";
 
-async function getAccounts(): Promise<Account[]> {
-	// Fetch data from your API here.
-	return accounts;
+async function getProblems(): Promise<ProblemItem[]> {
+	// Fetch data from the API here.
+	return problems;
 }
 
 export default async function Page() {
-	const accounts = await getAccounts();
+	const problems = await getProblems();
 
-	return <AccountsTableWrapper accounts={accounts} />;
+	return <StudentDashboardWrapper problems={problems} />;
 }

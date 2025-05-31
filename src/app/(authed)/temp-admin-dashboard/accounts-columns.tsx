@@ -1,7 +1,29 @@
 "use client";
 
+import { rolesInfo } from "@/app/(authed)/data";
 import { DataTableColumnHeader } from "@/components/data-table-column-header";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -10,14 +32,27 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Account } from "@/lib/types";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { AccountItem } from "@/lib/types";
 import { capitalizeFirstLetter } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+// Define schema for edit form
+const editAccountSchema = z.object({
+	firstName: z.string().min(1, "First name is required"),
+	lastName: z.string().min(1, "Last name is required"),
+	email: z.string().email("Invalid email address"),
+});
 
 // Dummy data. To be replace by real values from the server.
-export const accounts: Account[] = [
+export const accounts: AccountItem[] = [
 	{
 		firstName: "Luke",
 		lastName: "Exodus",
@@ -42,7 +77,7 @@ export const accounts: Account[] = [
 		email: "jose.ramirez@example.com",
 		dateCreated: new Date("2025-03-15T12:00:00Z"),
 		dateModified: new Date("2025-04-01T14:00:00Z"),
-		roles: ["teacher"],
+		roles: ["teacher", "admin"],
 		classes: ["Javascript Basics", "Advanced C++"],
 	},
 	{
@@ -261,7 +296,7 @@ export const accounts: Account[] = [
 		email: "nathaniel.cruz@example.com",
 		dateCreated: new Date("2025-01-25T07:30:00Z"),
 		dateModified: new Date("2025-03-01T08:30:00Z"),
-		roles: ["admin"],
+		roles: ["admin", "teacher"],
 	},
 	{
 		firstName: "Faith",
@@ -278,12 +313,12 @@ export const accounts: Account[] = [
 		email: "xander.lim@example.com",
 		dateCreated: new Date("2025-04-01T09:00:00Z"),
 		dateModified: new Date("2025-04-20T09:30:00Z"),
-		roles: ["teacher"],
+		roles: ["teacher", "admin"],
 		classes: ["UX Design", "Intro to Python"],
 	},
 ];
 
-export const columns: ColumnDef<Account>[] = [
+export const accountColumns: ColumnDef<AccountItem>[] = [
 	{
 		accessorKey: "lastName",
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Last Name" />,
@@ -301,7 +336,7 @@ export const columns: ColumnDef<Account>[] = [
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Date Created" />,
 		cell: ({ row }) => {
 			const date = row.getValue("dateCreated") as Date;
-			return format(date, "yyyy-MM-dd HH:mm:ss"); // Consistent format: "2025-05-20 18:00:00"
+			return format(date, "MMM d, yyyy h:mm a"); // Consistent format: "2025-05-20 18:00:00"
 		},
 	},
 	{
@@ -309,17 +344,25 @@ export const columns: ColumnDef<Account>[] = [
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Date Modified" />,
 		cell: ({ row }) => {
 			const date = row.getValue("dateModified") as Date;
-			return format(date, "yyyy-MM-dd HH:mm:ss");
+			return format(date, "MMM d, yyyy h:mm a");
 		},
 	},
 	{
 		accessorKey: "roles",
-		header: "Roles",
+		header: "Role",
 		cell: ({ row }) => {
 			let roles = null;
 			roles = (row.getValue("roles") as string[]) ?? null;
 			if (roles) {
-				return roles.map((role) => capitalizeFirstLetter(role)).join(", ");
+				return (
+					<span className="flex flex-row flex-wrap gap-2">
+						{roles.map((role) => (
+							<Badge variant="outline" key={role}>
+								{rolesInfo.find((_) => _.value === role)?.icon} {capitalizeFirstLetter(role)}
+							</Badge>
+						))}
+					</span>
+				);
 			} else {
 				return "";
 			}
@@ -343,6 +386,21 @@ export const columns: ColumnDef<Account>[] = [
 		cell: ({ row }) => {
 			const account = row.original;
 
+			// Add form hook for edit dialog
+			const form = useForm<z.infer<typeof editAccountSchema>>({
+				resolver: zodResolver(editAccountSchema),
+				defaultValues: {
+					firstName: account.firstName,
+					lastName: account.lastName,
+					email: account.email,
+				},
+			});
+
+			function onSubmit(values: z.infer<typeof editAccountSchema>) {
+				console.log(values);
+				// Handle form submission - to be implemented
+			}
+
 			return (
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
@@ -352,8 +410,90 @@ export const columns: ColumnDef<Account>[] = [
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
-						<DropdownMenuItem>Edit</DropdownMenuItem>
-						<DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+						<Dialog>
+							<DialogTrigger asChild>
+								<DropdownMenuItem onSelect={(event) => event.preventDefault()}>Edit</DropdownMenuItem>
+							</DialogTrigger>
+							<DialogContent className="sm:max-w-[425px]">
+								<DialogHeader>
+									<DialogTitle>Edit account</DialogTitle>
+									<DialogDescription>
+										Make changes to your account here. Click save when you&apos;re done.
+									</DialogDescription>
+								</DialogHeader>
+								<Form {...form}>
+									<form
+										onSubmit={(e) => {
+											e.preventDefault();
+											void form.handleSubmit(onSubmit)(e);
+										}}
+										className="grid gap-4 py-4">
+										<FormField
+											control={form.control}
+											name="firstName"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>First Name</FormLabel>
+													<FormControl>
+														<Input {...field} />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+										<FormField
+											control={form.control}
+											name="lastName"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Last Name</FormLabel>
+													<FormControl>
+														<Input {...field} />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+										<FormField
+											control={form.control}
+											name="email"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Email</FormLabel>
+													<FormControl>
+														<Input {...field} />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+										<DialogFooter>
+											<Button type="submit">Save changes</Button>
+										</DialogFooter>
+									</form>
+								</Form>
+							</DialogContent>
+						</Dialog>
+						<AlertDialog>
+							<AlertDialogTrigger asChild>
+								<DropdownMenuItem variant="destructive" onSelect={(event) => event.preventDefault()}>
+									Delete
+								</DropdownMenuItem>
+							</AlertDialogTrigger>
+							<AlertDialogContent>
+								<AlertDialogHeader>
+									<AlertDialogTitle>Are you sure you want to delete this account?</AlertDialogTitle>
+									<AlertDialogDescription>
+										This action cannot be undone. This will permanently delete your account and remove your data from
+										our servers.
+									</AlertDialogDescription>
+								</AlertDialogHeader>
+								<AlertDialogFooter>
+									<AlertDialogCancel>Cancel</AlertDialogCancel>
+									<AlertDialogAction>Delete</AlertDialogAction>
+								</AlertDialogFooter>
+							</AlertDialogContent>
+						</AlertDialog>
 					</DropdownMenuContent>
 				</DropdownMenu>
 			);

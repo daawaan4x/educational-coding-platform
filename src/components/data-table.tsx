@@ -8,7 +8,9 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { useSidebar } from "@/components/ui/sidebar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { camelToCapitalizedWords, camelToWords, cn, listToFalseObject } from "@/lib/utils";
 import {
 	ColumnDef,
 	ColumnFiltersState,
@@ -21,22 +23,47 @@ import {
 	useReactTable,
 	VisibilityState,
 } from "@tanstack/react-table";
+import { LucideIcon, X } from "lucide-react";
 import { useState } from "react";
+import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { DataTablePagination } from "./data-table-pagination";
+
+interface FilterOptionItem {
+	value: string;
+	label: string;
+	icon: LucideIcon;
+}
+
+interface Filter {
+	column: string;
+	options: FilterOptionItem[];
+}
 
 interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];
 	data: TData[];
+	filterColumn?: string;
+	notVisibleColumns: string[];
+	filters?: Filter[];
+	enablePagination?: boolean;
+	defaultPageSize?: number;
 }
 
-export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
+// `filterColumn` is for filtering a specific column with a text input.
+// `filters` is for filtering multiple columns with predefined options.
+
+export function DataTable<TData, TValue>({
+	columns,
+	data,
+	filterColumn,
+	notVisibleColumns,
+	filters,
+	enablePagination = true,
+	defaultPageSize,
+}: DataTableProps<TData, TValue>) {
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-		classes: false,
-		dateModified: false,
-		dateCreated: false,
-	});
+	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(listToFalseObject(notVisibleColumns));
 
 	const table = useReactTable({
 		data,
@@ -55,38 +82,76 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
 		},
 	});
 
+	const isFiltered = table.getState().columnFilters.length > 0;
+	const { state, isMobile } = useSidebar();
+
 	return (
-		<div className="">
-			<div className="flex items-center py-4">
-				<Input
-					placeholder="Filter last names..."
-					value={(table.getColumn("lastName")?.getFilterValue() as string) ?? ""}
-					onChange={(event) => table.getColumn("lastName")?.setFilterValue(event.target.value)}
-					className="max-w-sm"
-				/>
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button variant="outline" className="ml-auto">
-							Columns
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end">
-						{table
-							.getAllColumns()
-							.filter((column) => column.getCanHide())
-							.map((column) => {
+		<div className="max-w-full overflow-auto">
+			<div className="flex items-center justify-between gap-3 py-4">
+				<div className="flex flex-1 flex-row flex-wrap items-center gap-2">
+					{filterColumn ? (
+						<Input
+							placeholder={`Filter ${camelToWords(filterColumn)}s...`}
+							value={(table.getColumn(filterColumn)?.getFilterValue() as string) ?? ""}
+							onChange={(event) => table.getColumn(filterColumn)?.setFilterValue(event.target.value)}
+							className="max-w-sm"
+						/>
+					) : (
+						""
+					)}
+					{filters ? (
+						<div
+							className={cn("flex flex-1 flex-row flex-wrap items-center gap-2 sm:flex-nowrap", {
+								"sm:flex-wrap md:flex-nowrap": state == "expanded" && !isMobile,
+								"block sm:flex-wrap md:flex-nowrap": state != "expanded" && !isMobile,
+								"sm:flex-wrap md:flex-wrap lg:flex-nowrap": state == "expanded" && !isMobile && isFiltered,
+							})}>
+							{filters.map((filter) => {
 								return (
-									<DropdownMenuCheckboxItem
-										key={column.id}
-										className="capitalize"
-										checked={column.getIsVisible()}
-										onCheckedChange={(value) => column.toggleVisibility(!!value)}>
-										{column.id}
-									</DropdownMenuCheckboxItem>
+									<DataTableFacetedFilter
+										key={filter.column}
+										column={table.getColumn(filter.column)}
+										title={camelToCapitalizedWords(filter.column)}
+										options={filter.options}
+									/>
 								);
 							})}
-					</DropdownMenuContent>
-				</DropdownMenu>
+							{isFiltered && (
+								<Button variant="ghost" onClick={() => table.resetColumnFilters()} className="h-8 px-2 lg:px-3">
+									Reset
+									<X />
+								</Button>
+							)}
+						</div>
+					) : (
+						""
+					)}
+				</div>
+				<div className="flex justify-end">
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button variant="outline" className="ml-auto">
+								Columns
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end">
+							{table
+								.getAllColumns()
+								.filter((column) => column.getCanHide())
+								.map((column) => {
+									return (
+										<DropdownMenuCheckboxItem
+											key={column.id}
+											className="capitalize"
+											checked={column.getIsVisible()}
+											onCheckedChange={(value) => column.toggleVisibility(!!value)}>
+											{camelToCapitalizedWords(column.id)}
+										</DropdownMenuCheckboxItem>
+									);
+								})}
+						</DropdownMenuContent>
+					</DropdownMenu>
+				</div>
 			</div>
 			<div className="rounded-md border">
 				<Table>
@@ -122,9 +187,13 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
 					</TableBody>
 				</Table>
 			</div>
-			<div className="py-4">
-				<DataTablePagination table={table} />
-			</div>
+			{enablePagination && enablePagination == true ? (
+				<div className="py-4">
+					<DataTablePagination table={table} defaultPageSize={defaultPageSize} />
+				</div>
+			) : (
+				""
+			)}
 		</div>
 	);
 }

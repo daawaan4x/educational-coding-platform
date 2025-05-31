@@ -2,12 +2,20 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table } from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { useEffect } from "react";
 
 interface DataTablePaginationProps<TData> {
 	table: Table<TData>;
+	defaultPageSize?: number;
 }
 
-export function DataTablePagination<TData>({ table }: DataTablePaginationProps<TData>) {
+export function DataTablePagination<TData>({ table, defaultPageSize }: DataTablePaginationProps<TData>) {
+	useEffect(() => {
+		if (defaultPageSize && table.getState().pagination.pageSize !== defaultPageSize) {
+			table.setPageSize(defaultPageSize);
+		}
+	}, [defaultPageSize, table]);
+
 	return (
 		<div className="flex items-center justify-between px-2">
 			{/* <div className="flex-1 text-sm text-muted-foreground">
@@ -20,7 +28,8 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
 					value={`${table.getState().pagination.pageSize}`}
 					onValueChange={(value) => {
 						table.setPageSize(Number(value));
-					}}>
+					}}
+					defaultValue={`${defaultPageSize ?? 10}`}>
 					<SelectTrigger className="h-8 w-[70px]">
 						<SelectValue placeholder={table.getState().pagination.pageSize} />
 					</SelectTrigger>
