@@ -5,6 +5,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import TRPCProvider from "@/lib/trpc-provider";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -45,6 +46,7 @@ export default function Page({
 	return (
 		<html lang="en">
 			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+				<TRPCProvider>
 				<SidebarProvider>
 					<AppSidebar />
 					<SidebarInset>
@@ -68,6 +70,7 @@ export default function Page({
 						{children}
 					</SidebarInset>
 				</SidebarProvider>
+				</TRPCProvider>
 			</body>
 		</html>
 	);
