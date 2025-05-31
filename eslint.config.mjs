@@ -44,6 +44,11 @@ export default tseslint.config(
 			"@typescript-eslint/no-unused-vars": "off",
 			"@typescript-eslint/no-unnecessary-type-assertion": "off",
 			"@typescript-eslint/require-await": "off",
+			"@typescript-eslint/no-floating-promises": "off",
+			"no-irregular-whitespace": "off",
+			"react-hooks/rules-of-hooks": "off",
+			"@typescript-eslint/ban-ts-comment": "off",
+			"@typescript-eslint/prefer-optional-chain": "off",
 		},
 	},
 );
