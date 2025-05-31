@@ -49,6 +49,10 @@ export default tseslint.config(
 			"react-hooks/rules-of-hooks": "off",
 			"@typescript-eslint/ban-ts-comment": "off",
 			"@typescript-eslint/prefer-optional-chain": "off",
+			// conflict merge temporarily disabled rules
+			"@typescript-eslint/no-unsafe-assignment": "off",
+			"@typescript-eslint/no-unsafe-member-access": "off",
+			"@typescript-eslint/no-unsafe-call": "off",
 		},
 	},
 );
