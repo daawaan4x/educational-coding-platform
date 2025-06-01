@@ -40,6 +40,8 @@ export default tseslint.config(
 	},
 	prettiereslint,
 	{
+		// Temporarily disable rules for frontend development only
+		files: ["./src/app/**", "./src/components/**"],
 		rules: {
 			"@typescript-eslint/no-unused-vars": "off",
 			"@typescript-eslint/no-unnecessary-type-assertion": "off",
@@ -49,7 +51,11 @@ export default tseslint.config(
 			"react-hooks/rules-of-hooks": "off",
 			"@typescript-eslint/ban-ts-comment": "off",
 			"@typescript-eslint/prefer-optional-chain": "off",
-			// conflict merge temporarily disabled rules
+		},
+	},
+	{
+		rules: {
+			// backend rules
 			"@typescript-eslint/no-unsafe-assignment": "off",
 			"@typescript-eslint/no-unsafe-member-access": "off",
 			"@typescript-eslint/no-unsafe-call": "off",

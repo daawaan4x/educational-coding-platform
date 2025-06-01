@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import hljs from "highlight.js";
 import { Save } from "lucide-react";
 import type QuillType from "quill";
+import type { Delta, Op } from "quill";
 
 // Extend HTMLDivElement to allow __quill property
 declare global {
@@ -47,7 +48,7 @@ function DescriptionEditor({ descriptionReadonly }: { descriptionReadonly: boole
 		const savedContent = localStorage.getItem("quill-editor-content");
 		if (savedContent && quillInstanceRef.current) {
 			try {
-				const parsedContent = JSON.parse(savedContent);
+				const parsedContent = JSON.parse(savedContent) as Delta | Op[];
 				quillInstanceRef.current.setContents(parsedContent);
 			} catch (error) {
 				console.warn("Failed to parse saved content:", error);
@@ -59,7 +60,7 @@ function DescriptionEditor({ descriptionReadonly }: { descriptionReadonly: boole
 	useEffect(() => {
 		// Store the save function on the container for external access
 		if (containerRef.current) {
-			(containerRef.current as any).saveContent = saveContentToLocalStorage;
+			(containerRef.current as HTMLDivElement & { saveContent?: () => void }).saveContent = saveContentToLocalStorage;
 		}
 	}, []);
 
@@ -97,49 +98,56 @@ function DescriptionEditor({ descriptionReadonly }: { descriptionReadonly: boole
 				return;
 			}
 
-			import("quill").then((QuillModule) => {
-				const Quill = QuillModule.default;
-				
-				// Final check before creating Quill instance
-				if (editorDiv && editorDiv.parentNode && !quillInstanceRef.current && containerRef.current?.contains(editorDiv)) {
-					console.log("Creating new Quill instance...");
-					quillInstanceRef.current = new Quill(editorDiv, {
-						debug: "info",
-						readOnly: descriptionReadonly,
-						modules: {
-							syntax: true,
-							toolbar: descriptionReadonly
-								? false
-								: [
-										["bold", "italic", "underline", "strike", "code", { script: "sub" }, { script: "super" }],
-										["blockquote", "code-block"],
-										[{ header: 1 }, { header: 2 }, { header: 3 }],
-										[{ color: [] }, { background: [] }],
-										[{ list: "ordered" }, { list: "bullet" }],
-										[{ align: [] }, { indent: "-1" }, { indent: "+1" }],
-										["link", "image", "video", "formula"],
-								  ],
-						},
-						placeholder: descriptionReadonly ? "Loading description..." : "Start typing here...",
-						theme: "snow",
-						bounds: "#editor-bounds",
-					});
+			import("quill")
+				.then((QuillModule) => {
+					const Quill = QuillModule.default;
 
-					// Store reference on the DOM element for the save button
-					editorDiv.__quill = quillInstanceRef.current as QuillType;
+					// Final check before creating Quill instance
+					if (
+						editorDiv &&
+						editorDiv.parentNode &&
+						!quillInstanceRef.current &&
+						containerRef.current?.contains(editorDiv)
+					) {
+						console.log("Creating new Quill instance...");
+						quillInstanceRef.current = new Quill(editorDiv, {
+							debug: "info",
+							readOnly: descriptionReadonly,
+							modules: {
+								syntax: true,
+								toolbar: descriptionReadonly
+									? false
+									: [
+											["bold", "italic", "underline", "strike", "code", { script: "sub" }, { script: "super" }],
+											["blockquote", "code-block"],
+											[{ header: 1 }, { header: 2 }, { header: 3 }],
+											[{ color: [] }, { background: [] }],
+											[{ list: "ordered" }, { list: "bullet" }],
+											[{ align: [] }, { indent: "-1" }, { indent: "+1" }],
+											["link", "image", "video", "formula"],
+										],
+							},
+							placeholder: descriptionReadonly ? "Loading description..." : "Start typing here...",
+							theme: "snow",
+							bounds: "#editor-bounds",
+						});
 
-					// Load saved content after initialization
-					setTimeout(() => {
-						loadContentFromLocalStorage();
-					}, 50);
+						// Store reference on the DOM element for the save button
+						editorDiv.__quill = quillInstanceRef.current as QuillType;
 
-					console.log("Quill instance created successfully");
-				} else {
-					console.warn("Failed to create Quill instance - editorDiv not available or already initialized");
-				}
-			}).catch((error) => {
-				console.error("Failed to load Quill module:", error);
-			});
+						// Load saved content after initialization
+						setTimeout(() => {
+							loadContentFromLocalStorage();
+						}, 50);
+
+						console.log("Quill instance created successfully");
+					} else {
+						console.warn("Failed to create Quill instance - editorDiv not available or already initialized");
+					}
+				})
+				.catch((error) => {
+					console.error("Failed to load Quill module:", error);
+				});
 		}, 10);
 
 		const container = containerRef.current;
@@ -171,7 +179,9 @@ export default function Problem({ descriptionReadonly = false, showSubmissions =
 					onValueChange={(value) => {
 						// Save content to localStorage before switching tabs
 						if (tabValue === "description") {
-							const containerElement = document.querySelector('#editor-bounds .max-w-full') as any;
+							const containerElement = document.querySelector("#editor-bounds .max-w-full") as
+								| (HTMLDivElement & { saveContent?: () => void })
+								| null;
 							if (containerElement && containerElement.saveContent) {
 								containerElement.saveContent();
 							}
