@@ -58,4 +58,11 @@ export interface ParticipantItem {
 
 export interface SolutionItem {
 	id: string;
+	problemId: string;
+	authorId: string;
+	dateCreated: Date;
+	score: number;
+	attempt: number;
+	code: string;
+	feedback?: string;
 }

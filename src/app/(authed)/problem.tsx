@@ -269,7 +269,7 @@ export default function Problem({
 						</TabsList>
 						{/* )} */}
 
-						{tabValue === "description" && (
+						{(tabValue === "description" && !descriptionReadonly) && (
 							<Button variant="secondary" className="w-fit" onClick={handleSave}>
 								<Save />
 								<span className="sr-only">Save</span>
@@ -280,7 +280,7 @@ export default function Problem({
 						value="description"
 						className="flex h-auto max-h-full w-full flex-1 flex-col overflow-y-auto lg:h-full lg:max-h-full"
 						id="editor-bounds">
-						{!descriptionReadonly && (
+						{!descriptionReadonly ? (
 							<>
 								<Input
 									id="title"
@@ -296,74 +296,102 @@ export default function Problem({
 								/>
 								{validationErrors.title && <p className="mb-4 text-sm text-red-500">Title is required</p>}
 							</>
+						) : (
+							<h1 className="mb-2 h-auto scroll-mt-20 border-none bg-transparent px-3 py-0 text-[2.5rem] leading-[3rem] font-extrabold tracking-[-0.025em]">
+								{title || <span className="text-muted-foreground">Loading title...</span>}
+							</h1>
 						)}
 						<div className="flex-1">
 							<DescriptionEditor descriptionReadonly={descriptionReadonly} />
 						</div>
-						<Separator className="my-4" />
-						{!descriptionReadonly && (
-							<div className="bg-muted/30 mt-auto space-y-4 rounded-lg border p-4">
-								<div className="grid gap-4 md:grid-cols-2">
-									<div className="space-y-2">
-										<Label htmlFor="maxAttempts">Max Attempts *</Label>
-										<Input
-											id="maxAttempts"
-											type="number"
-											min="1"
-											placeholder="e.g. 5"
-											value={maxAttempts}
-											onChange={(e) => setMaxAttempts(e.target.value)}
-											className={cn({ "border-red-500": validationErrors.maxAttempts })}
-											required
-										/>
-										{validationErrors.maxAttempts && <p className="text-sm text-red-500">Max attempts is required</p>}
+
+						{!descriptionReadonly ? (
+							<>
+								<Separator className="my-4" />
+								<div className="bg-muted/30 mt-auto space-y-4 rounded-lg border p-4">
+									<div className="grid gap-4 md:grid-cols-2">
+										<div className="space-y-2">
+											<Label htmlFor="maxAttempts">Max Attempts *</Label>
+											<Input
+												id="maxAttempts"
+												type="number"
+												min="1"
+												placeholder="e.g. 5"
+												value={maxAttempts}
+												onChange={(e) => setMaxAttempts(e.target.value)}
+												className={cn({ "border-red-500": validationErrors.maxAttempts })}
+												required
+											/>
+											{validationErrors.maxAttempts && <p className="text-sm text-red-500">Max attempts is required</p>}
+										</div>
+										<div className="space-y-2">
+											<Label htmlFor="maxScore">Max Score *</Label>
+											<Input
+												id="maxScore"
+												type="number"
+												min="1"
+												placeholder="e.g. 100"
+												value={maxScore}
+												onChange={(e) => setMaxScore(e.target.value)}
+												className={cn({ "border-red-500": validationErrors.maxScore })}
+												required
+											/>
+											{validationErrors.maxScore && <p className="text-sm text-red-500">Max score is required</p>}
+										</div>
 									</div>
 									<div className="space-y-2">
-										<Label htmlFor="maxScore">Max Score *</Label>
-										<Input
-											id="maxScore"
-											type="number"
-											min="1"
-											placeholder="e.g. 100"
-											value={maxScore}
-											onChange={(e) => setMaxScore(e.target.value)}
-											className={cn({ "border-red-500": validationErrors.maxScore })}
-											required
-										/>
-										{validationErrors.maxScore && <p className="text-sm text-red-500">Max score is required</p>}
+										<Label>Deadline *</Label>
+										<div className="flex gap-2">
+											<Popover>
+												<PopoverTrigger asChild>
+													<Button
+														variant="outline"
+														className={cn(
+															"w-auto justify-start text-left font-normal",
+															!deadline && "text-muted-foreground",
+															{ "border-red-500": validationErrors.deadline },
+														)}>
+														<CalendarIcon className="mr-2 h-4 w-4" />
+														{deadline ? format(deadline, "PPP") : "Pick a date"}
+													</Button>
+												</PopoverTrigger>
+												<PopoverContent className="w-auto p-0" align="start">
+													<Calendar mode="single" selected={deadline} onSelect={setDeadline} initialFocus />
+												</PopoverContent>
+											</Popover>
+											<input
+												type="time"
+												value={deadlineTime}
+												onChange={(e) => setDeadlineTime(e.target.value)}
+												className="placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex h-9 w-fit w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+												required
+											/>
+										</div>
+										{validationErrors.deadline && <p className="text-sm text-red-500">Deadline is required</p>}
 									</div>
 								</div>
-								<div className="space-y-2">
-									<Label>Deadline *</Label>
-									<div className="flex gap-2">
-										<Popover>
-											<PopoverTrigger asChild>
-												<Button
-													variant="outline"
-													className={cn(
-														"w-auto justify-start text-left font-normal",
-														!deadline && "text-muted-foreground",
-														{ "border-red-500": validationErrors.deadline },
-													)}>
-													<CalendarIcon className="mr-2 h-4 w-4" />
-													{deadline ? format(deadline, "PPP") : "Pick a date"}
-												</Button>
-											</PopoverTrigger>
-											<PopoverContent className="w-auto p-0" align="start">
-												<Calendar mode="single" selected={deadline} onSelect={setDeadline} initialFocus />
-											</PopoverContent>
-										</Popover>
-										<input
-											type="time"
-											value={deadlineTime}
-											onChange={(e) => setDeadlineTime(e.target.value)}
-											className="placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex h-9 w-fit w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-											required
-										/>
+							</>
+						) : (
+							// TODO: Replace with the state values once connected with the backend
+							<>
+								<Separator className="mt-4 mb-1" />
+								<div className="mt-auto space-y-1">
+									<div className="flex items-center justify-between py-2">
+										<span className="text-muted-foreground text-sm font-medium">Max Attempts</span>
+										<span className="text-sm font-semibold">5</span>
 									</div>
-									{validationErrors.deadline && <p className="text-sm text-red-500">Deadline is required</p>}
+									<Separator />
+									<div className="flex items-center justify-between py-2">
+										<span className="text-muted-foreground text-sm font-medium">Max Score</span>
+										<span className="text-sm font-semibold">100</span>
+									</div>
+									<Separator />
+									<div className="flex items-center justify-between py-2">
+										<span className="text-muted-foreground text-sm font-medium">Deadline</span>
+										<span className="text-sm font-semibold">Dec 25, 2024 at 11:59 PM</span>
+									</div>
 								</div>
-							</div>
+							</>
 						)}
 					</TabsContent>
 					{showSubmissions && <TabsContent value="submissions" className="w-full"></TabsContent>}
@@ -384,7 +412,7 @@ export default function Problem({
 						</span>
 						<Button variant="secondary" className="w-fit" onClick={() => {}}>
 							<Play />
-							<span className="sr-only">Save</span>
+							<span className="sr-only">Run Code</span>
 						</Button>
 					</div>
 					<div className="min-h-0 flex-1 overflow-auto">
