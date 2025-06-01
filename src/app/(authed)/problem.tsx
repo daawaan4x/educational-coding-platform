@@ -33,6 +33,36 @@ function DescriptionEditor({ descriptionReadonly }: { descriptionReadonly: boole
 	const quillInstanceRef = useRef<QuillType | null>(null);
 	const [isVisible, setIsVisible] = useState(true);
 
+	// Function to save content to localStorage
+	const saveContentToLocalStorage = () => {
+		if (quillInstanceRef.current) {
+			const content = quillInstanceRef.current.getContents();
+			const serializedContent = JSON.stringify(content);
+			localStorage.setItem("quill-editor-content", serializedContent);
+		}
+	};
+
+	// Function to load content from localStorage
+	const loadContentFromLocalStorage = () => {
+		const savedContent = localStorage.getItem("quill-editor-content");
+		if (savedContent && quillInstanceRef.current) {
+			try {
+				const parsedContent = JSON.parse(savedContent);
+				quillInstanceRef.current.setContents(parsedContent);
+			} catch (error) {
+				console.warn("Failed to parse saved content:", error);
+			}
+		}
+	};
+
+	// Expose save function to parent component
+	useEffect(() => {
+		// Store the save function on the container for external access
+		if (containerRef.current) {
+			(containerRef.current as any).saveContent = saveContentToLocalStorage;
+		}
+	}, []);
+
 	useEffect(() => {
 		// Force re-render when component becomes visible
 		setIsVisible(true);
@@ -61,9 +91,17 @@ function DescriptionEditor({ descriptionReadonly }: { descriptionReadonly: boole
 
 		// Add a small delay to ensure DOM is ready
 		setTimeout(() => {
+			// Double-check that the editorDiv still exists and is connected
+			if (!editorDiv || !editorDiv.parentNode || !containerRef.current?.contains(editorDiv)) {
+				console.warn("Editor div was removed before Quill could initialize");
+				return;
+			}
+
 			import("quill").then((QuillModule) => {
 				const Quill = QuillModule.default;
-				if (editorDiv && editorDiv.parentNode && !quillInstanceRef.current) {
+				
+				// Final check before creating Quill instance
+				if (editorDiv && editorDiv.parentNode && !quillInstanceRef.current && containerRef.current?.contains(editorDiv)) {
 					console.log("Creating new Quill instance...");
 					quillInstanceRef.current = new Quill(editorDiv, {
 						debug: "info",
@@ -80,7 +118,7 @@ function DescriptionEditor({ descriptionReadonly }: { descriptionReadonly: boole
 										[{ list: "ordered" }, { list: "bullet" }],
 										[{ align: [] }, { indent: "-1" }, { indent: "+1" }],
 										["link", "image", "video", "formula"],
-									],
+								  ],
 						},
 						placeholder: descriptionReadonly ? "Loading description..." : "Start typing here...",
 						theme: "snow",
@@ -89,10 +127,18 @@ function DescriptionEditor({ descriptionReadonly }: { descriptionReadonly: boole
 
 					// Store reference on the DOM element for the save button
 					editorDiv.__quill = quillInstanceRef.current as QuillType;
+
+					// Load saved content after initialization
+					setTimeout(() => {
+						loadContentFromLocalStorage();
+					}, 50);
+
 					console.log("Quill instance created successfully");
 				} else {
-					console.warn("Failed to create Quill instance - editorDiv not available");
+					console.warn("Failed to create Quill instance - editorDiv not available or already initialized");
 				}
+			}).catch((error) => {
+				console.error("Failed to load Quill module:", error);
 			});
 		}, 10);
 
@@ -122,7 +168,16 @@ export default function Problem({ descriptionReadonly = false, showSubmissions =
 			<Card className="h-auto min-h-[13rem] overflow-y-hidden px-2 py-[8px] lg:h-full lg:max-h-full">
 				<Tabs
 					value={tabValue}
-					onValueChange={setTabValue}
+					onValueChange={(value) => {
+						// Save content to localStorage before switching tabs
+						if (tabValue === "description") {
+							const containerElement = document.querySelector('#editor-bounds .max-w-full') as any;
+							if (containerElement && containerElement.saveContent) {
+								containerElement.saveContent();
+							}
+						}
+						setTabValue(value);
+					}}
 					className={cn("h-auto w-full lg:h-[calc(100%-3rem)] lg:max-h-full", {
 						"h-full lg:h-full": descriptionReadonly,
 						"h-full md:h-full lg:h-full": state != "expanded" && !isMobile && descriptionReadonly,
