@@ -31,6 +31,8 @@ import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+export type solutionStatus = "accepted" | "wrong-answer";
+
 export const solutions: SolutionItem[] = [
 	{
 		id: "b1d2a7c1-45ea-4b8d-9b3c-8f3e3a2b1c01",
@@ -41,6 +43,7 @@ export const solutions: SolutionItem[] = [
 		attempt: 1,
 		code: "function sum(a, b) { return a + b; }",
 		feedback: "Good use of function syntax. Consider edge cases.",
+		status: "accepted",
 	},
 	{
 		id: "3a924fa5-bdd1-4d13-945f-0c1e2e7b9aa2",
@@ -51,6 +54,7 @@ export const solutions: SolutionItem[] = [
 		attempt: 2,
 		code: "let result = arr.filter(x => x > 10);",
 		feedback: "Efficient filtering, but clarify variable types.",
+		status: "wrong-answer",
 	},
 	{
 		id: "77e2c3b1-dbb1-4317-8a02-228e1d26319e",
@@ -61,6 +65,7 @@ export const solutions: SolutionItem[] = [
 		attempt: 1,
 		code: "const max = Math.max(...numbers);",
 		feedback: "Well optimized for performance.",
+		status: "accepted",
 	},
 	{
 		id: "157efc29-5cd0-45cc-a5e3-e1dc3ea0df02",
@@ -71,6 +76,7 @@ export const solutions: SolutionItem[] = [
 		attempt: 3,
 		code: "for (let i = 0; i < arr.length; i++) { console.log(arr[i]); }",
 		feedback: "Try using array methods like forEach.",
+		status: "wrong-answer",
 	},
 	{
 		id: "9c6f7d27-1f4c-4a6e-b711-7a3c6717a302",
@@ -81,7 +87,13 @@ export const solutions: SolutionItem[] = [
 		attempt: 1,
 		code: "return input === input.split('').reverse().join('');",
 		feedback: "Excellent one-liner for palindrome check.",
+		status: "accepted",
 	},
 ];
 
-export const solutionsColumns: ColumnDef<SolutionItem>[] = [];
+export const solutionsColumns: ColumnDef<SolutionItem>[] = [
+	{
+		accessorKey: "attempt",
+		header: "",
+	},
+];
