@@ -92,7 +92,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 								<div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
 									<Image
 										alt="CodeMight"
-										src="/webmight-logo.png"
+										src="/codemight-logo.png"
 										width={32}
 										height={32}
 										style={{ borderRadius: "0.5rem" }}

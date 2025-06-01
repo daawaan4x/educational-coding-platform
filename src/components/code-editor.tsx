@@ -2,7 +2,6 @@
 
 // Mark as client component for Next.js App Router
 import { javascript } from "@codemirror/lang-javascript";
-import { EditorView } from "@codemirror/view";
 import { basicSetup } from "codemirror";
 import dynamic from "next/dynamic";
 import { useState } from "react";

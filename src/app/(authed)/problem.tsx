@@ -173,7 +173,7 @@ export default function Problem({ descriptionReadonly = false, showSubmissions =
 			className={cn(
 				"grid h-auto grid-cols-1 gap-1 p-2 md:gap-2 lg:h-full lg:max-h-[91vh] lg:max-h-full lg:grid-cols-2 lg:overflow-y-hidden",
 				{
-					"lg:max-h-[91vh] max-w-[calc(100vw-16rem)]": state == "expanded" && !isMobile,
+					"max-w-[calc(100vw-16rem)] lg:max-h-[91vh]": state == "expanded" && !isMobile,
 					"md:h-full md:max-h-[91vh] md:max-h-full md:grid-cols-2 md:overflow-y-hidden":
 						state != "expanded" && !isMobile,
 				},
