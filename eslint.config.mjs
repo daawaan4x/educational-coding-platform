@@ -52,6 +52,7 @@ export default tseslint.config(
 			"@typescript-eslint/ban-ts-comment": "off",
 			"@typescript-eslint/prefer-optional-chain": "off",
 			"@typescript-eslint/no-empty-function": "off",
+			"@typescript-eslint/prefer-nullish-coalescing": "off",
 		},
 	},
 	{
