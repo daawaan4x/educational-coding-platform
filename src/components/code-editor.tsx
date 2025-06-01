@@ -11,7 +11,30 @@ const CodeMirror = dynamic(() => import("@uiw/react-codemirror"), {
 	ssr: false,
 });
 
-export default function CodeEditor({ language = "plain", placeholder }: { language: string; placeholder?: string }) {
+const classNameDefault = "overflow-auto rounded border";
+const theme = "light"; // You can change this to 'dark' if needed
+const basicSetupOptions = {
+	lineNumbers: true,
+	foldGutter: true,
+	dropCursor: false,
+	allowMultipleSelections: false,
+	indentOnInput: true,
+	bracketMatching: true,
+	closeBrackets: true,
+	autocompletion: true,
+	highlightSelectionMatches: false,
+	searchKeymap: true,
+};
+
+export default function CodeEditor({
+	language = "plain",
+	placeholder,
+	className,
+}: {
+	language: string;
+	placeholder?: string;
+	className?: string;
+}) {
 	const placholder =
 		language == "javascript"
 			? `// Write JavaScript code here\nconsole.log("Hello, CodeMirror!");`
@@ -19,6 +42,7 @@ export default function CodeEditor({ language = "plain", placeholder }: { langua
 				? placeholder
 				: `// Write ${language} code here`;
 	const [value, setValue] = useState(placholder);
+	className = className ? classNameDefault + " " + className : classNameDefault;
 
 	const handleChange = (val: string) => {
 		setValue(val);
@@ -27,44 +51,22 @@ export default function CodeEditor({ language = "plain", placeholder }: { langua
 		return (
 			<CodeMirror
 				value={value}
-				className="overflow-auto rounded border"
+				className={className}
 				extensions={[basicSetup, javascript({ jsx: true })]}
 				onChange={handleChange}
-				theme="light"
-				basicSetup={{
-					lineNumbers: true,
-					foldGutter: true,
-					dropCursor: false,
-					allowMultipleSelections: false,
-					indentOnInput: true,
-					bracketMatching: true,
-					closeBrackets: true,
-					autocompletion: true,
-					highlightSelectionMatches: false,
-					searchKeymap: true,
-				}}
+				theme={theme}
+				basicSetup={basicSetupOptions}
 			/>
 		);
 	} else if (language == "plain") {
 		return (
 			<CodeMirror
 				value={value}
-				className="overflow-auto rounded border"
+				className={className}
 				extensions={[basicSetup]}
 				onChange={handleChange}
-				theme="light"
-				basicSetup={{
-					lineNumbers: true,
-					foldGutter: true,
-					dropCursor: false,
-					allowMultipleSelections: false,
-					indentOnInput: true,
-					bracketMatching: true,
-					closeBrackets: true,
-					autocompletion: true,
-					highlightSelectionMatches: false,
-					searchKeymap: true,
-				}}
+				theme={theme}
+				basicSetup={basicSetupOptions}
 			/>
 		);
 	} else {

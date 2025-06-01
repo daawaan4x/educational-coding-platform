@@ -225,15 +225,16 @@ export default function Problem({
 
 	return (
 		<div
-			className={cn(
-				"grid h-auto grid-cols-1 gap-1 p-2 md:gap-2 lg:h-full lg:max-h-[91vh] lg:max-h-full lg:grid-cols-2 lg:overflow-y-hidden",
-				{
-					"max-w-[calc(100vw-16rem)] lg:max-h-[91vh]": state == "expanded" && !isMobile,
-					"md:h-full md:max-h-[91vh] md:max-h-full md:grid-cols-2 md:overflow-y-hidden":
-						state != "expanded" && !isMobile,
-				},
-			)}>
-			<Card className="h-auto min-h-[13rem] overflow-y-hidden px-2 py-[8px] lg:h-full lg:max-h-full">
+			className={cn("grid h-auto grid-cols-1 gap-1 p-2 md:gap-2 lg:max-h-[91vh]", {
+				"max-w-[calc(100vw-16rem)] lg:h-full lg:max-h-[91vh] lg:grid-cols-2 lg:overflow-y-hidden":
+					state == "expanded" && !isMobile,
+				"md:h-full md:max-h-[91vh] md:grid-cols-2 md:overflow-y-hidden": state != "expanded" && !isMobile,
+			})}>
+			<Card
+				className={cn("h-auto min-h-[13rem] overflow-y-hidden px-2 py-[8px]", {
+					"md:h-full md:max-h-full": state != "expanded" && !isMobile,
+					"lg:h-full lg:max-h-full": state == "expanded" && !isMobile,
+				})}>
 				<Tabs
 					value={tabValue}
 					onValueChange={(value) => {
@@ -269,7 +270,7 @@ export default function Problem({
 						</TabsList>
 						{/* )} */}
 
-						{(tabValue === "description" && !descriptionReadonly) && (
+						{tabValue === "description" && !descriptionReadonly && (
 							<Button variant="secondary" className="w-fit" onClick={handleSave}>
 								<Save />
 								<span className="sr-only">Save</span>
@@ -278,7 +279,10 @@ export default function Problem({
 					</div>
 					<TabsContent
 						value="description"
-						className="flex h-auto max-h-full w-full flex-1 flex-col overflow-y-auto lg:h-full lg:max-h-full"
+						className={cn("flex h-auto max-h-full w-full flex-1 flex-col overflow-y-auto", {
+							"md:h-full md:max-h-full": state != "expanded" && !isMobile,
+							"lg:h-full lg:max-h-full": state == "expanded" && !isMobile,
+						})}
 						id="editor-bounds">
 						{!descriptionReadonly ? (
 							<>
@@ -450,7 +454,11 @@ export default function Problem({
 						<TabsContent value="testcase">
 							<CodeEditor
 								language="plain"
-								placeholder="\\ Write the arguments for your function here. Separate with newlines."
+								placeholder="// Write the list arguments for your function here. Separate with newlines."
+								className={cn("h-full w-full overflow-y-auto", {
+									"md:max-h-[21.5vh]": state != "expanded" || isMobile,
+									"lg:max-h-[21.5vh]": state == "expanded" || isMobile,
+								})}
 							/>
 						</TabsContent>
 						<TabsContent value="testresult">

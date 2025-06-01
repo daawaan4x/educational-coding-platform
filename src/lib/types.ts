@@ -56,6 +56,8 @@ export interface ParticipantItem {
 	roles: UserRoleString[];
 }
 
+type solutionStatus = "accepted" | "wrong-answer";
+
 export interface SolutionItem {
 	id: string;
 	problemId: string;
@@ -65,4 +67,5 @@ export interface SolutionItem {
 	attempt: number;
 	code: string;
 	feedback?: string;
+	status: solutionStatus;
 }
