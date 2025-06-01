@@ -51,6 +51,7 @@ export default tseslint.config(
 			"react-hooks/rules-of-hooks": "off",
 			"@typescript-eslint/ban-ts-comment": "off",
 			"@typescript-eslint/prefer-optional-chain": "off",
+			"@typescript-eslint/no-empty-function": "off",
 		},
 	},
 	{

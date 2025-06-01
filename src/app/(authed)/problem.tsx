@@ -5,10 +5,11 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import "quill/dist/quill.snow.css";
+import CodeEditor from "@/components/code-editor";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import hljs from "highlight.js";
-import { Save } from "lucide-react";
+import { CodeXml, FolderClock, NotepadText, Play, Save } from "lucide-react";
 import type QuillType from "quill";
 import type { Delta, Op } from "quill";
 
@@ -85,7 +86,7 @@ function DescriptionEditor({ descriptionReadonly }: { descriptionReadonly: boole
 		// Create a new editor div inside the container
 		const editorDiv = document.createElement("div");
 		editorDiv.id = "editor";
-		editorDiv.className = "my-2";
+		editorDiv.className = "my-2 max-h-full overflow-y-auto flex-1";
 		containerRef.current.appendChild(editorDiv);
 
 		window.hljs = hljs;
@@ -160,7 +161,7 @@ function DescriptionEditor({ descriptionReadonly }: { descriptionReadonly: boole
 		};
 	}, [descriptionReadonly, isVisible]);
 
-	return <div ref={containerRef} className="max-w-full overflow-y-auto" />;
+	return <div ref={containerRef} className="flex max-h-full max-w-full flex-col gap-2 overflow-y-auto" />;
 }
 
 export default function Problem({ descriptionReadonly = false, showSubmissions = false }: ProblemProps) {
@@ -169,10 +170,14 @@ export default function Problem({ descriptionReadonly = false, showSubmissions =
 
 	return (
 		<div
-			className={cn("grid h-auto grid-cols-1 gap-2 p-2 lg:h-full lg:max-h-full lg:grid-cols-2 lg:overflow-y-hidden", {
-				"max-w-[calc(100vw-16rem)]": state == "expanded" && !isMobile,
-				"md:h-full md:max-h-full md:grid-cols-2 md:overflow-y-hidden": state != "expanded" && !isMobile,
-			})}>
+			className={cn(
+				"grid h-auto grid-cols-1 gap-1 p-2 md:gap-2 lg:h-full lg:max-h-[91vh] lg:max-h-full lg:grid-cols-2 lg:overflow-y-hidden",
+				{
+					"lg:max-h-[91vh] max-w-[calc(100vw-16rem)]": state == "expanded" && !isMobile,
+					"md:h-full md:max-h-[91vh] md:max-h-full md:grid-cols-2 md:overflow-y-hidden":
+						state != "expanded" && !isMobile,
+				},
+			)}>
 			<Card className="h-auto min-h-[13rem] overflow-y-hidden px-2 py-[8px] lg:h-full lg:max-h-full">
 				<Tabs
 					value={tabValue}
@@ -188,15 +193,27 @@ export default function Problem({ descriptionReadonly = false, showSubmissions =
 						}
 						setTabValue(value);
 					}}
-					className={cn("h-auto w-full lg:h-[calc(100%-3rem)] lg:max-h-full", {
+					className={cn("h-full w-full lg:max-h-full", {
 						"h-full lg:h-full": descriptionReadonly,
 						"h-full md:h-full lg:h-full": state != "expanded" && !isMobile && descriptionReadonly,
 					})}>
 					<div className="flex w-full flex-wrap items-center justify-between gap-3 lg:flex-nowrap">
+						{/* {showSubmissions == false ? (
+							<button className="data-[state=active]:bg-background focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring text-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 rounded-lg w-auto h-auto flex-initial"><NotepadText /> Description</button>
+						): ( */}
 						<TabsList>
-							<TabsTrigger value="description">Description</TabsTrigger>
-							{showSubmissions && <TabsTrigger value="submissions">Submissions</TabsTrigger>}
+							<TabsTrigger value="description">
+								<NotepadText /> Description
+							</TabsTrigger>
+							{showSubmissions && (
+								<TabsTrigger value="submissions">
+									<FolderClock />
+									Submissions
+								</TabsTrigger>
+							)}
 						</TabsList>
+						{/* )} */}
+
 						{tabValue === "description" && (
 							<Button
 								variant="secondary"
@@ -214,15 +231,44 @@ export default function Problem({ descriptionReadonly = false, showSubmissions =
 							</Button>
 						)}
 					</div>
-					<TabsContent value="description" className="h-auto w-full lg:h-full lg:max-h-full" id="editor-bounds">
+					<TabsContent
+						value="description"
+						className="h-auto max-h-full w-full flex-1 overflow-y-auto lg:h-full lg:max-h-full"
+						id="editor-bounds">
 						<DescriptionEditor descriptionReadonly={descriptionReadonly} />
 					</TabsContent>
 					{showSubmissions && <TabsContent value="submissions" className="w-full"></TabsContent>}
 				</Tabs>
 			</Card>
-			<div className="grid grid-cols-1 gap-2">
-				<Card className="">code editor</Card>
-				<Card className="">compiler output</Card>
+			<div className="flex h-full flex-col gap-2">
+				<Card
+					className={cn(
+						"flex flex-col gap-2 px-2 py-[8px] lg:max-h-[60vh] lg:flex-auto lg:flex-grow-[5] lg:overflow-hidden",
+						{
+							"md:max-h-[60vh] md:flex-auto md:flex-grow-[5] md:overflow-hidden": state != "expanded" && !isMobile,
+						},
+					)}>
+					<div className="flex w-full flex-wrap items-center justify-between gap-3 lg:flex-nowrap">
+						<span className="inline-flex w-fit flex-row items-center justify-center gap-1 rounded-md border px-2 py-1 text-sm shadow-sm">
+							<CodeXml />
+							<span>Code</span>
+						</span>
+						<Button variant="secondary" className="w-fit" onClick={() => {}}>
+							<Play />
+							<span className="sr-only">Save</span>
+						</Button>
+					</div>
+					<div className="min-h-0 flex-1 overflow-auto">
+						<CodeEditor />
+					</div>
+				</Card>
+				<Card
+					className={cn("px-2 py-[8px] lg:max-h-[28.4vh] lg:flex-auto lg:flex-grow-[2] lg:overflow-auto", {
+						"px-2 py-[8px] md:max-h-[28.4vh] md:flex-auto md:flex-grow-[2] md:overflow-auto":
+							state != "expanded" && !isMobile,
+					})}>
+					compiler output
+				</Card>
 			</div>
 		</div>
 	);
