@@ -11,6 +11,7 @@ import { completionStatuses, deadlineStatuses } from "./data";
 
 export const problems: ProblemItem[] = [
 	{
+		id: "550e8400-e29b-41d4-a716-446655440001",
 		dateCreated: new Date("2025-04-01T09:00:00Z"),
 		dateModified: new Date("2025-04-10T10:00:00Z"),
 		deadline: new Date("2025-05-01T23:59:00Z"),
@@ -18,13 +19,15 @@ export const problems: ProblemItem[] = [
 		class: "Data Structures & Algorithms",
 	},
 	{
-		dateCreated: new Date("2025-04-03T08:30:00Z"),
-		dateModified: new Date("2025-04-11T12:00:00Z"),
-		deadline: new Date("2025-05-05T23:59:00Z"),
+		id: "550e8400-e29b-41d4-a716-446655440002",
+		dateCreated: new Date("2025-04-03T08:00:00Z"),
+		dateModified: new Date("2025-04-11T09:00:00Z"),
+		deadline: new Date("2025-05-03T23:59:00Z"),
 		title: "Reverse String",
 		class: "Javascript Basics",
 	},
 	{
+		id: "550e8400-e29b-41d4-a716-446655440003",
 		dateCreated: new Date("2025-04-05T07:00:00Z"),
 		dateModified: new Date("2025-04-12T09:00:00Z"),
 		deadline: new Date("2025-05-10T23:59:00Z"),
@@ -32,6 +35,7 @@ export const problems: ProblemItem[] = [
 		class: "Intro to Python",
 	},
 	{
+		id: "550e8400-e29b-41d4-a716-446655440004",
 		dateCreated: new Date("2025-04-07T10:00:00Z"),
 		dateModified: new Date("2025-04-13T13:00:00Z"),
 		deadline: new Date("2025-05-07T23:59:00Z"),
@@ -39,6 +43,7 @@ export const problems: ProblemItem[] = [
 		class: "Javascript Basics",
 	},
 	{
+		id: "550e8400-e29b-41d4-a716-446655440005",
 		dateCreated: new Date("2025-04-08T10:30:00Z"),
 		dateModified: new Date("2025-04-15T11:30:00Z"),
 		deadline: new Date("2025-05-12T23:59:00Z"),
@@ -46,6 +51,7 @@ export const problems: ProblemItem[] = [
 		class: "Intro to Python",
 	},
 	{
+		id: "550e8400-e29b-41d4-a716-446655440006",
 		dateCreated: new Date("2025-04-09T12:00:00Z"),
 		dateModified: new Date("2025-04-17T14:00:00Z"),
 		deadline: new Date("2025-05-15T23:59:00Z"),
@@ -53,6 +59,7 @@ export const problems: ProblemItem[] = [
 		class: "Frontend Development",
 	},
 	{
+		id: "550e8400-e29b-41d4-a716-446655440007",
 		dateCreated: new Date("2025-04-10T09:45:00Z"),
 		dateModified: new Date("2025-04-18T10:15:00Z"),
 		deadline: new Date("2025-05-18T23:59:00Z"),
@@ -60,6 +67,7 @@ export const problems: ProblemItem[] = [
 		class: "Algorithms 101",
 	},
 	{
+		id: "550e8400-e29b-41d4-a716-446655440008",
 		dateCreated: new Date("2025-04-11T14:00:00Z"),
 		dateModified: new Date("2025-04-19T16:00:00Z"),
 		deadline: new Date("2025-05-20T23:59:00Z"),
@@ -67,6 +75,7 @@ export const problems: ProblemItem[] = [
 		class: "Javascript Basics",
 	},
 	{
+		id: "550e8400-e29b-41d4-a716-446655440009",
 		dateCreated: new Date("2025-04-12T10:00:00Z"),
 		dateModified: new Date("2025-04-20T10:30:00Z"),
 		deadline: new Date("2025-05-25T23:59:00Z"),
@@ -74,6 +83,7 @@ export const problems: ProblemItem[] = [
 		class: "Data Structures & Algorithms",
 	},
 	{
+		id: "550e8400-e29b-41d4-a716-446655440010",
 		dateCreated: new Date("2025-04-13T08:30:00Z"),
 		dateModified: new Date("2025-04-22T09:00:00Z"),
 		deadline: new Date("2025-05-27T23:59:00Z"),
@@ -81,6 +91,7 @@ export const problems: ProblemItem[] = [
 		class: "Frontend Development",
 	},
 	{
+		id: "550e8400-e29b-41d4-a716-446655440011",
 		dateCreated: new Date("2025-04-14T09:30:00Z"),
 		dateModified: new Date("2025-04-23T11:00:00Z"),
 		deadline: new Date("2025-05-30T23:59:00Z"),
@@ -88,6 +99,7 @@ export const problems: ProblemItem[] = [
 		class: "Javascript Basics",
 	},
 	{
+		id: "550e8400-e29b-41d4-a716-446655440012",
 		dateCreated: new Date("2025-04-15T10:30:00Z"),
 		dateModified: new Date("2025-04-24T12:00:00Z"),
 		deadline: new Date("2025-06-01T23:59:00Z"),
@@ -95,6 +107,7 @@ export const problems: ProblemItem[] = [
 		class: "Data Structures & Algorithms",
 	},
 	{
+		id: "550e8400-e29b-41d4-a716-446655440013",
 		dateCreated: new Date("2025-04-16T11:00:00Z"),
 		dateModified: new Date("2025-04-25T13:00:00Z"),
 		deadline: new Date("2025-06-03T23:59:00Z"),
@@ -102,6 +115,7 @@ export const problems: ProblemItem[] = [
 		class: "Intro to Python",
 	},
 	{
+		id: "550e8400-e29b-41d4-a716-446655440014",
 		dateCreated: new Date("2025-04-17T09:00:00Z"),
 		dateModified: new Date("2025-04-26T10:00:00Z"),
 		deadline: new Date("2025-06-05T23:59:00Z"),
@@ -109,6 +123,7 @@ export const problems: ProblemItem[] = [
 		class: "Algorithms 101",
 	},
 	{
+		id: "550e8400-e29b-41d4-a716-446655440015",
 		dateCreated: new Date("2025-04-18T13:30:00Z"),
 		dateModified: new Date("2025-04-27T14:30:00Z"),
 		deadline: new Date("2025-06-07T23:59:00Z"),
@@ -116,6 +131,7 @@ export const problems: ProblemItem[] = [
 		class: "Intro to Python",
 	},
 	{
+		id: "550e8400-e29b-41d4-a716-446655440016",
 		dateCreated: new Date("2025-04-19T14:00:00Z"),
 		dateModified: new Date("2025-04-28T15:00:00Z"),
 		deadline: new Date("2025-06-10T23:59:00Z"),
@@ -123,6 +139,7 @@ export const problems: ProblemItem[] = [
 		class: "Frontend Development",
 	},
 	{
+		id: "550e8400-e29b-41d4-a716-446655440017",
 		dateCreated: new Date("2025-04-20T15:00:00Z"),
 		dateModified: new Date("2025-04-29T16:00:00Z"),
 		deadline: new Date("2025-06-12T23:59:00Z"),
@@ -130,6 +147,7 @@ export const problems: ProblemItem[] = [
 		class: "Data Structures & Algorithms",
 	},
 	{
+		id: "550e8400-e29b-41d4-a716-446655440018",
 		dateCreated: new Date("2025-04-21T10:00:00Z"),
 		dateModified: new Date("2025-04-30T11:00:00Z"),
 		deadline: new Date("2025-06-14T23:59:00Z"),
@@ -137,6 +155,7 @@ export const problems: ProblemItem[] = [
 		class: "Javascript Basics",
 	},
 	{
+		id: "550e8400-e29b-41d4-a716-446655440019",
 		dateCreated: new Date("2025-04-22T08:00:00Z"),
 		dateModified: new Date("2025-05-01T09:00:00Z"),
 		deadline: new Date("2025-06-15T23:59:00Z"),
@@ -144,6 +163,7 @@ export const problems: ProblemItem[] = [
 		class: "Algorithms 101",
 	},
 	{
+		id: "550e8400-e29b-41d4-a716-446655440020",
 		dateCreated: new Date("2025-04-23T13:30:00Z"),
 		dateModified: new Date("2025-05-02T14:30:00Z"),
 		deadline: new Date("2025-06-17T23:59:00Z"),
