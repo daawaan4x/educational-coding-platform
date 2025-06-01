@@ -54,13 +54,4 @@ export default tseslint.config(
 			"@typescript-eslint/no-empty-function": "off",
 		},
 	},
-	{
-		rules: {
-			// backend rules
-			"@typescript-eslint/no-unsafe-assignment": "off",
-			"@typescript-eslint/no-unsafe-member-access": "off",
-			"@typescript-eslint/no-unsafe-call": "off",
-		},
-	},
 );
-// Comment out the rules before production
