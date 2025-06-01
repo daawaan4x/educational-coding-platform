@@ -16,6 +16,13 @@
 		"commitlint": "commitlint --edit",
 		"prepare": "husky"
 	},
+	"lint-staged": {
+		"*": [
+			"pnpm run prettier:write",
+			"pnpm run eslint"
+		],
+		".{ts,tsx,d.ts,cts,d.cts,mts,d.mts}": "pnpm run tscheck"
+	},
 	"dependencies": {
 		"@codemirror/commands": "^6.8.1",
 		"@codemirror/lang-javascript": "^6.2.4",
@@ -89,6 +96,7 @@
 		"eslint-config-next": "15.3.2",
 		"eslint-config-prettier": "^10.1.5",
 		"husky": "^9.1.7",
+		"lint-staged": "^16.1.0",
 		"log-symbols": "^7.0.1",
 		"ora": "^8.2.0",
 		"prettier": "3.5.3",
