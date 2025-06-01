@@ -7,6 +7,14 @@ on:
   pull_request:
 
 jobs:
+  next:
+    name: Next.js Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/setup
+      - run: pnpm run build
+
   tsc:
     name: Typescript Compiler
     runs-on: ubuntu-latest
