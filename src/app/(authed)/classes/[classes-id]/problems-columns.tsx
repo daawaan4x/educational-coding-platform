@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 "use client";
 
 import { completionStatuses, deadlineStatuses } from "@/app/(authed)/data";

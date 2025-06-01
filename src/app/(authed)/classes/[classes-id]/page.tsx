@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/require-await */
 import ClassPageWrapper from "./class-page-wrapper";
 
 // async function getProblems(): Promise<ProblemItemWithProgress[]> {

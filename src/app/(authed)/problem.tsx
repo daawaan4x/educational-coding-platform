@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+/* eslint-disable @typescript-eslint/prefer-optional-chain */
 "use client";
 
 import { Card } from "@/components/ui/card";
@@ -32,7 +36,6 @@ import type { Delta, Op } from "quill";
 // Extend HTMLDivElement to allow __quill property
 declare global {
 	interface HTMLDivElement {
-		// @ts-ignore
 		__quill?: unknown;
 	}
 	interface Window {
