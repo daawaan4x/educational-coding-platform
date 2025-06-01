@@ -39,7 +39,9 @@ export default tseslint.config(
 		],
 	},
 	prettiereslint,
-	{
+{
+		// Temporarily disable rules for frontend development only
+		files: ["./src/app/**", "./src/components/**"],
 		rules: {
 			"@typescript-eslint/no-unused-vars": "off",
 			"@typescript-eslint/no-unnecessary-type-assertion": "off",
