@@ -15,7 +15,17 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import hljs from "highlight.js";
-import { CalendarIcon, CodeXml, FolderClock, NotepadText, Play, Save } from "lucide-react";
+import {
+	CalendarIcon,
+	CodeXml,
+	FileTerminal,
+	FolderClock,
+	NotepadText,
+	Play,
+	Save,
+	SquareCheckBig,
+	Terminal,
+} from "lucide-react";
 import type QuillType from "quill";
 import type { Delta, Op } from "quill";
 
@@ -173,6 +183,7 @@ function DescriptionEditor({ descriptionReadonly }: { descriptionReadonly: boole
 export default function Problem({ descriptionReadonly = false, showSubmissions = false }: ProblemProps) {
 	const { state, isMobile } = useSidebar();
 	const [tabValue, setTabValue] = useState("description");
+	const [outputTabValue, setOutputTabValue] = useState("output");
 	const [title, setTitle] = useState("");
 	const [maxAttempts, setMaxAttempts] = useState("");
 	const [maxScore, setMaxScore] = useState("");
@@ -184,6 +195,7 @@ export default function Problem({ descriptionReadonly = false, showSubmissions =
 		maxScore: false,
 		deadline: false,
 	});
+	const [codeOutput, setCodeOutput] = useState(null);
 
 	const handleSave = () => {
 		const errors = {
@@ -371,7 +383,7 @@ export default function Problem({ descriptionReadonly = false, showSubmissions =
 						</Button>
 					</div>
 					<div className="min-h-0 flex-1 overflow-auto">
-						<CodeEditor />
+						<CodeEditor language="javascript" />
 					</div>
 				</Card>
 				<Card
@@ -379,7 +391,45 @@ export default function Problem({ descriptionReadonly = false, showSubmissions =
 						"px-2 py-[8px] md:max-h-[28.4vh] md:flex-auto md:flex-grow-[2] md:overflow-auto":
 							state != "expanded" && !isMobile,
 					})}>
-					compiler output
+					<Tabs value={outputTabValue} onValueChange={setOutputTabValue} className="h-full w-full">
+						<TabsList>
+							<TabsTrigger value="output">
+								<Terminal /> Output
+							</TabsTrigger>
+							<TabsTrigger value="testcase">
+								<SquareCheckBig />
+								Testcase
+							</TabsTrigger>
+							<TabsTrigger value="testresult">
+								<FileTerminal />
+								Test Result
+							</TabsTrigger>
+						</TabsList>
+						<TabsContent value="output">
+							{!codeOutput || codeOutput == null ? (
+								<div className="flex h-full w-full items-center justify-center">
+									<p className="text-muted-foreground">No output yet. Run your code to see the output.</p>
+								</div>
+							) : (
+								<div>Code output</div>
+							)}
+						</TabsContent>
+						<TabsContent value="testcase">
+							<CodeEditor
+								language="plain"
+								placeholder="\\ Write the arguments for your function here. Separate with newlines."
+							/>
+						</TabsContent>
+						<TabsContent value="testresult">
+							{!codeOutput || codeOutput == null ? (
+								<div className="flex h-full w-full items-center justify-center">
+									<p className="text-muted-foreground">No output yet. Run your code to see the output.</p>
+								</div>
+							) : (
+								<div>Code output</div>
+							)}
+						</TabsContent>
+					</Tabs>
 				</Card>
 			</div>
 		</div>
