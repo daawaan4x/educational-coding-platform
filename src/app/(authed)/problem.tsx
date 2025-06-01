@@ -43,6 +43,7 @@ declare global {
 interface ProblemProps {
 	descriptionReadonly?: boolean;
 	showSubmissions?: boolean;
+	showCodeEditor?: boolean;
 }
 
 // Updated DescriptionEditor component to fix Quill cleanup
@@ -180,7 +181,11 @@ function DescriptionEditor({ descriptionReadonly }: { descriptionReadonly: boole
 	return <div ref={containerRef} className="flex max-h-full max-w-full flex-col gap-2 overflow-y-auto" />;
 }
 
-export default function Problem({ descriptionReadonly = false, showSubmissions = false }: ProblemProps) {
+export default function Problem({
+	descriptionReadonly = false,
+	showSubmissions = false,
+	showCodeEditor = true,
+}: ProblemProps) {
 	const { state, isMobile } = useSidebar();
 	const [tabValue, setTabValue] = useState("description");
 	const [outputTabValue, setOutputTabValue] = useState("output");

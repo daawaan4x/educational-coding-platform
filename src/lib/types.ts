@@ -1,6 +1,7 @@
 export type UserRoleString = "admin" | "teacher" | "student";
 
 export interface AccountItem {
+	id: string;
 	firstName: string;
 	lastName: string;
 	email: string;
@@ -11,6 +12,7 @@ export interface AccountItem {
 }
 
 export interface ProblemItem {
+	id: string;
 	dateCreated: Date;
 	dateModified: Date;
 	deadline: Date;
@@ -19,6 +21,7 @@ export interface ProblemItem {
 }
 
 export interface ProblemItemStudent {
+	id: string;
 	dateCreated: Date;
 	dateModified: Date;
 	deadline: Date;
@@ -31,6 +34,7 @@ export interface ProblemItemStudent {
 }
 
 export interface ProblemItemWithProgress extends ProblemItem {
+	id: string;
 	studentsCompleted: number;
 	totalStudents: number;
 }
@@ -38,14 +42,20 @@ export interface ProblemItemWithProgress extends ProblemItem {
 export type ProblemItemVariable = ProblemItemWithProgress | ProblemItemStudent;
 
 export interface ClassItem {
+	id: string;
 	name: string;
 	dateCreated: Date;
 	dateModified: Date;
 }
 
 export interface ParticipantItem {
+	id: string;
 	firstName: string;
 	lastName: string;
 	email: string;
 	roles: UserRoleString[];
+}
+
+export interface SolutionItem {
+	id: string;
 }
