@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/require-await */
 import { AccountItem } from "@/lib/types";
 import { accounts } from "./accounts-columns";
 import AdminDashboardWrapper from "./admin-dashboard-wrapper";

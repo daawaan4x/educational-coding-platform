@@ -31,7 +31,6 @@ export default tseslint.config(
 			"dist",
 			".next",
 			"out",
-			"src/components/magicui",
 			"tailwind.config.ts",
 			"eslint.config.mjs",
 			"commitlint.config.mjs",
@@ -39,19 +38,4 @@ export default tseslint.config(
 		],
 	},
 	prettiereslint,
-	{
-		// Temporarily disable rules for frontend development only
-		files: ["./src/app/**", "./src/components/**"],
-		rules: {
-			"@typescript-eslint/no-unused-vars": "off",
-			"@typescript-eslint/no-unnecessary-type-assertion": "off",
-			"@typescript-eslint/require-await": "off",
-			"@typescript-eslint/no-floating-promises": "off",
-			"no-irregular-whitespace": "off",
-			"react-hooks/rules-of-hooks": "off",
-			"@typescript-eslint/ban-ts-comment": "off",
-			"@typescript-eslint/prefer-optional-chain": "off",
-			"@typescript-eslint/no-empty-function": "off",
-		},
-	},
 );
