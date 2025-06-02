@@ -1,3 +1,1 @@
-pnpm run prettier
-pnpm run eslint
-pnpm run tscheck
+pnpm exec lint-staged

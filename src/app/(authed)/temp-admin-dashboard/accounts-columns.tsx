@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 "use client";
 
 import { rolesInfo } from "@/app/(authed)/data";

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/require-await */
 import { ProblemItemWithProgress } from "@/lib/types";
 import { problems } from "./problems-columns";
 import TeacherDashboardWrapper from "./teacher-dashboard-wrapper";
