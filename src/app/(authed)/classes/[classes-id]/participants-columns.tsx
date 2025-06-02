@@ -308,8 +308,7 @@ export const participantsColumns: ColumnDef<ParticipantItem>[] = [
 		accessorKey: "roles",
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
 		cell: ({ row }) => {
-			let roles = null;
-			roles = (row.getValue("roles") as string[]) ?? null;
+			const { roles } = row.original;
 			if (roles) {
 				return (
 					<span className="flex flex-row flex-wrap gap-2">

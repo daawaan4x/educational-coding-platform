@@ -224,7 +224,7 @@ export const problemColumns: ColumnDef<ProblemItemWithProgress>[] = [
 		accessorKey: "deadline",
 		header: "Deadline",
 		cell: ({ row }) => {
-			const date = row.getValue("deadline") as Date;
+			const { deadline: date } = row.original;
 			return format(date, "MMM d, yyyy h:mm a");
 		},
 	},
@@ -237,7 +237,7 @@ export const problemColumns: ColumnDef<ProblemItemWithProgress>[] = [
 			return deadline <= now ? "Overdue" : "Due Soon";
 		},
 		cell: ({ row }) => {
-			const deadline = row.getValue("deadline") as Date;
+			const { deadline } = row.original;
 			const now = new Date();
 
 			if (deadline <= now) {
@@ -259,7 +259,7 @@ export const problemColumns: ColumnDef<ProblemItemWithProgress>[] = [
 			}
 		},
 		filterFn: (row, id, value) => {
-			return value === row.getValue(id);
+			return value === row.original.id;
 		},
 	},
 	{
@@ -273,9 +273,8 @@ export const problemColumns: ColumnDef<ProblemItemWithProgress>[] = [
 	{
 		accessorKey: "completed",
 		header: "Completed",
-		cell: ({ row }: { row: { getValue: (key: string) => number | string } }) => {
-			const totalStudents = row.getValue("totalStudents") as number;
-			const studentsCompleted = row.getValue("studentsCompleted") as number;
+		cell: ({ row }) => {
+			const { totalStudents, studentsCompleted } = row.original;
 			return <Progress value={(studentsCompleted / totalStudents) * 100} />;
 		},
 	},
@@ -283,7 +282,7 @@ export const problemColumns: ColumnDef<ProblemItemWithProgress>[] = [
 		accessorKey: "dateModified",
 		header: "Date Modified",
 		cell: ({ row }) => {
-			const date = row.getValue("dateModified") as Date;
+			const { dateModified: date } = row.original;
 			return format(date, "MMM d, yyyy h:mm a");
 		},
 	},
@@ -291,7 +290,7 @@ export const problemColumns: ColumnDef<ProblemItemWithProgress>[] = [
 		accessorKey: "dateCreated",
 		header: "Date Created",
 		cell: ({ row }) => {
-			const date = row.getValue("dateCreated") as Date;
+			const { dateCreated: date } = row.original;
 			return format(date, "MMM d, yyyy h:mm a");
 		},
 	},
@@ -305,8 +304,7 @@ export const problemColumns: ColumnDef<ProblemItemWithProgress>[] = [
 			else return "Not Started";
 		},
 		cell: ({ row }) => {
-			const totalStudents = row.getValue("totalStudents") as number;
-			const studentsCompleted = row.getValue("studentsCompleted") as number;
+			const { totalStudents, studentsCompleted } = row.original;
 			if (studentsCompleted === totalStudents) {
 				const status = completionStatuses.find((completionObj) => completionObj.value === "All Completed");
 				return (
@@ -334,7 +332,7 @@ export const problemColumns: ColumnDef<ProblemItemWithProgress>[] = [
 			}
 		},
 		filterFn: (row, id, value) => {
-			return value === row.getValue(id);
+			return value === row.original.id;
 		},
 	},
 ];
@@ -541,7 +539,7 @@ export const problemColumnsForStudent: ColumnDef<ProblemItemStudent>[] = [
 		accessorKey: "deadline",
 		header: "Deadline",
 		cell: ({ row }) => {
-			const date = row.getValue("deadline") as Date;
+			const { deadline: date } = row.original;
 			return format(date, "MMM d, yyyy h:mm a");
 		},
 	},
@@ -554,7 +552,7 @@ export const problemColumnsForStudent: ColumnDef<ProblemItemStudent>[] = [
 			return deadline <= now ? "Overdue" : "Due Soon";
 		},
 		cell: ({ row }) => {
-			const deadline = row.getValue("deadline") as Date;
+			const { deadline } = row.original;
 			const now = new Date();
 
 			if (deadline <= now) {
@@ -576,14 +574,14 @@ export const problemColumnsForStudent: ColumnDef<ProblemItemStudent>[] = [
 			}
 		},
 		filterFn: (row, id, value) => {
-			return value === row.getValue(id);
+			return value === row.original.id;
 		},
 	},
 	{
 		accessorKey: "dateCreated",
 		header: "Date Created",
 		cell: ({ row }) => {
-			const date = row.getValue("dateCreated") as Date;
+			const { dateCreated: date } = row.original;
 			return format(date, "MMM d, yyyy h:mm a");
 		},
 	},
@@ -591,7 +589,7 @@ export const problemColumnsForStudent: ColumnDef<ProblemItemStudent>[] = [
 		accessorKey: "dateModified",
 		header: "Date Modified",
 		cell: ({ row }) => {
-			const date = row.getValue("dateModified") as Date;
+			const { dateModified: date } = row.original;
 			return format(date, "MMM d, yyyy h:mm a");
 		},
 	},
@@ -599,7 +597,7 @@ export const problemColumnsForStudent: ColumnDef<ProblemItemStudent>[] = [
 		accessorKey: "submitted",
 		header: "Submitted",
 		cell: ({ row }) => {
-			const submitted = row.getValue("submitted") as boolean;
+			const { submitted } = row.original as { submitted: boolean };
 			return submitted ? "Yes" : "No";
 		},
 	},
