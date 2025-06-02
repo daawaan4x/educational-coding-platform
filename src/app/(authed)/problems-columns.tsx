@@ -183,7 +183,7 @@ export const problemColumns: ColumnDef<ProblemItem>[] = [
 		accessorKey: "deadline",
 		header: "Deadline",
 		cell: ({ row }) => {
-			const date = row.getValue("deadline") as Date;
+			const { deadline: date } = row.original;
 			return format(date, "MMM d, yyyy h:mm a");
 		},
 	},
@@ -191,7 +191,7 @@ export const problemColumns: ColumnDef<ProblemItem>[] = [
 		accessorKey: "dateModified",
 		header: "Date Modified",
 		cell: ({ row }) => {
-			const date = row.getValue("dateModified") as Date;
+			const { dateModified: date } = row.original;
 			return format(date, "MMM d, yyyy h:mm a");
 		},
 	},
@@ -199,7 +199,7 @@ export const problemColumns: ColumnDef<ProblemItem>[] = [
 		accessorKey: "dateCreated",
 		header: "Date Created",
 		cell: ({ row }) => {
-			const date = row.getValue("dateCreated") as Date;
+			const { dateCreated: date } = row.original;
 			return format(date, "MMM d, yyyy h:mm a");
 		},
 	},
@@ -212,7 +212,7 @@ export const problemColumns: ColumnDef<ProblemItem>[] = [
 			return deadline <= now ? "Overdue" : "Due Soon";
 		},
 		cell: ({ row }) => {
-			const deadline = row.getValue("deadline") as Date;
+			const { deadline } = row.original;
 			const now = new Date();
 
 			if (deadline <= now) {
@@ -234,7 +234,7 @@ export const problemColumns: ColumnDef<ProblemItem>[] = [
 			}
 		},
 		filterFn: (row, id, value) => {
-			return value === row.getValue(id);
+			return value === row.original.id;
 		},
 	},
 ];

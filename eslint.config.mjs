@@ -53,6 +53,7 @@ export default tseslint.config(
 			"@typescript-eslint/prefer-optional-chain": "off",
 			"@typescript-eslint/no-empty-function": "off",
 			"@typescript-eslint/prefer-nullish-coalescing": "off",
+			"react-hooks/exhaustive-deps": "off",
 		},
 	},
 	{

@@ -5,7 +5,7 @@ import * as React from "react";
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
 	return (
-		<div data-slot="table-container" className="relative w-full overflow-x-auto">
+		<div data-slot="table-container" className="relative w-full overflow-x-auto overflow-y-auto">
 			<table data-slot="table" className={cn("w-full caption-bottom text-sm", className)} {...props} />
 		</div>
 	);
@@ -16,7 +16,9 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
 }
 
 function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
-	return <tbody data-slot="table-body" className={cn("[&_tr:last-child]:border-0", className)} {...props} />;
+	return (
+		<tbody data-slot="table-body" className={cn("overflow-y-auto [&_tr:last-child]:border-0", className)} {...props} />
+	);
 }
 
 function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
