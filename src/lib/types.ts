@@ -56,16 +56,26 @@ export interface ParticipantItem {
 	roles: UserRoleString[];
 }
 
-type solutionStatus = "accepted" | "wrong-answer";
+type solutionStatus = "accepted" | "wrong-answer" | "error" | "timeout" | "pending";
 
+// For student view of solutions
 export interface SolutionItem {
 	id: string;
 	problemId: string;
 	authorId: string;
 	dateCreated: Date;
-	score: number;
 	attempt: number;
 	code: string;
 	feedback?: string;
 	status: solutionStatus;
+}
+
+// For teacher view of solutions
+export interface SolutionsItem {
+	problemId: string;
+	authorId: string;
+	authorFirstName: string;
+	authorLastName: string;
+	attempts: number;
+	score: number;
 }

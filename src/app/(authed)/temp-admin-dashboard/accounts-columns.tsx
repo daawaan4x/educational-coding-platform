@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/rules-of-hooks */
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 "use client";
 
 import { rolesInfo } from "@/app/(authed)/data";
@@ -368,15 +367,15 @@ export const accountColumns: ColumnDef<AccountItem>[] = [
 		accessorKey: "dateCreated",
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Date Created" />,
 		cell: ({ row }) => {
-			const date = row.getValue("dateCreated") as Date;
-			return format(date, "MMM d, yyyy h:mm a"); // Consistent format: "2025-05-20 18:00:00"
+			const { dateCreated: date } = row.original;
+			return format(date, "MMM d, yyyy h:mm a");
 		},
 	},
 	{
 		accessorKey: "dateModified",
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Date Modified" />,
 		cell: ({ row }) => {
-			const date = row.getValue("dateModified") as Date;
+			const { dateModified: date } = row.original;
 			return format(date, "MMM d, yyyy h:mm a");
 		},
 	},
@@ -384,8 +383,7 @@ export const accountColumns: ColumnDef<AccountItem>[] = [
 		accessorKey: "roles",
 		header: "Role",
 		cell: ({ row }) => {
-			let roles = null;
-			roles = (row.getValue("roles") as string[]) ?? null;
+			const { roles } = row.original;
 			if (roles) {
 				return (
 					<span className="flex flex-row flex-wrap gap-2">
@@ -405,8 +403,7 @@ export const accountColumns: ColumnDef<AccountItem>[] = [
 		accessorKey: "classes",
 		header: "Classes",
 		cell: ({ row }) => {
-			let classes = null;
-			classes = (row.getValue("classes") as string[]) ?? null;
+			const { classes } = row.original;
 			if (classes) {
 				return classes.join(", ");
 			} else {

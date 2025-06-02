@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-floating-promises */
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
@@ -92,15 +91,15 @@ export const classColumns: ColumnDef<ClassItem>[] = [
 		accessorKey: "dateCreated",
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Date Created" />,
 		cell: ({ row }) => {
-			const date = row.getValue("dateCreated") as Date;
-			return format(date, "MMM d, yyyy h:mm a"); // Consistent format: "2025-05-20 18:00:00"
+			const { dateCreated: date } = row.original;
+			return format(date, "MMM d, yyyy h:mm a");
 		},
 	},
 	{
 		accessorKey: "dateModified",
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Date Modified" />,
 		cell: ({ row }) => {
-			const date = row.getValue("dateModified") as Date;
+			const { dateModified: date } = row.original;
 			return format(date, "MMM d, yyyy h:mm a");
 		},
 	},
