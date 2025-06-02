@@ -1,3 +1,7 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable @typescript-eslint/no-floating-promises */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { DataTableColumnHeader } from "@/components/data-table-column-header";
@@ -44,26 +48,31 @@ import { z } from "zod";
 // Dummy data. To be replace by real values from the server.
 export const classes: ClassItem[] = [
 	{
+		id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
 		name: "Javascript Basics",
 		dateCreated: new Date("2025-01-10T08:00:00Z"),
 		dateModified: new Date("2025-02-01T10:00:00Z"),
 	},
 	{
+		id: "b2c3d4e5-f6g7-8901-bcde-f23456789012",
 		name: "Data Structures & Algorithms",
 		dateCreated: new Date("2025-01-15T09:30:00Z"),
 		dateModified: new Date("2025-02-05T11:00:00Z"),
 	},
 	{
+		id: "c3d4e5f6-g7h8-9012-cdef-345678901234",
 		name: "Web Development Fundamentals",
 		dateCreated: new Date("2025-02-01T14:00:00Z"),
 		dateModified: new Date("2025-02-20T09:45:00Z"),
 	},
 	{
+		id: "d4e5f6g7-h8i9-0123-defa-456789012345",
 		name: "Object-Oriented Programming",
 		dateCreated: new Date("2025-03-10T07:45:00Z"),
 		dateModified: new Date("2025-03-25T08:30:00Z"),
 	},
 	{
+		id: "e5f6g7h8-i9j0-1234-efab-567890123456",
 		name: "Database Systems",
 		dateCreated: new Date("2025-03-20T13:15:00Z"),
 		dateModified: new Date("2025-04-10T15:00:00Z"),

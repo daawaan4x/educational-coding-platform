@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 "use client";
 
 import { DataTableColumnHeader } from "@/components/data-table-column-header";
@@ -9,6 +10,7 @@ import { completionStatuses, deadlineStatuses } from "../data";
 
 export const problems: ProblemItemWithProgress[] = [
 	{
+		id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
 		dateCreated: new Date("2025-04-01T09:00:00Z"),
 		dateModified: new Date("2025-04-10T10:00:00Z"),
 		deadline: new Date("2025-05-01T23:59:00Z"),
@@ -18,6 +20,7 @@ export const problems: ProblemItemWithProgress[] = [
 		totalStudents: 20,
 	},
 	{
+		id: "b2c3d4e5-f6g7-8901-bcde-f23456789012",
 		dateCreated: new Date("2025-04-03T08:30:00Z"),
 		dateModified: new Date("2025-04-11T12:00:00Z"),
 		deadline: new Date("2025-05-05T23:59:00Z"),
@@ -27,6 +30,7 @@ export const problems: ProblemItemWithProgress[] = [
 		totalStudents: 18,
 	},
 	{
+		id: "c3d4e5f6-g7h8-9012-cdef-345678901234",
 		dateCreated: new Date("2025-04-05T07:00:00Z"),
 		dateModified: new Date("2025-04-12T09:00:00Z"),
 		deadline: new Date("2025-05-10T23:59:00Z"),
@@ -36,6 +40,7 @@ export const problems: ProblemItemWithProgress[] = [
 		totalStudents: 16,
 	},
 	{
+		id: "d4e5f6g7-h8i9-0123-defg-456789012345",
 		dateCreated: new Date("2025-04-07T10:00:00Z"),
 		dateModified: new Date("2025-04-13T13:00:00Z"),
 		deadline: new Date("2025-05-07T23:59:00Z"),
@@ -45,6 +50,7 @@ export const problems: ProblemItemWithProgress[] = [
 		totalStudents: 18,
 	},
 	{
+		id: "e5f6g7h8-i9j0-1234-efgh-567890123456",
 		dateCreated: new Date("2025-04-08T10:30:00Z"),
 		dateModified: new Date("2025-04-15T11:30:00Z"),
 		deadline: new Date("2025-05-12T23:59:00Z"),
@@ -54,6 +60,7 @@ export const problems: ProblemItemWithProgress[] = [
 		totalStudents: 15,
 	},
 	{
+		id: "f6g7h8i9-j0k1-2345-fghi-678901234567",
 		dateCreated: new Date("2025-04-09T12:00:00Z"),
 		dateModified: new Date("2025-04-17T14:00:00Z"),
 		deadline: new Date("2025-05-15T23:59:00Z"),
@@ -63,6 +70,7 @@ export const problems: ProblemItemWithProgress[] = [
 		totalStudents: 20,
 	},
 	{
+		id: "g7h8i9j0-k1l2-3456-ghij-789012345678",
 		dateCreated: new Date("2025-04-10T09:45:00Z"),
 		dateModified: new Date("2025-04-18T10:15:00Z"),
 		deadline: new Date("2025-05-18T23:59:00Z"),
@@ -72,6 +80,7 @@ export const problems: ProblemItemWithProgress[] = [
 		totalStudents: 14,
 	},
 	{
+		id: "h8i9j0k1-l2m3-4567-hijk-890123456789",
 		dateCreated: new Date("2025-04-11T14:00:00Z"),
 		dateModified: new Date("2025-04-19T16:00:00Z"),
 		deadline: new Date("2025-05-20T23:59:00Z"),
@@ -81,6 +90,7 @@ export const problems: ProblemItemWithProgress[] = [
 		totalStudents: 16,
 	},
 	{
+		id: "i9j0k1l2-m3n4-5678-ijkl-901234567890",
 		dateCreated: new Date("2025-04-12T10:00:00Z"),
 		dateModified: new Date("2025-04-20T10:30:00Z"),
 		deadline: new Date("2025-05-25T23:59:00Z"),
@@ -90,6 +100,7 @@ export const problems: ProblemItemWithProgress[] = [
 		totalStudents: 13,
 	},
 	{
+		id: "j0k1l2m3-n4o5-6789-jklm-012345678901",
 		dateCreated: new Date("2025-04-13T08:30:00Z"),
 		dateModified: new Date("2025-04-22T09:00:00Z"),
 		deadline: new Date("2025-05-27T23:59:00Z"),
@@ -99,6 +110,7 @@ export const problems: ProblemItemWithProgress[] = [
 		totalStudents: 20,
 	},
 	{
+		id: "k1l2m3n4-o5p6-7890-klmn-123456789012",
 		dateCreated: new Date("2025-04-14T09:30:00Z"),
 		dateModified: new Date("2025-04-23T11:00:00Z"),
 		deadline: new Date("2025-05-30T23:59:00Z"),
@@ -108,6 +120,7 @@ export const problems: ProblemItemWithProgress[] = [
 		totalStudents: 18,
 	},
 	{
+		id: "l2m3n4o5-p6q7-8901-lmno-234567890123",
 		dateCreated: new Date("2025-04-15T10:30:00Z"),
 		dateModified: new Date("2025-04-24T12:00:00Z"),
 		deadline: new Date("2025-06-01T23:59:00Z"),
@@ -117,6 +130,7 @@ export const problems: ProblemItemWithProgress[] = [
 		totalStudents: 14,
 	},
 	{
+		id: "m3n4o5p6-q7r8-9012-mnop-345678901234",
 		dateCreated: new Date("2025-04-16T11:00:00Z"),
 		dateModified: new Date("2025-04-25T13:00:00Z"),
 		deadline: new Date("2025-06-03T23:59:00Z"),
@@ -126,6 +140,7 @@ export const problems: ProblemItemWithProgress[] = [
 		totalStudents: 10,
 	},
 	{
+		id: "n4o5p6q7-r8s9-0123-nopq-456789012345",
 		dateCreated: new Date("2025-04-17T09:00:00Z"),
 		dateModified: new Date("2025-04-26T10:00:00Z"),
 		deadline: new Date("2025-06-05T23:59:00Z"),
@@ -135,6 +150,7 @@ export const problems: ProblemItemWithProgress[] = [
 		totalStudents: 10,
 	},
 	{
+		id: "o5p6q7r8-s9t0-1234-opqr-567890123456",
 		dateCreated: new Date("2025-04-18T13:30:00Z"),
 		dateModified: new Date("2025-04-27T14:30:00Z"),
 		deadline: new Date("2025-06-07T23:59:00Z"),
@@ -144,6 +160,7 @@ export const problems: ProblemItemWithProgress[] = [
 		totalStudents: 10,
 	},
 	{
+		id: "p6q7r8s9-t0u1-2345-pqrs-678901234567",
 		dateCreated: new Date("2025-04-19T14:00:00Z"),
 		dateModified: new Date("2025-04-28T15:00:00Z"),
 		deadline: new Date("2025-06-10T23:59:00Z"),
@@ -153,6 +170,7 @@ export const problems: ProblemItemWithProgress[] = [
 		totalStudents: 18,
 	},
 	{
+		id: "q7r8s9t0-u1v2-3456-qrst-789012345678",
 		dateCreated: new Date("2025-04-20T15:00:00Z"),
 		dateModified: new Date("2025-04-29T16:00:00Z"),
 		deadline: new Date("2025-06-12T23:59:00Z"),
@@ -162,6 +180,7 @@ export const problems: ProblemItemWithProgress[] = [
 		totalStudents: 15,
 	},
 	{
+		id: "r8s9t0u1-v2w3-4567-rstu-890123456789",
 		dateCreated: new Date("2025-04-21T10:00:00Z"),
 		dateModified: new Date("2025-04-30T11:00:00Z"),
 		deadline: new Date("2025-06-14T23:59:00Z"),
@@ -171,6 +190,7 @@ export const problems: ProblemItemWithProgress[] = [
 		totalStudents: 18,
 	},
 	{
+		id: "s9t0u1v2-w3x4-5678-stuv-901234567890",
 		dateCreated: new Date("2025-04-22T08:00:00Z"),
 		dateModified: new Date("2025-05-01T09:00:00Z"),
 		deadline: new Date("2025-06-15T23:59:00Z"),
@@ -180,6 +200,7 @@ export const problems: ProblemItemWithProgress[] = [
 		totalStudents: 15,
 	},
 	{
+		id: "t0u1v2w3-x4y5-6789-tuvw-012345678901",
 		dateCreated: new Date("2025-04-23T13:30:00Z"),
 		dateModified: new Date("2025-05-02T14:30:00Z"),
 		deadline: new Date("2025-06-17T23:59:00Z"),

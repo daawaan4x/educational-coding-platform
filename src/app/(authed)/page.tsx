@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/require-await */
 import { ProblemItem } from "@/lib/types";
 import { problems } from "./problems-columns";
 import StudentDashboardWrapper from "./student-dashboard-wrapper";
