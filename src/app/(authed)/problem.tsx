@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 /* eslint-disable @typescript-eslint/prefer-optional-chain */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { Card } from "@/components/ui/card";
@@ -305,7 +306,7 @@ export default function Problem({
 							</>
 						) : (
 							<h1 className="mb-2 h-auto scroll-mt-20 border-none bg-transparent px-3 py-0 text-[2.5rem] leading-[3rem] font-extrabold tracking-[-0.025em]">
-								{title || <span className="text-muted-foreground">Loading title...</span>}
+								{title ?? <span className="text-muted-foreground">Loading title...</span>}
 							</h1>
 						)}
 						<div className="flex-1">
@@ -446,7 +447,7 @@ export default function Problem({
 							</TabsTrigger>
 						</TabsList>
 						<TabsContent value="output">
-							{!codeOutput || codeOutput == null ? (
+							{(codeOutput ?? codeOutput == null) ? (
 								<div className="flex h-full w-full items-center justify-center">
 									<p className="text-muted-foreground">No output yet. Run your code to see the output.</p>
 								</div>
@@ -465,7 +466,7 @@ export default function Problem({
 							/>
 						</TabsContent>
 						<TabsContent value="testresult">
-							{!codeOutput || codeOutput == null ? (
+							{(codeOutput ?? codeOutput == null) ? (
 								<div className="flex h-full w-full items-center justify-center">
 									<p className="text-muted-foreground">No output yet. Run your code to see the output.</p>
 								</div>
