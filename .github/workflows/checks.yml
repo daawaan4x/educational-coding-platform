@@ -45,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/setup
-      - run: pnpm run eslint
+      - run: pnpm run lint
 
   commitlint:
     name: CommitLint
