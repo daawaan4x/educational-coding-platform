@@ -470,7 +470,7 @@ export const studentSolutionsColumns: ColumnDef<SolutionItem>[] = [
 		cell: ({ row }) => {
 			const { status, feedback } = row.original;
 
-			const [feedbackValue, setFeedbackValue] = useState(feedback || "");
+			const [feedbackValue, setFeedbackValue] = useState(feedback ?? "");
 
 			const onSubmit = () => {
 				// TODO: Implement feedback submission

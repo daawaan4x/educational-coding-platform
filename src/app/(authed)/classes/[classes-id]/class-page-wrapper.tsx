@@ -24,14 +24,14 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProblemItemStudent, ProblemItemWithProgress } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { CirclePlus, FolderKanban } from "lucide-react";
+import { Bolt, CirclePlus, FolderKanban } from "lucide-react";
 import { useEffect, useState } from "react";
 import Loading from "./loading";
 import { participants, participantsColumns } from "./participants-columns";
 import { problemColumns, problemColumnsForStudent, problems, problemsForStudent } from "./problems-columns";
 
 // TODO: Replace with actual role logic from authentication/user context
-const role: "teacher" | "student" = "student";
+const role: "teacher" | "student" = "teacher";
 
 export default function ClassPageWrapper() {
 	const { state, isMobile } = useSidebar();
@@ -79,7 +79,14 @@ export default function ClassPageWrapper() {
 			className={cn("align-items mt-3 flex w-full flex-col justify-center overflow-hidden px-8 pb-8", {
 				"max-w-[calc(100vw-16rem)]": state == "expanded" && !isMobile,
 			})}>
-			<h1 className="mb-6">[Class name]</h1>
+			<div className="flex flex-row items-center justify-between gap-3">
+				<h1 className="mb-6">[Class name]</h1>
+				{role === "teacher" && (
+					<Button variant="outline">
+						<Bolt /> Edit
+					</Button>
+				)}
+			</div>
 			<Tabs value={tabValue} onValueChange={setTabValue} className="w-full">
 				<div className="flex w-full items-center">
 					<div className="flex w-full flex-wrap items-center justify-between gap-3 lg:flex-nowrap">
@@ -88,7 +95,7 @@ export default function ClassPageWrapper() {
 							<TabsTrigger value="participants">Participants</TabsTrigger>
 						</TabsList>
 						{tabValue === "problems" && (
-							<Button variant="outline">
+							<Button>
 								<CirclePlus /> Add Problem
 							</Button>
 						)}

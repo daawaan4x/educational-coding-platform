@@ -7,7 +7,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { completionStatuses, deadlineStatuses } from "../data";
 
-export const problems: ProblemItemWithProgress[] = [
+export const problemsForTeacher: ProblemItemWithProgress[] = [
 	{
 		id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
 		dateCreated: new Date("2025-04-01T09:00:00Z"),
