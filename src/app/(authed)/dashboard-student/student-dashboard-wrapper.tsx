@@ -21,7 +21,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { ProblemItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CirclePlus, FolderKanban } from "lucide-react";
-import { deadlineStatuses } from "./data";
+import { deadlineStatuses } from "../data";
 import { problemColumns } from "./problems-columns";
 
 export default function StudentDashboardWrapper({ problems }: { problems: ProblemItem[] }) {
