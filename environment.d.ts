@@ -7,11 +7,6 @@ declare global {
 			DATABASE_URL: string;
 
 			/**
-			 * Server URL for the Client
-			 */
-			SERVER_URL: string;
-
-			/**
 			 * Required by Next-Auth (see https://authjs.dev/getting-started/installation)
 			 */
 			AUTH_SECRET: string;
