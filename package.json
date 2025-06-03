@@ -18,10 +18,12 @@
 	},
 	"lint-staged": {
 		"*": [
-			"pnpm run prettier:write",
-			"pnpm run eslint"
+			"pnpm run prettier:write"
 		],
-		".{ts,tsx,d.ts,cts,d.cts,mts,d.mts}": "pnpm run tscheck"
+		".{ts,tsx,d.ts,cts,d.cts,mts,d.mts}": [
+			"pnpm run lint",
+			"pnpm run tscheck"
+		]
 	},
 	"dependencies": {
 		"@codemirror/commands": "^6.8.1",

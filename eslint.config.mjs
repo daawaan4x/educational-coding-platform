@@ -26,8 +26,6 @@ export default tseslint.config(
 				tsconfigRootDir: import.meta.dirname,
 			},
 		},
-	},
-	{
 		ignores: [
 			"node_modules",
 			"dist",
