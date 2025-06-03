@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { classes, problems, solutions, users } from "@/db/schema";
 import { ProblemSchema, SolutionSchema, UserSchema } from "@/db/validation";
 import { UserColumns } from "@/db/validation/schemas/user";
-import { pagination } from "@/lib/server/pagination";
+import { pagination } from "@/server/lib/pagination";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, getTableColumns } from "drizzle-orm";
 import { z } from "zod/v4";
