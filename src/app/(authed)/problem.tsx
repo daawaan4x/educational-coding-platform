@@ -58,7 +58,7 @@ import {
 	studentsSolutionsColumns,
 } from "./problems/add/solutions-columns";
 
-const role: "student" | "teacher" = "teacher"; // Simulate user role, replace with actual logic
+const role: "student" | "teacher" = "student"; // Simulate user role, replace with actual logic
 
 // Extend HTMLDivElement to allow __quill property
 declare global {
