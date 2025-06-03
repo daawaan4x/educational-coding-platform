@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-"use client";
-
 import { NavClasses } from "@/components/nav-classes";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
@@ -14,16 +11,12 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Braces, Command, SquareTerminal, Waypoints } from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { Braces, SquareTerminal, Waypoints } from "lucide-react";
 import Image from "next/image";
 import * as React from "react";
 
 const data = {
-	user: {
-		name: "luke",
-		email: "m@example.com",
-		avatar: "/avatars/shadcn.jpg",
-	},
 	navMain: [
 		{
 			title: "Playground",
@@ -82,7 +75,9 @@ const data = {
 	],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar> & {}) {
+	const user = useAuth();
+
 	return (
 		<Sidebar variant="inset" {...props}>
 			<SidebarHeader>
@@ -114,7 +109,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				<NavSecondary items={data.navSecondary} className="mt-auto" />
 			</SidebarContent>
 			<SidebarFooter>
-				<NavUser user={data.user} />
+				<NavUser
+					user={{
+						name: `${user.data.first_name} ${user.data.last_name}`,
+						email: user.data.email,
+						avatar: `https://ui-avatars.com/api/?name=${user.data.first_name}+${user.data.last_name}`,
+					}}
+				/>
 			</SidebarFooter>
 		</Sidebar>
 	);
