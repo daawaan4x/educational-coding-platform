@@ -10,6 +10,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthedLayout } from "@/lib/auth";
 import TRPCProvider from "@/lib/trpc/provider";
 import { Separator } from "@radix-ui/react-separator";
+import { usePathname } from "next/navigation";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -47,6 +48,10 @@ export default function Page({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	const pathname = usePathname();
+
+	console.log("Current pathname:", pathname);
+
 	return (
 		<html lang="en">
 			<body
@@ -68,13 +73,16 @@ export default function Page({
 										<Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
 										<Breadcrumb>
 											<BreadcrumbList>
-												<BreadcrumbItem className="hidden md:block">
-													<BreadcrumbLink href="#">Data Structures & Algorithms</BreadcrumbLink>
-												</BreadcrumbItem>
-												{/* <BreadcrumbSeparator className="hidden md:block" />
-								<BreadcrumbItem>
-									<BreadcrumbPage>Data Fetching</BreadcrumbPage>
-								</BreadcrumbItem> */}
+												{pathname === "/playground" && (
+													<BreadcrumbItem className="hidden md:block">
+														<BreadcrumbLink href="#">Playground</BreadcrumbLink>
+													</BreadcrumbItem>
+												)}
+												{pathname === "/" && (
+													<BreadcrumbItem className="hidden md:block">
+														<BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
+													</BreadcrumbItem>
+												)}
 											</BreadcrumbList>
 										</Breadcrumb>
 									</div>
