@@ -1,12 +1,14 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import type { Metadata } from "next";
+"use client";
+
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/app/(authed)/app-sidebar";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList } from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import TRPCProvider from "@/lib/trpc-provider";
+import { AuthedLayout } from "@/lib/auth";
+import TRPCProvider from "@/lib/trpc/provider";
+import { Separator } from "@radix-ui/react-separator";
+import Loading from "./loading";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -18,16 +20,16 @@ const geistMono = Geist_Mono({
 	subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-	title: "[Role] Dashboard",
-};
+// export const metadata: Metadata = {
+// 	title: "[Role] Dashboard",
+// };
 
 // Placeholder `user` object
 // Implementation of role/permissions attributes may be different,
 // but the logic should be the same.
-const user = {
-	role: "teacher",
-};
+// const user = {
+// 	role: "teacher",
+// };
 
 // User must already be authenticated here.
 // We should have a `user` object here now.
@@ -48,29 +50,31 @@ export default function Page({
 		<html lang="en">
 			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
 				<TRPCProvider>
-					<SidebarProvider>
-						<AppSidebar />
-						<SidebarInset>
-							<header className="flex h-16 shrink-0 items-center gap-2">
-								<div className="flex items-center gap-2 px-4">
-									<SidebarTrigger className="-ml-1" />
-									<Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
-									<Breadcrumb>
-										<BreadcrumbList>
-											<BreadcrumbItem className="hidden md:block">
-												<BreadcrumbLink href="#">Data Structures & Algorithms</BreadcrumbLink>
-											</BreadcrumbItem>
-											{/* <BreadcrumbSeparator className="hidden md:block" />
+					<AuthedLayout Loading={<Loading />}>
+						<SidebarProvider>
+							<AppSidebar />
+							<SidebarInset>
+								<header className="flex h-16 shrink-0 items-center gap-2">
+									<div className="flex items-center gap-2 px-4">
+										<SidebarTrigger className="-ml-1" />
+										<Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
+										<Breadcrumb>
+											<BreadcrumbList>
+												<BreadcrumbItem className="hidden md:block">
+													<BreadcrumbLink href="#">Data Structures & Algorithms</BreadcrumbLink>
+												</BreadcrumbItem>
+												{/* <BreadcrumbSeparator className="hidden md:block" />
 								<BreadcrumbItem>
 									<BreadcrumbPage>Data Fetching</BreadcrumbPage>
 								</BreadcrumbItem> */}
-										</BreadcrumbList>
-									</Breadcrumb>
-								</div>
-							</header>
-							{children}
-						</SidebarInset>
-					</SidebarProvider>
+											</BreadcrumbList>
+										</Breadcrumb>
+									</div>
+								</header>
+								{children}
+							</SidebarInset>
+						</SidebarProvider>
+					</AuthedLayout>
 				</TRPCProvider>
 			</body>
 		</html>
