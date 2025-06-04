@@ -1,4 +1,4 @@
-import ".banter-load.css"; // Importing the CSS file for styles
+import "./banter-load.css"; // Importing the CSS file for styles
 
 export default function BanterLoad() {
 	return (
