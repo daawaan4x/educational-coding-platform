@@ -11,7 +11,17 @@ import { cn } from "@/lib/utils";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, VariantProps } from "class-variance-authority";
 import { PanelLeftIcon } from "lucide-react";
+import { useSession } from "next-auth/react";
 import * as React from "react";
+
+declare module "next-auth" {
+	interface User {
+		role?: string;
+	}
+	interface Session {
+		user: User;
+	}
+}
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -28,6 +38,7 @@ interface SidebarContextProps {
 	setOpenMobile: (open: boolean) => void;
 	isMobile: boolean;
 	toggleSidebar: () => void;
+	userRole: string | null;
 }
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null);
@@ -55,6 +66,7 @@ function SidebarProvider({
 	onOpenChange?: (open: boolean) => void;
 }) {
 	const isMobile = useIsMobile();
+	const { data: session } = useSession();
 	const [openMobile, setOpenMobile] = React.useState(false);
 
 	// This is the internal state of the sidebar.
@@ -107,8 +119,9 @@ function SidebarProvider({
 			openMobile,
 			setOpenMobile,
 			toggleSidebar,
+			userRole: session?.user?.role ?? null,
 		}),
-		[state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
+		[state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar, session?.user?.role],
 	);
 
 	return (

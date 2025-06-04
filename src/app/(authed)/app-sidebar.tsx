@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+"use client";
+
 import { NavClasses } from "@/components/nav-classes";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
@@ -10,9 +13,11 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/lib/auth";
-import { Braces, SquareTerminal, Waypoints } from "lucide-react";
+import { Braces, LayoutDashboard, SquareTerminal, Waypoints } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import * as React from "react";
 
@@ -20,7 +25,7 @@ const data = {
 	navMain: [
 		{
 			title: "Playground",
-			url: "#",
+			url: "playground/",
 			icon: SquareTerminal,
 			isActive: true,
 			// items: [
@@ -37,6 +42,12 @@ const data = {
 			//     url: "#",
 			//   },
 			// ],
+		},
+		{
+			title: "Dashboard",
+			url: "/",
+			icon: LayoutDashboard,
+			isActive: true,
 		},
 	],
 	navSecondary: [
@@ -105,7 +116,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar> & 
 			</SidebarHeader>
 			<SidebarContent>
 				<NavMain items={data.navMain} />
-				<NavClasses classes={data.classes} />
+				{/* {user.role === "teacher" || user.role === "student" ? (
+					<NavClasses classes={data.classes} />
+				) : null} */}
 				<NavSecondary items={data.navSecondary} className="mt-auto" />
 			</SidebarContent>
 			<SidebarFooter>
