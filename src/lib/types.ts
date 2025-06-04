@@ -7,7 +7,7 @@ export interface AccountItem {
 	email: string;
 	dateCreated: Date;
 	dateModified: Date;
-	roles: UserRoleString[];
+	role: UserRoleString;
 	// classes?: string[];
 }
 
@@ -53,7 +53,7 @@ export interface ParticipantItem {
 	firstName: string;
 	lastName: string;
 	email: string;
-	roles: UserRoleString[];
+	role: UserRoleString;
 }
 
 type solutionStatus = "accepted" | "wrong-answer" | "error" | "timeout" | "pending";
@@ -78,4 +78,11 @@ export interface SolutionsItem {
 	authorLastName: string;
 	attempts: number;
 	score: number;
+}
+
+export interface ClassItem {
+	id: string;
+	name: string;
+	dateCreated: Date;
+	dateModified: Date;
 }

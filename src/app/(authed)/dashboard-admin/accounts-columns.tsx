@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Dialog,
 	DialogContent,
@@ -58,6 +59,25 @@ const editAccountSchema = z.object({
 
 export const accountColumns: ColumnDef<AccountItem>[] = [
 	{
+		id: "select",
+		header: ({ table }) => (
+			<Checkbox
+				checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
+				onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+				aria-label="Select all"
+			/>
+		),
+		cell: ({ row }) => (
+			<Checkbox
+				checked={row.getIsSelected()}
+				onCheckedChange={(value) => row.toggleSelected(!!value)}
+				aria-label="Select row"
+			/>
+		),
+		enableSorting: false,
+		enableHiding: false,
+	},
+	{
 		accessorKey: "lastName",
 		header: "Last Name",
 	},
@@ -86,18 +106,21 @@ export const accountColumns: ColumnDef<AccountItem>[] = [
 		},
 	},
 	{
-		accessorKey: "roles",
+		accessorKey: "role",
 		header: "Role",
 		cell: ({ row }) => {
-			const { roles } = row.original;
-			if (roles) {
+			const { role } = row.original;
+			if (role) {
 				return (
 					<span className="flex flex-row flex-wrap gap-2">
-						{roles.map((role) => (
-							<Badge variant="outline" key={role}>
-								{rolesInfo.find((_) => _.value === role)?.icon} {role && capitalizeFirstLetter(role)}
-							</Badge>
-						))}
+						<Badge variant="outline" key={role}>
+							{(() => {
+								const roleInfo = rolesInfo.find((_) => _.value === role);
+								const IconComponent = roleInfo?.icon;
+								return IconComponent ? <IconComponent className="mr-1 h-4 w-4" /> : null;
+							})()}{" "}
+							{role && capitalizeFirstLetter(role)}
+						</Badge>
 					</span>
 				);
 			} else {

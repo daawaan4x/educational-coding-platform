@@ -20,6 +20,8 @@ import TeacherDashboardWrapper from "./dashboard-teacher/teacher-dashboard-wrapp
 // 	return accounts;
 // }
 
+document.title = "Dashboard";
+
 export default function Page() {
 	const { user } = useAuthStore();
 	const role = user?.role; // "admin", "teacher", "student"
