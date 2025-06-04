@@ -202,7 +202,7 @@ export default function AdminDashboardWrapper() {
 
 	return (
 		<div
-			className={cn("align-items mt-3 flex w-full flex-col justify-center overflow-hidden px-8 pb-8", {
+			className={cn("align-items mt-3 flex w-full flex-col justify-start overflow-hidden px-8 pb-8", {
 				"h-full max-w-[calc(100vw-16rem)]": state == "expanded" && !isMobile,
 			})}>
 			<div className="flex items-center justify-between gap-3 border-b pb-2">
