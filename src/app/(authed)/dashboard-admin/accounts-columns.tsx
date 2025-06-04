@@ -57,7 +57,7 @@ const editAccountSchema = z.object({
 	email: z.string().email("Invalid email address"),
 });
 
-export const accountColumns: ColumnDef<AccountItem>[] = [
+export const accountColumnsWithActions: ColumnDef<AccountItem>[] = [
 	{
 		id: "select",
 		header: ({ table }) => (
@@ -302,6 +302,79 @@ export const accountColumns: ColumnDef<AccountItem>[] = [
 					</DropdownMenuContent>
 				</DropdownMenu>
 			);
+		},
+	},
+];
+
+export const accountColumns: ColumnDef<AccountItem>[] = [
+	{
+		id: "select",
+		header: ({ table }) => (
+			<Checkbox
+				checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
+				onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+				aria-label="Select all"
+			/>
+		),
+		cell: ({ row }) => (
+			<Checkbox
+				checked={row.getIsSelected()}
+				onCheckedChange={(value) => row.toggleSelected(!!value)}
+				aria-label="Select row"
+			/>
+		),
+		enableSorting: false,
+		enableHiding: false,
+	},
+	{
+		accessorKey: "lastName",
+		header: "Last Name",
+	},
+	{
+		accessorKey: "firstName",
+		header: "First Name",
+	},
+	{
+		accessorKey: "email",
+		header: "Email",
+	},
+	{
+		accessorKey: "dateCreated",
+		header: "Date Created",
+		cell: ({ row }) => {
+			const { dateCreated: date } = row.original;
+			return format(date, "MMM d, yyyy h:mm a");
+		},
+	},
+	{
+		accessorKey: "dateModified",
+		header: "Date Modified",
+		cell: ({ row }) => {
+			const { dateModified: date } = row.original;
+			return format(date, "MMM d, yyyy h:mm a");
+		},
+	},
+	{
+		accessorKey: "role",
+		header: "Role",
+		cell: ({ row }) => {
+			const { role } = row.original;
+			if (role) {
+				return (
+					<span className="flex flex-row flex-wrap gap-2">
+						<Badge variant="outline" key={role}>
+							{(() => {
+								const roleInfo = rolesInfo.find((_) => _.value === role);
+								const IconComponent = roleInfo?.icon;
+								return IconComponent ? <IconComponent className="mr-1 h-4 w-4" /> : null;
+							})()}{" "}
+							{role && capitalizeFirstLetter(role)}
+						</Badge>
+					</span>
+				);
+			} else {
+				return "";
+			}
 		},
 	},
 ];
