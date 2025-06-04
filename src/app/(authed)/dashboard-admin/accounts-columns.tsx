@@ -144,7 +144,7 @@ export const accountColumns: ColumnDef<AccountItem>[] = [
 						onSuccess: () => {
 							toast.success("Account deleted successfully", { id: "delete-account" });
 							// Refetch the users list to update the table
-							utils.users.list.invalidate();
+							void utils.users.list.invalidate();
 						},
 						onError: (error) => {
 							toast.error("Failed to delete account", { id: "delete-account" });
