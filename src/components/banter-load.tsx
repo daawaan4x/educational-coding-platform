@@ -1,4 +1,4 @@
-export const BanterLoader = () => {
+export default function BanterLoad() {
 	return (
 		<>
 			<style jsx>{`
@@ -509,4 +509,4 @@ export const BanterLoader = () => {
 			</div>
 		</>
 	);
-};
+}

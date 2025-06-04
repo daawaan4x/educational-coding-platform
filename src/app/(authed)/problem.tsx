@@ -11,7 +11,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import "quill/dist/quill.snow.css";
-import { BanterLoader } from "@/components/banter-load";
+import BanterLoader from "@/components/banter-load";
 import CodeEditor from "@/components/code-editor";
 import { DataTable } from "@/components/data-table";
 import { Button } from "@/components/ui/button";

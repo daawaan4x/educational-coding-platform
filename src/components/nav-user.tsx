@@ -12,6 +12,7 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { firstTwoCapitalized } from "@/lib/utils";
 import { ChevronsUpDown, LogOut } from "lucide-react";
+import { signOut } from "next-auth/react";
 
 export function NavUser({
 	user,
@@ -23,6 +24,10 @@ export function NavUser({
 	};
 }) {
 	const { isMobile } = useSidebar();
+
+	const handleSignOut = () => {
+		signOut({ callbackUrl: "/auth/login" });
+	};
 
 	return (
 		<SidebarMenu>
@@ -60,15 +65,8 @@ export function NavUser({
 								</div>
 							</div>
 						</DropdownMenuLabel>
-						{/* <DropdownMenuSeparator />
-						<DropdownMenuGroup>
-							<DropdownMenuItem>
-								<Bell />
-								Notifications
-							</DropdownMenuItem>
-						</DropdownMenuGroup> */}
 						<DropdownMenuSeparator />
-						<DropdownMenuItem>
+						<DropdownMenuItem onClick={handleSignOut}>
 							<LogOut />
 							Log out
 						</DropdownMenuItem>

@@ -3,6 +3,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import { AppSidebar } from "@/app/(authed)/app-sidebar";
+import BanterLoad from "@/components/banter-load";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList } from "@/components/ui/breadcrumb";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AuthedLayout } from "@/lib/auth";
@@ -50,7 +51,12 @@ export default function Page({
 		<html lang="en">
 			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
 				<TRPCProvider>
-					<AuthedLayout Loading={<Loading />}>
+					<AuthedLayout
+						Loading={
+							<div className="flex h-full w-full items-center justify-center">
+								<BanterLoad />
+							</div>
+						}>
 						<SidebarProvider>
 							<AppSidebar />
 							<SidebarInset>
