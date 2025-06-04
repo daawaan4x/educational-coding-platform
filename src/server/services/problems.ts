@@ -4,7 +4,7 @@ import { ClassSchema, ProblemSchema } from "@/db/validation";
 import { UserColumns } from "@/db/validation/schemas/user";
 import { pagination } from "@/server/lib/pagination";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, getTableColumns, sql } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, gt, ilike, lt, or, sql } from "drizzle-orm";
 import { z } from "zod/v4";
 import { t } from "../trpc";
 import { authed, authedProcedure } from "../trpc/auth";
@@ -58,6 +58,9 @@ export const list = authed({
 		size: z.int().gte(1).lte(50).default(1),
 		page: z.int().gte(1).default(1),
 		class_id: ClassSchema.Select.shape.id.optional(),
+
+		search: z.string().optional(),
+		deadline_status: z.enum(["due-soon", "overdue"]).optional(),
 	}),
 
 	async fn({ ctx, input }) {
@@ -79,6 +82,13 @@ export const list = authed({
 					and(
 						eq(users_to_classes.user_id, user.id),
 						input.class_id ? eq(users_to_classes.class_id, input.class_id) : undefined,
+
+						input.search
+							? or(ilike(problems.name, `%${input.search}%`), ilike(classes.name, `%${input.search}%`))
+							: undefined,
+
+						input.deadline_status == "due-soon" ? gt(problems.deadline, new Date()) : undefined,
+						input.deadline_status == "overdue" ? lt(problems.deadline, new Date()) : undefined,
 
 						// If Problem Author | Class is deleted, consider Problem as deleted
 						eq(problems.is_deleted, false),

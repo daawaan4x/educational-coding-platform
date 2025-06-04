@@ -233,14 +233,14 @@ export const problemColumns: ColumnDef<ProblemItemWithProgress>[] = [
 		accessorFn: (row) => {
 			const deadline = row.deadline;
 			const now = new Date();
-			return deadline <= now ? "Overdue" : "Due Soon";
+			return deadline <= now ? "overdue" : "due-soon";
 		},
 		cell: ({ row }) => {
 			const { deadline } = row.original;
 			const now = new Date();
 
 			if (deadline <= now) {
-				const status = deadlineStatuses.find((statusObj) => statusObj.value === "Overdue");
+				const status = deadlineStatuses.find((statusObj) => statusObj.value === "overdue");
 				return (
 					<div className="flex items-center">
 						{status?.icon && <status.icon className="text-muted-foreground mr-2 h-4 w-4" />}
@@ -248,7 +248,7 @@ export const problemColumns: ColumnDef<ProblemItemWithProgress>[] = [
 					</div>
 				);
 			} else {
-				const status = deadlineStatuses.find((statusObj) => statusObj.value === "Due Soon");
+				const status = deadlineStatuses.find((statusObj) => statusObj.value === "due-soon");
 				return (
 					<div className="flex items-center">
 						{status?.icon && <status.icon className="text-muted-foreground mr-2 h-4 w-4" />}
@@ -548,14 +548,14 @@ export const problemColumnsForStudent: ColumnDef<ProblemItemStudent>[] = [
 		accessorFn: (row) => {
 			const deadline = row.deadline;
 			const now = new Date();
-			return deadline <= now ? "Overdue" : "Due Soon";
+			return deadline <= now ? "overdue" : "due-soon";
 		},
 		cell: ({ row }) => {
 			const { deadline } = row.original;
 			const now = new Date();
 
 			if (deadline <= now) {
-				const status = deadlineStatuses.find((statusObj) => statusObj.value === "Overdue");
+				const status = deadlineStatuses.find((statusObj) => statusObj.value === "overdue");
 				return (
 					<div className="flex items-center">
 						{status?.icon && <status.icon className="text-muted-foreground mr-2 h-4 w-4" />}
@@ -563,7 +563,7 @@ export const problemColumnsForStudent: ColumnDef<ProblemItemStudent>[] = [
 					</div>
 				);
 			} else {
-				const status = deadlineStatuses.find((statusObj) => statusObj.value === "Due Soon");
+				const status = deadlineStatuses.find((statusObj) => statusObj.value === "due-soon");
 				return (
 					<div className="flex items-center">
 						{status?.icon && <status.icon className="text-muted-foreground mr-2 h-4 w-4" />}

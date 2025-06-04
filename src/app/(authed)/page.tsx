@@ -1,11 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useAuthStore } from "@/lib/auth/store";
-import { trpc } from "@/lib/trpc";
-import { AccountItem, ProblemItem, ProblemItemWithProgress } from "@/lib/types";
 import AdminDashboardWrapper from "./dashboard-admin/admin-dashboard-wrapper";
-import { problemsForStudent } from "./dashboard-student/problems-columns";
 import StudentDashboardWrapper from "./dashboard-student/student-dashboard-wrapper";
 import { problemsForTeacher } from "./dashboard-teacher/problems-columns";
 import TeacherDashboardWrapper from "./dashboard-teacher/teacher-dashboard-wrapper";
@@ -30,7 +26,7 @@ export default function Page() {
 	const role = user?.role; // "admin", "teacher", "student"
 
 	if (role === "student") {
-		return <StudentDashboardWrapper problems={problemsForStudent} />;
+		return <StudentDashboardWrapper />;
 	}
 
 	if (role === "teacher") {

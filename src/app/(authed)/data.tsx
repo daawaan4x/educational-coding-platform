@@ -5,16 +5,16 @@ import { RiAdminLine } from "react-icons/ri";
 
 export const deadlineStatuses = [
 	{
-		value: "Due Soon",
+		value: "due-soon",
 		label: "Due Soon",
 		icon: CalendarClock,
 	},
 	{
-		value: "Overdue",
+		value: "overdue",
 		label: "Overdue",
 		icon: CalendarMinus,
 	},
-];
+] as const;
 
 export const completionStatuses = [
 	{
