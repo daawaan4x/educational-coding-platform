@@ -34,7 +34,7 @@ export default function StudentDashboardWrapper() {
 	const { state, isMobile } = useSidebar();
 
 	const [search, setSearchValue] = useState<string | undefined>(undefined);
-	const [deadline_status, setDeadlineStatus] = useState<(typeof deadlineStatuses)[number]["value"] | undefined>(
+	const [deadlineStatus, setDeadlineStatus] = useState<(typeof deadlineStatuses)[number]["value"] | undefined>(
 		undefined,
 	);
 
@@ -53,7 +53,7 @@ export default function StudentDashboardWrapper() {
 		size: pageSize,
 		page: pageIndex + 1,
 		search,
-		deadline_status,
+		deadlineStatus,
 	});
 
 	const problems: ProblemItem[] =

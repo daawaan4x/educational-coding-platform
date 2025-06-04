@@ -36,12 +36,15 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { trpc } from "@/lib/trpc";
 import { ClassItem } from "@/lib/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { MoreHorizontal } from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 // Dummy data. To be replace by real values from the server.
@@ -107,16 +110,54 @@ export const classColumns: ColumnDef<ClassItem>[] = [
 		id: "actions",
 		cell: ({ row }) => {
 			const classItem = row.original;
+			const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+			const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+			const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+			const utils = trpc.useUtils();
+
+			const updateClassMutation = trpc.classes.update.useMutation({
+				onSuccess: () => {
+					toast.success("Class updated successfully");
+					setIsEditDialogOpen(false);
+					setIsDropdownOpen(false);
+					utils.classes.list_by_user.invalidate();
+				},
+				onError: (error) => {
+					toast.error(`Failed to update class: ${error.message}`);
+				},
+			});
+
+			const deleteClassMutation = trpc.classes.remove.useMutation({
+				onSuccess: () => {
+					toast.success("Class deleted successfully");
+					setIsDeleteDialogOpen(false);
+					setIsDropdownOpen(false);
+					utils.classes.list_by_user.invalidate();
+				},
+				onError: (error) => {
+					toast.error(`Failed to delete class: ${error.message}`);
+				},
+			});
+
 			const form = useForm<z.infer<typeof editClassSchema>>({
 				resolver: zodResolver(editClassSchema),
 				defaultValues: { name: classItem.name },
 			});
+
 			function onSubmit(values: z.infer<typeof editClassSchema>) {
-				console.log(values);
-				// Handle form submission - to be implemented
+				updateClassMutation.mutate({
+					id: classItem.id,
+					data: { name: values.name },
+				});
 			}
+
+			function handleDelete() {
+				deleteClassMutation.mutate({ id: classItem.id });
+			}
+
 			return (
-				<DropdownMenu>
+				<DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
 					<DropdownMenuTrigger asChild>
 						<Button variant="ghost" className="h-8 w-8 p-0">
 							<span className="sr-only">Open menu</span>
@@ -124,7 +165,7 @@ export const classColumns: ColumnDef<ClassItem>[] = [
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
-						<Dialog>
+						<Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
 							<DialogTrigger asChild>
 								<DropdownMenuItem onSelect={(event) => event.preventDefault()}>Edit</DropdownMenuItem>
 							</DialogTrigger>
@@ -155,13 +196,15 @@ export const classColumns: ColumnDef<ClassItem>[] = [
 											)}
 										/>
 										<DialogFooter>
-											<Button type="submit">Save</Button>
+											<Button type="submit" disabled={updateClassMutation.isPending}>
+												{updateClassMutation.isPending ? "Saving..." : "Save"}
+											</Button>
 										</DialogFooter>
 									</form>
 								</Form>
 							</DialogContent>
 						</Dialog>
-						<AlertDialog>
+						<AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
 							<AlertDialogTrigger asChild>
 								<DropdownMenuItem variant="destructive" onSelect={(event) => event.preventDefault()}>
 									Delete
@@ -177,7 +220,9 @@ export const classColumns: ColumnDef<ClassItem>[] = [
 								</AlertDialogHeader>
 								<AlertDialogFooter>
 									<AlertDialogCancel>Cancel</AlertDialogCancel>
-									<AlertDialogAction>Delete</AlertDialogAction>
+									<AlertDialogAction onClick={handleDelete} disabled={deleteClassMutation.isPending}>
+										{deleteClassMutation.isPending ? "Deleting..." : "Delete"}
+									</AlertDialogAction>
 								</AlertDialogFooter>
 							</AlertDialogContent>
 						</AlertDialog>
