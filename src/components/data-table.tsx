@@ -63,7 +63,9 @@ interface DataTableProps<TData, TValue> {
 	onSearchChange?: (search: string) => void;
 	filterSearchPlaceholder?: string;
 	enableSelection?: boolean;
+	singleSelection?: boolean; // Add single selection mode
 	onSelectionChange?: (selectedRows: TData[]) => void;
+	className?: string;
 }
 
 // `filterColumn` is for filtering a specific column with a text input.
@@ -91,7 +93,9 @@ export function DataTable<TData, TValue>({
 	onSearchChange,
 	filterSearchPlaceholder = "Search...",
 	enableSelection = false,
+	singleSelection = false,
 	onSelectionChange,
+	className = "",
 }: DataTableProps<TData, TValue>) {
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(listToFalseObject(notVisibleColumns));
@@ -124,11 +128,22 @@ export function DataTable<TData, TValue>({
 		getCoreRowModel: getCoreRowModel(),
 		onColumnVisibilityChange: setColumnVisibility,
 		onRowSelectionChange: (newRowSelection) => {
-			const updatedSelection = typeof newRowSelection === "function" ? newRowSelection(rowSelection) : newRowSelection;
+			let updatedSelection = typeof newRowSelection === "function" ? newRowSelection(rowSelection) : newRowSelection;
+
+			if (singleSelection) {
+				// For single selection, only keep the last selected row
+				const selectedKeys = Object.keys(updatedSelection).filter((key) => updatedSelection[key]);
+				if (selectedKeys.length > 0) {
+					// Clear all selections and only keep the last one
+					const lastSelectedKey = selectedKeys[selectedKeys.length - 1];
+					updatedSelection = { [lastSelectedKey]: true };
+				}
+			}
+
 			setRowSelection(updatedSelection);
 
 			if (enableSelection && onSelectionChange) {
-				// Get selected rows using the table instance
+				// Get selected rows using the updated selection
 				const selectedRowIndices = Object.keys(updatedSelection).filter((key) => updatedSelection[key]);
 				const selectedRows = selectedRowIndices.map((index) => data[parseInt(index)]);
 				onSelectionChange(selectedRows);
@@ -175,89 +190,92 @@ export function DataTable<TData, TValue>({
 	const { state, isMobile } = useSidebar();
 
 	return (
-		<div className="max-w-full overflow-auto">
-			{(filterColumn ?? filters ?? showColumnViewControl ?? onSearchChange) && (
-				<div className="flex items-center justify-between gap-3 py-4">
-					<div className="flex flex-1 flex-row flex-wrap items-center gap-2">
-						{filterColumn ? (
-							<Input
-								placeholder={`Filter ${camelToWords(filterColumn)}s...`}
-								value={(table.getColumn(filterColumn)?.getFilterValue() as string) ?? ""}
-								onChange={(event) => table.getColumn(filterColumn)?.setFilterValue(event.target.value)}
-								className="max-w-sm"
-							/>
-						) : (
-							""
-						)}
+		<div className={`max-w-full overflow-auto ${className}`}>
+			{
+				// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+				(filterColumn || filters || showColumnViewControl || onSearchChange) && (
+					<div className="flex items-center justify-between gap-3 py-4">
+						<div className="flex flex-1 flex-row flex-wrap items-center gap-2">
+							{filterColumn ? (
+								<Input
+									placeholder={`Filter ${camelToWords(filterColumn)}s...`}
+									value={(table.getColumn(filterColumn)?.getFilterValue() as string) ?? ""}
+									onChange={(event) => table.getColumn(filterColumn)?.setFilterValue(event.target.value)}
+									className="max-w-sm"
+								/>
+							) : (
+								""
+							)}
 
-						{onSearchChange ? (
-							<Input
-								placeholder={filterSearchPlaceholder}
-								onChange={(event) => onSearchChange(event.target.value)}
-								className="max-w-sm"
-							/>
-						) : (
-							""
-						)}
+							{onSearchChange ? (
+								<Input
+									placeholder={filterSearchPlaceholder}
+									onChange={(event) => onSearchChange(event.target.value)}
+									className="max-w-sm"
+								/>
+							) : (
+								""
+							)}
 
-						{filters ? (
-							<div
-								className={cn("flex flex-1 flex-row flex-wrap items-center gap-2 sm:flex-nowrap", {
-									"sm:flex-wrap md:flex-nowrap": state == "expanded" && !isMobile,
-									"block sm:flex-wrap md:flex-nowrap": state != "expanded" && !isMobile,
-									"sm:flex-wrap md:flex-wrap lg:flex-nowrap": state == "expanded" && !isMobile && isFiltered,
-								})}>
-								{filters.map((filter) => {
-									return (
-										<DataTableFacetedFilter
-											key={filter.column}
-											column={table.getColumn(filter.column)}
-											title={camelToCapitalizedWords(filter.column)}
-											options={filter.options as unknown as FilterOptionItem[]}
-										/>
-									);
-								})}
-								{isFiltered && (
-									<Button variant="ghost" onClick={() => table.resetColumnFilters()} className="h-8 px-2 lg:px-3">
-										Reset
-										<X />
-									</Button>
-								)}
-							</div>
-						) : (
-							""
-						)}
+							{filters ? (
+								<div
+									className={cn("flex flex-1 flex-row flex-wrap items-center gap-2 sm:flex-nowrap", {
+										"sm:flex-wrap md:flex-nowrap": state == "expanded" && !isMobile,
+										"block sm:flex-wrap md:flex-nowrap": state != "expanded" && !isMobile,
+										"sm:flex-wrap md:flex-wrap lg:flex-nowrap": state == "expanded" && !isMobile && isFiltered,
+									})}>
+									{filters.map((filter) => {
+										return (
+											<DataTableFacetedFilter
+												key={filter.column}
+												column={table.getColumn(filter.column)}
+												title={camelToCapitalizedWords(filter.column)}
+												options={filter.options as unknown as FilterOptionItem[]}
+											/>
+										);
+									})}
+									{isFiltered && (
+										<Button variant="ghost" onClick={() => table.resetColumnFilters()} className="h-8 px-2 lg:px-3">
+											Reset
+											<X />
+										</Button>
+									)}
+								</div>
+							) : (
+								""
+							)}
+						</div>
+
+						<div className="flex justify-end">
+							{showColumnViewControl && (
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button variant="outline" className="ml-auto">
+											Columns
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent align="end">
+										{table
+											.getAllColumns()
+											.filter((column) => column.getCanHide())
+											.map((column) => {
+												return (
+													<DropdownMenuCheckboxItem
+														key={column.id}
+														className="capitalize"
+														checked={column.getIsVisible()}
+														onCheckedChange={(value) => column.toggleVisibility(!!value)}>
+														{camelToCapitalizedWords(column.id)}
+													</DropdownMenuCheckboxItem>
+												);
+											})}
+									</DropdownMenuContent>
+								</DropdownMenu>
+							)}
+						</div>
 					</div>
-
-					<div className="flex justify-end">
-						{showColumnViewControl && (
-							<DropdownMenu>
-								<DropdownMenuTrigger asChild>
-									<Button variant="outline" className="ml-auto">
-										Columns
-									</Button>
-								</DropdownMenuTrigger>
-								<DropdownMenuContent align="end">
-									{table
-										.getAllColumns()
-										.filter((column) => column.getCanHide())
-										.map((column) => {
-											return (
-												<DropdownMenuCheckboxItem
-													key={column.id}
-													className="capitalize"
-													checked={column.getIsVisible()}
-													onCheckedChange={(value) => column.toggleVisibility(!!value)}>
-													{camelToCapitalizedWords(column.id)}
-												</DropdownMenuCheckboxItem>
-											);
-										})}
-								</DropdownMenuContent>
-							</DropdownMenu>
-						)}
-					</div>
-				</div>
-			)}
+				)
+			}
 			<div className="rounded-md border">
 				<Table>
 					<TableHeader>

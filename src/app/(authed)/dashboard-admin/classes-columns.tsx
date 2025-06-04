@@ -13,6 +13,7 @@ import {
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Dialog,
 	DialogContent,
@@ -45,6 +46,26 @@ import { z } from "zod";
 const editClassSchema = z.object({
 	name: z.string().min(1, "Class name is required"),
 });
+
+export const classSelectColumns: ColumnDef<ClassItem>[] = [
+	{
+		id: "select",
+		header: "",
+		cell: ({ row }) => (
+			<Checkbox
+				checked={row.getIsSelected()}
+				onCheckedChange={(value) => row.toggleSelected(!!value)}
+				aria-label="Select row"
+			/>
+		),
+		enableSorting: false,
+		enableHiding: false,
+	},
+	{
+		accessorKey: "name",
+		header: "Class Name",
+	},
+];
 
 export const classColumns: ColumnDef<ClassItem>[] = [
 	{
