@@ -30,6 +30,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { CirclePlus, Search, X } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 import { accountColumns } from "./accounts-columns";
 
@@ -50,6 +51,11 @@ export default function AdminDashboardWrapper() {
 	const [isSearchMode, setIsSearchMode] = useState(false);
 	const [searchParams, setSearchParams] = useState<z.infer<typeof searchSchema> | null>(null);
 
+	const [isServerProcessing, setIsServerProcessing] = useState(false);
+
+	// Add create user mutation
+	const createUser = trpc.users.create.useMutation();
+
 	// Search form
 	const searchForm = useForm<z.infer<typeof searchSchema>>({
 		resolver: zodResolver(searchSchema),
@@ -65,62 +71,22 @@ export default function AdminDashboardWrapper() {
 	const hasFormInputs =
 		watchedValues.search_key?.trim() !== "" || (watchedValues.roles && watchedValues.roles.length > 0);
 
-	// Conditionally fetch data based on search mode
-	const listQuery = trpc.users.list.useQuery(
-		{
-			size: pageSize,
-			page: pageIndex + 1,
-		},
-		{
-			enabled: !isSearchMode, // Only fetch when not in search mode
-		},
-	);
+	// Use unified list query with optional search parameters
+	const listQuery = trpc.users.list.useQuery({
+		size: pageSize,
+		page: pageIndex + 1,
+		...(isSearchMode &&
+			searchParams && {
+				search_key: searchParams.search_key,
+				search_type: searchParams.search_type,
+				roles: searchParams.roles,
+			}),
+	});
 
-	// Use list_by_key when search term is provided
-	const searchByKeyQuery = trpc.users.list_by_key.useQuery(
-		{
-			search_key: searchParams?.search_key ?? "",
-			search_type: searchParams?.search_type ?? "firstName",
-			roles: searchParams?.roles,
-			size: pageSize,
-			page: pageIndex + 1,
-		},
-		{
-			enabled: Boolean(isSearchMode && searchParams?.search_key && searchParams.search_key.trim() !== ""),
-		},
-	);
-
-	// Use list_by_roles when no search term is provided
-	const searchByRolesQuery = trpc.users.list_by_roles.useQuery(
-		{
-			roles: searchParams?.roles ?? [],
-			size: pageSize,
-			page: pageIndex + 1,
-		},
-		{
-			enabled:
-				isSearchMode && searchParams !== null && (!searchParams.search_key || searchParams.search_key.trim() === ""),
-		},
-	);
-
-	// Use the appropriate query result
-	const usersData = isSearchMode
-		? searchParams?.search_key && searchParams.search_key.trim() !== ""
-			? searchByKeyQuery.data
-			: searchByRolesQuery.data
-		: listQuery.data;
-
-	const isLoading = isSearchMode
-		? searchParams?.search_key && searchParams.search_key.trim() !== ""
-			? searchByKeyQuery.isLoading
-			: searchByRolesQuery.isLoading
-		: listQuery.isLoading;
-
-	const error = isSearchMode
-		? searchParams?.search_key && searchParams.search_key.trim() !== ""
-			? searchByKeyQuery.error
-			: searchByRolesQuery.error
-		: listQuery.error;
+	// Use the query result
+	const usersData = listQuery.data;
+	const isLoading = listQuery.isLoading;
+	const error = listQuery.error;
 
 	// Form definition with react-hook-form
 	const form = useForm<z.infer<typeof addAccountSchema>>({
@@ -135,8 +101,35 @@ export default function AdminDashboardWrapper() {
 	});
 
 	function onSubmit(values: z.infer<typeof addAccountSchema>) {
-		// This will be implemented later
-		console.log(values);
+		setIsServerProcessing(true);
+		toast.loading("Adding account...", { id: "create-account" });
+
+		createUser.mutate(
+			{
+				data: {
+					email: values.email,
+					password: values.password,
+					first_name: values.firstName,
+					last_name: values.lastName,
+					role: values.role,
+				},
+			},
+			{
+				onSuccess: () => {
+					toast.success("Account added", { id: "create-account" });
+					form.reset();
+					setIsServerProcessing(false);
+
+					// Refetch the appropriate query to update the table
+					listQuery.refetch();
+				},
+				onError: (error) => {
+					toast.error("Failed to add account", { id: "create-account" });
+					setIsServerProcessing(false);
+					console.error("Error creating user:", error);
+				},
+			},
+		);
 	}
 
 	function onSearch(values: z.infer<typeof searchSchema>) {
@@ -208,7 +201,7 @@ export default function AdminDashboardWrapper() {
 
 				<Dialog>
 					<DialogTrigger asChild>
-						<Button variant="outline">
+						<Button variant="outline" disabled={isServerProcessing}>
 							<CirclePlus /> Add Account
 						</Button>
 					</DialogTrigger>
@@ -302,7 +295,9 @@ export default function AdminDashboardWrapper() {
 									)}
 								/>
 								<DialogFooter>
-									<Button type="submit">Save changes</Button>
+									<Button type="submit" disabled={isServerProcessing}>
+										{isServerProcessing ? "Saving..." : "Save changes"}
+									</Button>
 								</DialogFooter>
 							</form>
 						</Form>
@@ -322,7 +317,7 @@ export default function AdminDashboardWrapper() {
 				</div>
 
 				<Form {...searchForm}>
-					<form onSubmit={void searchForm.handleSubmit(onSearch)} className="space-y-4">
+					<form onSubmit={searchForm.handleSubmit(onSearch)} className="space-y-4">
 						<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 							<FormField
 								control={searchForm.control}

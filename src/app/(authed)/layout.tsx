@@ -7,10 +7,10 @@ import { AppSidebar } from "@/app/(authed)/app-sidebar";
 import BanterLoad from "@/components/banter-load";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList } from "@/components/ui/breadcrumb";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/sonner";
 import { AuthedLayout } from "@/lib/auth";
 import TRPCProvider from "@/lib/trpc/provider";
 import { Separator } from "@radix-ui/react-separator";
-import Loading from "./loading";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -55,6 +55,7 @@ export default function Page({
 								<BanterLoad />
 							</div>
 						}>
+						<Toaster richColors />
 						<SidebarProvider>
 							<AppSidebar />
 							<SidebarInset>
