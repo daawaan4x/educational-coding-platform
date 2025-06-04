@@ -1,7 +1,4 @@
-import { CalendarClock, CalendarMinus, CheckCircle, Circle, Timer } from "lucide-react";
-import { FaChalkboardTeacher } from "react-icons/fa";
-import { PiStudentBold } from "react-icons/pi";
-import { RiAdminLine } from "react-icons/ri";
+import { CalendarClock, CalendarMinus, CheckCircle, Circle, GraduationCap, Shield, Timer, User } from "lucide-react";
 
 export const deadlineStatuses = [
 	{
@@ -35,7 +32,19 @@ export const completionStatuses = [
 ];
 
 export const rolesInfo = [
-	{ value: "student", label: "Student", icon: <PiStudentBold /> },
-	{ value: "teacher", label: "Teacher", icon: <FaChalkboardTeacher /> },
-	{ value: "admin", label: "Admin", icon: <RiAdminLine /> },
-];
+	{
+		value: "student",
+		label: "Student",
+		icon: User,
+	},
+	{
+		value: "teacher",
+		label: "Teacher",
+		icon: GraduationCap,
+	},
+	{
+		value: "admin",
+		label: "Admin",
+		icon: Shield,
+	},
+] as const;

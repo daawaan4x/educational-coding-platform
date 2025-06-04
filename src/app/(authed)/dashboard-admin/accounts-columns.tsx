@@ -86,18 +86,21 @@ export const accountColumns: ColumnDef<AccountItem>[] = [
 		},
 	},
 	{
-		accessorKey: "roles",
+		accessorKey: "role",
 		header: "Role",
 		cell: ({ row }) => {
-			const { roles } = row.original;
-			if (roles) {
+			const { role } = row.original;
+			if (role) {
 				return (
 					<span className="flex flex-row flex-wrap gap-2">
-						{roles.map((role) => (
-							<Badge variant="outline" key={role}>
-								{rolesInfo.find((_) => _.value === role)?.icon} {role && capitalizeFirstLetter(role)}
-							</Badge>
-						))}
+						<Badge variant="outline" key={role}>
+							{(() => {
+								const roleInfo = rolesInfo.find((_) => _.value === role);
+								const IconComponent = roleInfo?.icon;
+								return IconComponent ? <IconComponent className="mr-1 h-4 w-4" /> : null;
+							})()}{" "}
+							{role && capitalizeFirstLetter(role)}
+						</Badge>
 					</span>
 				);
 			} else {

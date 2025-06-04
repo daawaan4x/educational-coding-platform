@@ -44,33 +44,12 @@ export const list = authed({
 		size: z.int().gte(1).lte(50).default(50),
 		page: z.int().gte(1).default(1),
 		class_id: ClassSchema.Select.shape.id.optional(),
-		search_key: z.string().optional(),
-		search_type: z.enum(["firstName", "lastName", "email"]).optional(),
+
+		search: z.string().optional(),
 		roles: z.array(z.enum(["student", "teacher", "admin"])).optional(),
 	}),
 
 	async fn({ input }) {
-		// Build search condition if search_key is provided
-		let searchCondition: ReturnType<typeof ilike> | undefined;
-		if (input.search_key && input.search_key.trim() !== "" && input.search_type) {
-			switch (input.search_type) {
-				case "firstName":
-					searchCondition = ilike(users.first_name, `%${input.search_key}%`);
-					break;
-				case "lastName":
-					searchCondition = ilike(users.last_name, `%${input.search_key}%`);
-					break;
-				case "email":
-					searchCondition = ilike(users.email, `%${input.search_key}%`);
-					break;
-				default:
-					throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid search type" });
-			}
-		}
-
-		// Build role filter condition
-		const roleCondition = input.roles && input.roles.length > 0 ? inArray(users.role, input.roles) : undefined;
-
 		// Get list of User (with optional search and role filters)
 		const query_users = () =>
 			db
@@ -83,8 +62,16 @@ export const list = authed({
 						eq(users.is_deleted, false),
 						input.class_id ? eq(users_to_classes.class_id, input.class_id) : undefined,
 						input.class_id ? eq(classes.is_deleted, false) : undefined,
-						searchCondition,
-						roleCondition,
+
+						input.search
+							? or(
+									ilike(users.last_name, `%${input.search}%`),
+									ilike(users.first_name, `%${input.search}%`),
+									ilike(users.email, `%${input.search}%`),
+								)
+							: undefined,
+
+						input.roles && input.roles.length ? inArray(users.role, input.roles) : undefined,
 					),
 				)
 				.orderBy(users.id) // order-by is required by distinct-on

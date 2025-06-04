@@ -24,14 +24,14 @@ import {
 	VisibilityState,
 } from "@tanstack/react-table";
 import { LucideIcon, X } from "lucide-react";
-import { useState } from "react";
+import { ComponentType, JSX, useState } from "react";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { DataTablePagination } from "./data-table-pagination";
 
 export interface FilterOptionItem {
 	readonly value: string;
 	readonly label: string;
-	readonly icon: LucideIcon;
+	readonly icon?: ComponentType<{ className?: string | undefined }>;
 }
 
 export interface Filter {
@@ -61,6 +61,7 @@ interface DataTableProps<TData, TValue> {
 	manualFiltering?: boolean;
 	onFilterChange?: (filters: ColumnFiltersState) => void;
 	onSearchChange?: (search: string) => void;
+	filterSearchPlaceholder?: string;
 }
 
 // `filterColumn` is for filtering a specific column with a text input.
@@ -86,6 +87,7 @@ export function DataTable<TData, TValue>({
 	manualFiltering = false,
 	onFilterChange,
 	onSearchChange,
+	filterSearchPlaceholder,
 }: DataTableProps<TData, TValue>) {
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(listToFalseObject(notVisibleColumns));
@@ -174,7 +176,7 @@ export function DataTable<TData, TValue>({
 
 						{onSearchChange ? (
 							<Input
-								placeholder={"Search ..."}
+								placeholder={filterSearchPlaceholder || "Search ..."}
 								onChange={(event) => onSearchChange(event.target.value)}
 								className="max-w-sm"
 							/>
