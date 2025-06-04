@@ -63,7 +63,9 @@ interface DataTableProps<TData, TValue> {
 	onSearchChange?: (search: string) => void;
 	filterSearchPlaceholder?: string;
 	enableSelection?: boolean;
+	singleSelection?: boolean; // Add single selection mode
 	onSelectionChange?: (selectedRows: TData[]) => void;
+	className?: string;
 }
 
 // `filterColumn` is for filtering a specific column with a text input.
@@ -91,7 +93,9 @@ export function DataTable<TData, TValue>({
 	onSearchChange,
 	filterSearchPlaceholder = "Search...",
 	enableSelection = false,
+	singleSelection = false,
 	onSelectionChange,
+	className = "",
 }: DataTableProps<TData, TValue>) {
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(listToFalseObject(notVisibleColumns));
@@ -124,11 +128,22 @@ export function DataTable<TData, TValue>({
 		getCoreRowModel: getCoreRowModel(),
 		onColumnVisibilityChange: setColumnVisibility,
 		onRowSelectionChange: (newRowSelection) => {
-			const updatedSelection = typeof newRowSelection === "function" ? newRowSelection(rowSelection) : newRowSelection;
+			let updatedSelection = typeof newRowSelection === "function" ? newRowSelection(rowSelection) : newRowSelection;
+
+			if (singleSelection) {
+				// For single selection, only keep the last selected row
+				const selectedKeys = Object.keys(updatedSelection).filter((key) => updatedSelection[key]);
+				if (selectedKeys.length > 0) {
+					// Clear all selections and only keep the last one
+					const lastSelectedKey = selectedKeys[selectedKeys.length - 1];
+					updatedSelection = { [lastSelectedKey]: true };
+				}
+			}
+
 			setRowSelection(updatedSelection);
 
 			if (enableSelection && onSelectionChange) {
-				// Get selected rows using the table instance
+				// Get selected rows using the updated selection
 				const selectedRowIndices = Object.keys(updatedSelection).filter((key) => updatedSelection[key]);
 				const selectedRows = selectedRowIndices.map((index) => data[parseInt(index)]);
 				onSelectionChange(selectedRows);
@@ -175,8 +190,8 @@ export function DataTable<TData, TValue>({
 	const { state, isMobile } = useSidebar();
 
 	return (
-		<div className="max-w-full overflow-auto">
-			{(filterColumn ?? filters ?? showColumnViewControl ?? onSearchChange) && (
+		<div className={`max-w-full overflow-auto ${className}`}>
+			{(filterColumn || filters || showColumnViewControl || onSearchChange) && (
 				<div className="flex items-center justify-between gap-3 py-4">
 					<div className="flex flex-1 flex-row flex-wrap items-center gap-2">
 						{filterColumn ? (

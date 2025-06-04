@@ -20,7 +20,9 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
@@ -30,14 +32,15 @@ import { addAccountSchema } from "@/lib/validations/addAccountSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ColumnFiltersState } from "@tanstack/react-table";
 import { BookOpenText, CirclePlus, DoorClosed, DoorOpen, Search, Users, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useThrottledCallback } from "use-debounce";
 import { z } from "zod";
 import { rolesInfo } from "../data";
 import { accountColumns } from "./accounts-columns";
-import { classColumns } from "./classes-columns";
+import { ClassSelector } from "./class-selector";
+import { classColumns, classSelectColumns } from "./classes-columns";
 
 // Add class creation schema
 const createClassSchema = z.object({
@@ -53,6 +56,28 @@ export default function AdminDashboardWrapper() {
 
 	// Selection state
 	const [selectedAccounts, setSelectedAccounts] = useState<AccountItem[]>([]);
+	const [selectedClass, setSelectedClass] = useState<string>("");
+
+	// Add users to class mutation
+	const addUsersToClass = trpc.classes.add_users.useMutation();
+
+	// Add to class dialog state
+	const [isAddToClassOpen, setIsAddToClassOpen] = useState(false);
+	const [addToClassSearch, setAddToClassSearch] = useState<string>("");
+	const [addToClassPageIndex, setAddToClassPageIndex] = useState(0);
+	const [addToClassPageSize, setAddToClassPageSize] = useState(10);
+
+	const onAddToClassSearchChange = useThrottledCallback((search: string) => {
+		setAddToClassSearch(search);
+		setAddToClassPageIndex(0);
+	}, 500);
+
+	// Classes query for add to class dialog
+	const addToClassQuery = trpc.classes.list.useQuery({
+		size: addToClassPageSize,
+		page: addToClassPageIndex + 1,
+		search: addToClassSearch,
+	});
 
 	useEffect(() => {
 		console.log(
@@ -93,6 +118,8 @@ export default function AdminDashboardWrapper() {
 	const onClassesSearchChange = useThrottledCallback((search: string) => {
 		setClassesSearchValue(search);
 		setClassesPageIndex(0); // Reset to first page when searching
+		// Refetch the classes query with the new search term
+		void classesQuery.refetch();
 	}, 500);
 
 	// Class form definition
@@ -229,6 +256,10 @@ export default function AdminDashboardWrapper() {
 		);
 	}
 
+	// Add helper to filter out admin users
+	const nonAdminAccounts = selectedAccounts.filter((account) => account.role !== "admin");
+	const adminAccounts = selectedAccounts.filter((account) => account.role === "admin");
+
 	return (
 		<div
 			className={cn("align-items mt-3 flex w-full flex-col justify-start overflow-hidden px-8 pb-8", {
@@ -248,7 +279,7 @@ export default function AdminDashboardWrapper() {
 						<h2>Manage Accounts</h2>
 
 						<div className="flex flex-row flex-wrap justify-end gap-3 md:flex-nowrap">
-							<Dialog>
+							<Dialog open={isAddToClassOpen} onOpenChange={setIsAddToClassOpen}>
 								<DialogTrigger asChild>
 									<Button variant="outline" disabled={!selectedAccounts.length} className="group">
 										<DoorClosed className="group-hover:hidden" />
@@ -256,39 +287,94 @@ export default function AdminDashboardWrapper() {
 										Add to class
 									</Button>
 								</DialogTrigger>
-								<DialogContent className="sm:max-w-[425px]">
+								<DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-[600px]">
 									<DialogHeader>
-										<DialogTitle>Add account</DialogTitle>
+										<DialogTitle>Add students to class</DialogTitle>
 										<DialogDescription>
-											Fill out the details below to add a new account. Click save when you&apos;re done.
+											Select a class to add the following {nonAdminAccounts.length} student
+											{nonAdminAccounts.length !== 1 ? "s" : ""}:
 										</DialogDescription>
-									</DialogHeader>
-									<Form {...form}>
-										<form
-											onSubmit={(e) => {
-												form.handleSubmit(onSubmit)(e);
-											}}
-											className="grid gap-4 py-4">
-											<FormField
-												control={form.control}
-												name="firstName"
-												render={({ field }) => (
-													<FormItem className="grid grid-cols-4 items-center gap-4">
-														<FormLabel className="text-right">Name</FormLabel>
-														<FormControl>
-															<Input placeholder="Class Name" className="col-span-3" {...field} />
-														</FormControl>
-														<FormMessage className="col-span-4 col-start-2" />
-													</FormItem>
+										{adminAccounts.length > 0 && (
+											<div className="rounded-md border border-orange-200 bg-orange-50 p-3">
+												<p className="text-sm font-medium text-orange-800">
+													Notice: {adminAccounts.length} admin user{adminAccounts.length !== 1 ? "s" : ""} selected will
+													be excluded from class assignment.
+												</p>
+											</div>
+										)}
+										<div className="mt-1 max-h-48 overflow-y-auto rounded-md border px-3 pt-2 pb-3">
+											<span className="mb-1 text-sm leading-none font-bold">Students</span>
+											<div className="mt-1 flex flex-col gap-2">
+												{nonAdminAccounts.map((account) => (
+													<div key={account.id} className="text-muted-foreground text-sm leading-none">
+														{account.lastName}, {account.firstName} ({account.email})
+													</div>
+												))}
+												{nonAdminAccounts.length === 0 && (
+													<div className="text-muted-foreground text-sm leading-none italic">No students selected</div>
 												)}
-											/>
-											<DialogFooter>
-												<Button type="submit" disabled={isServerProcessing}>
-													{isServerProcessing ? "Saving..." : "Save changes"}
-												</Button>
-											</DialogFooter>
-										</form>
-									</Form>
+											</div>
+										</div>
+									</DialogHeader>
+									<div className="py-4">
+										<ClassSelector
+											onSelectionChange={(selectedClassId) => {
+												setSelectedClass(selectedClassId);
+											}}
+										/>
+									</div>
+									<DialogFooter>
+										<Button
+											variant="outline"
+											onClick={() => {
+												setIsAddToClassOpen(false);
+												setSelectedClass("");
+												setAddToClassSearch("");
+												setAddToClassPageIndex(0);
+											}}>
+											Cancel
+										</Button>
+										<Button
+											disabled={!selectedClass || addUsersToClass.isPending || nonAdminAccounts.length === 0}
+											onClick={() => {
+												if (selectedClass && nonAdminAccounts.length > 0) {
+													toast.loading("Adding students to class...", { id: "add-to-class" });
+													addUsersToClass.mutate(
+														{
+															id: selectedClass,
+															user_ids: nonAdminAccounts.map((account) => account.id),
+														},
+														{
+															onSuccess: (result) => {
+																let message = `Successfully added ${result.added} student${result.added !== 1 ? "s" : ""} to class`;
+
+																if (result.already_in_class > 0) {
+																	message += ` (${result.already_in_class} already in class)`;
+																}
+
+																if (result.admin_users_excluded > 0) {
+																	message += ` (${result.admin_users_excluded} admin user${result.admin_users_excluded !== 1 ? "s" : ""} excluded)`;
+																}
+
+																toast.success(message, { id: "add-to-class" });
+																setIsAddToClassOpen(false);
+																setSelectedClass("");
+																setSelectedAccounts([]);
+																setAddToClassSearch("");
+																setAddToClassPageIndex(0);
+															},
+															onError: (error) => {
+																toast.error(`Failed to add students to class: ${error.message}`, {
+																	id: "add-to-class",
+																});
+															},
+														},
+													);
+												}
+											}}>
+											{addUsersToClass.isPending ? "Adding..." : "Add to class"}
+										</Button>
+									</DialogFooter>
 								</DialogContent>
 							</Dialog>
 							<Dialog>

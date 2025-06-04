@@ -1,9 +1,9 @@
 import { db } from "@/db";
-import { classes, users_to_classes } from "@/db/schema";
-import { ClassSchema } from "@/db/validation";
+import { classes, users, users_to_classes } from "@/db/schema";
+import { ClassSchema, UserSchema } from "@/db/validation";
 import { pagination } from "@/server/lib/pagination";
 import { TRPCError } from "@trpc/server";
-import { and, eq, getTableColumns, ilike, or, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, ilike, inArray, or, sql } from "drizzle-orm";
 import { z } from "zod/v4";
 import { t } from "../trpc";
 import { authed, authedProcedure } from "../trpc/auth";
@@ -152,10 +152,73 @@ export const remove = authed({
 	},
 });
 
+export const add_users = authed({
+	require: ["classes:update"],
+	input: z.object({
+		id: ClassSchema.Select.shape.id,
+		user_ids: z.array(UserSchema.Select.shape.id).min(1),
+	}),
+
+	async fn({ ctx, input }) {
+		const { user } = ctx;
+
+		// Check if User has access to Class
+		await find({ ctx, input });
+
+		// Verify all users exist and are not deleted
+		const existingUsers = await db
+			.select({ id: users.id, role: users.role })
+			.from(users)
+			.where(and(inArray(users.id, input.user_ids), eq(users.is_deleted, false)));
+
+		if (existingUsers.length !== input.user_ids.length) {
+			throw new TRPCError({ code: "BAD_REQUEST", message: "One or more users do not exist" });
+		}
+
+		// Filter out admin users - only allow teachers and students
+		const validUsers = existingUsers.filter((u) => u.role !== "admin");
+		const validUserIds = validUsers.map((u) => u.id);
+
+		if (validUserIds.length === 0) {
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "No valid users to add to class (admin users cannot be added to classes)",
+			});
+		}
+
+		// Check which users are already in the class
+		const existingMemberships = await db
+			.select({ user_id: users_to_classes.user_id })
+			.from(users_to_classes)
+			.where(and(eq(users_to_classes.class_id, input.id), inArray(users_to_classes.user_id, validUserIds)));
+
+		const existingUserIds = existingMemberships.map((m) => m.user_id);
+		const newUserIds = validUserIds.filter((id) => !existingUserIds.includes(id));
+
+		// Add users to class (only those not already in the class)
+		if (newUserIds.length > 0) {
+			await db.insert(users_to_classes).values(
+				newUserIds.map((user_id) => ({
+					user_id,
+					class_id: input.id,
+				})),
+			);
+		}
+
+		return {
+			added: newUserIds.length,
+			already_in_class: existingUserIds.length,
+			total: validUserIds.length,
+			admin_users_excluded: existingUsers.length - validUsers.length,
+		};
+	},
+});
+
 export const routers = t.router({
 	find: authedProcedure().input(find.input).query(find),
 	list: authedProcedure().input(list.input).query(list),
 	create: authedProcedure().input(create.input).mutation(create),
 	update: authedProcedure().input(update.input).mutation(update),
 	remove: authedProcedure().input(remove.input).mutation(remove),
+	add_users: authedProcedure().input(add_users.input).mutation(add_users),
 });
