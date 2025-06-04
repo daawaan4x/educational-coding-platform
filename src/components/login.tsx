@@ -45,7 +45,7 @@ const Login = ({ heading = "Login", subheading = "Welcome back", loginText = "Lo
 				} else {
 					router.push("/");
 				}
-			} catch (error) {
+			} catch {
 				setError("An error occurred during login");
 			} finally {
 				setIsLoading(false);
