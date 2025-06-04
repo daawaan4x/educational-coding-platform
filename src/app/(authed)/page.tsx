@@ -3,7 +3,6 @@
 import { useAuthStore } from "@/lib/auth/store";
 import AdminDashboardWrapper from "./dashboard-admin/admin-dashboard-wrapper";
 import StudentDashboardWrapper from "./dashboard-student/student-dashboard-wrapper";
-import { problemsForTeacher } from "./dashboard-teacher/problems-columns";
 import TeacherDashboardWrapper from "./dashboard-teacher/teacher-dashboard-wrapper";
 
 // async function getProblemsForStudent(): Promise<ProblemItem[]> {
@@ -28,9 +27,8 @@ export default function Page() {
 	if (role === "student") {
 		return <StudentDashboardWrapper />;
 	}
-
 	if (role === "teacher") {
-		return <TeacherDashboardWrapper problems={problemsForTeacher} />;
+		return <TeacherDashboardWrapper />;
 	}
 
 	if (role == "admin") {
