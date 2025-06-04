@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { db } from "@/db";
 import { classes, users, users_to_classes } from "@/db/schema";
 import { ClassSchema, UserSchema } from "@/db/validation";
 import { UserColumns } from "@/db/validation/schemas/user";
 import { pagination } from "@/server/lib/pagination";
 import { TRPCError } from "@trpc/server";
-import { and, eq, getTableColumns, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, ilike, inArray, or, sql } from "drizzle-orm";
 import { z } from "zod/v4";
 import { t } from "../trpc";
 import { authed, authedProcedure } from "../trpc/auth";
@@ -61,6 +62,75 @@ export const list = authed({
 					),
 				)
 				.orderBy(users.id) // order-by is required by distinct-on
+				.$dynamic();
+
+		const records = await pagination(query_users)(input);
+
+		return records;
+	},
+});
+
+export const list_by_key = authed({
+	require: ["users:read"],
+	input: z.object({
+		size: z.int().gte(1).lte(50).default(50),
+		page: z.int().gte(1).default(1),
+		search_key: z.string().min(1),
+		search_type: z.enum(["firstName", "lastName", "email"]),
+		roles: z.array(z.enum(["student", "teacher", "admin"])).optional(),
+	}),
+
+	async fn({ input }) {
+		// Build search condition based on search type
+		let searchCondition;
+		switch (input.search_type) {
+			case "firstName":
+				searchCondition = ilike(users.first_name, `%${input.search_key}%`);
+				break;
+			case "lastName":
+				searchCondition = ilike(users.last_name, `%${input.search_key}%`);
+				break;
+			case "email":
+				searchCondition = ilike(users.email, `%${input.search_key}%`);
+				break;
+			default:
+				throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid search type" });
+		}
+
+		// Build role filter condition
+		const roleCondition = input.roles && input.roles.length > 0 ? inArray(users.role, input.roles) : undefined;
+
+		// Get list of Users based on search criteria
+		const query_users = () =>
+			db
+				.select(UserColumns)
+				.from(users)
+				.where(and(eq(users.is_deleted, false), searchCondition, roleCondition))
+				.orderBy(users.id)
+				.$dynamic();
+
+		const records = await pagination(query_users)(input);
+
+		return records;
+	},
+});
+
+export const list_by_roles = authed({
+	require: ["users:read"],
+	input: z.object({
+		size: z.int().gte(1).lte(50).default(50),
+		page: z.int().gte(1).default(1),
+		roles: z.array(z.enum(["student", "teacher", "admin"])).min(1),
+	}),
+
+	async fn({ input }) {
+		// Get list of Users based on roles
+		const query_users = () =>
+			db
+				.select(UserColumns)
+				.from(users)
+				.where(and(eq(users.is_deleted, false), inArray(users.role, input.roles)))
+				.orderBy(users.id)
 				.$dynamic();
 
 		const records = await pagination(query_users)(input);
@@ -183,6 +253,8 @@ export async function authenticate(email: string, password: string) {
 export const routers = t.router({
 	find: authedProcedure().input(find.input).query(find),
 	list: authedProcedure().input(list.input).query(list),
+	list_by_key: authedProcedure().input(list_by_key.input).query(list_by_key),
+	list_by_roles: authedProcedure().input(list_by_roles.input).query(list_by_roles),
 	create: authedProcedure().input(create.input).mutation(create),
 	update: authedProcedure().input(update.input).mutation(update),
 	delete: authedProcedure().input(remove.input).mutation(remove),

@@ -22,10 +22,6 @@ const geistMono = Geist_Mono({
 	subsets: ["latin"],
 });
 
-// export const metadata: Metadata = {
-// 	title: "[Role] Dashboard",
-// };
-
 // Placeholder `user` object
 // Implementation of role/permissions attributes may be different,
 // but the logic should be the same.

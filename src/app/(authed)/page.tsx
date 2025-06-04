@@ -3,7 +3,6 @@
 
 import { useAuthStore } from "@/lib/auth/store";
 import { trpc } from "@/lib/trpc";
-import { AccountItem, ProblemItem, ProblemItemWithProgress } from "@/lib/types";
 import AdminDashboardWrapper from "./dashboard-admin/admin-dashboard-wrapper";
 import { problemsForStudent } from "./dashboard-student/problems-columns";
 import StudentDashboardWrapper from "./dashboard-student/student-dashboard-wrapper";
@@ -28,6 +27,8 @@ import TeacherDashboardWrapper from "./dashboard-teacher/teacher-dashboard-wrapp
 export default function Page() {
 	const { user } = useAuthStore();
 	const role = user?.role; // "admin", "teacher", "student"
+
+	document.title = "Dashboard";
 
 	if (role === "student") {
 		return <StudentDashboardWrapper problems={problemsForStudent} />;
