@@ -215,6 +215,41 @@ export const add_users = authed({
 	},
 });
 
+export const remove_users = authed({
+	require: ["classes:update"],
+	input: z.object({
+		id: ClassSchema.Select.shape.id,
+		user_ids: z.array(UserSchema.Select.shape.id).min(1),
+	}),
+
+	async fn({ ctx, input }) {
+		// Check if User has access to Class
+		await find({ ctx, input });
+
+		// Check which users are currently in the class
+		const existingMemberships = await db
+			.select({ user_id: users_to_classes.user_id })
+			.from(users_to_classes)
+			.where(and(eq(users_to_classes.class_id, input.id), inArray(users_to_classes.user_id, input.user_ids)));
+
+		const existingUserIds = existingMemberships.map((m) => m.user_id);
+		const notInClassIds = input.user_ids.filter((id) => !existingUserIds.includes(id));
+
+		// Remove users from class (only those currently in the class)
+		if (existingUserIds.length > 0) {
+			await db
+				.delete(users_to_classes)
+				.where(and(eq(users_to_classes.class_id, input.id), inArray(users_to_classes.user_id, existingUserIds)));
+		}
+
+		return {
+			removed: existingUserIds.length,
+			not_in_class: notInClassIds.length,
+			total_requested: input.user_ids.length,
+		};
+	},
+});
+
 export const routers = t.router({
 	find: authedProcedure().input(find.input).query(find),
 	list: authedProcedure().input(list.input).query(list),
@@ -222,4 +257,5 @@ export const routers = t.router({
 	update: authedProcedure().input(update.input).mutation(update),
 	remove: authedProcedure().input(remove.input).mutation(remove),
 	add_users: authedProcedure().input(add_users.input).mutation(add_users),
+	remove_users: authedProcedure().input(remove_users.input).mutation(remove_users),
 });

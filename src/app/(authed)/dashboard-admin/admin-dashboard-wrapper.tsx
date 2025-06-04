@@ -25,21 +25,33 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { trpc } from "@/lib/trpc";
 import { AccountItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { addAccountSchema } from "@/lib/validations/addAccountSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ColumnFiltersState } from "@tanstack/react-table";
-import { BookOpenText, CirclePlus, DoorClosed, DoorOpen, Search, Users, X } from "lucide-react";
+import {
+	BookOpenText,
+	ChevronLeft,
+	CircleMinus,
+	CirclePlus,
+	DoorClosed,
+	DoorOpen,
+	Search,
+	Users,
+	X,
+} from "lucide-react";
 import { Fragment, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useThrottledCallback } from "use-debounce";
 import { z } from "zod";
 import { rolesInfo } from "../data";
-import { accountColumns } from "./accounts-columns";
+import { accountColumnsWithActions } from "./accounts-columns";
 import { ClassSelector } from "./class-selector";
+import { ClassStudentsManager } from "./class-students-manager";
 import { classColumns, classSelectColumns } from "./classes-columns";
 
 // Add class creation schema
@@ -49,6 +61,12 @@ const createClassSchema = z.object({
 
 export default function AdminDashboardWrapper() {
 	const { state, isMobile } = useSidebar();
+
+	//
+	const [classStudentsView, setClassStudentsView] = useState(false);
+	const [selectedClassView, setSelectedClassView] = useState<{ name: string; id: string } | null>(null);
+
+	const [selectedUsers, setSelectedUsers] = useState<AccountItem[]>([]);
 
 	// Pagination state
 	const [pageIndex, setPageIndex] = useState(0);
@@ -485,7 +503,7 @@ export default function AdminDashboardWrapper() {
 					</div>
 
 					<DataTable
-						columns={accountColumns}
+						columns={accountColumnsWithActions}
 						data={accounts}
 						notVisibleColumns={["dateCreated", "dateModified", "classes"]}
 						enablePagination={true}
@@ -513,72 +531,86 @@ export default function AdminDashboardWrapper() {
 					/>
 				</TabsContent>
 				<TabsContent value="classes">
-					<div className="flex items-center justify-between gap-3 border-b pb-2">
-						<h2>Manage Classes</h2>
+					{classStudentsView ? (
+						<ClassStudentsManager
+							classId={selectedClassView?.id ?? ""}
+							className={selectedClassView?.name ?? ""}
+							onBack={() => setClassStudentsView(false)}
+						/>
+					) : (
+						<>
+							<div className="flex items-center justify-between gap-3 border-b pb-2">
+								<h2>Manage Classes</h2>
 
-						<Dialog open={isClassFormOpen} onOpenChange={setIsClassFormOpen}>
-							<DialogTrigger asChild>
-								<Button variant="outline" disabled={createClass.isPending}>
-									<CirclePlus /> Add Class
-								</Button>
-							</DialogTrigger>
-							<DialogContent className="sm:max-w-[425px]">
-								<DialogHeader>
-									<DialogTitle>Add class</DialogTitle>
-									<DialogDescription>
-										Fill out the details below to add a new class. Click save when you&apos;re done.
-									</DialogDescription>
-								</DialogHeader>
-								<Form {...classForm}>
-									<form
-										onSubmit={(e) => {
-											e.preventDefault();
-											void classForm.handleSubmit(onClassSubmit)(e);
-										}}
-										className="grid gap-4 py-4">
-										<FormField
-											control={classForm.control}
-											name="name"
-											render={({ field }) => (
-												<FormItem className="grid grid-cols-4 items-center gap-4">
-													<FormLabel className="text-right">Class Name</FormLabel>
-													<FormControl>
-														<Input placeholder="Class Name" className="col-span-3" {...field} />
-													</FormControl>
-													<FormMessage className="col-span-4 col-start-2" />
-												</FormItem>
-											)}
-										/>
-										<DialogFooter>
-											<Button type="submit" disabled={createClass.isPending}>
-												{createClass.isPending ? "Creating..." : "Create Class"}
-											</Button>
-										</DialogFooter>
-									</form>
-								</Form>
-							</DialogContent>
-						</Dialog>
-					</div>
+								<Dialog open={isClassFormOpen} onOpenChange={setIsClassFormOpen}>
+									<DialogTrigger asChild>
+										<Button disabled={createClass.isPending}>
+											<CirclePlus /> Add Class
+										</Button>
+									</DialogTrigger>
+									<DialogContent className="sm:max-w-[425px]">
+										<DialogHeader>
+											<DialogTitle>Add class</DialogTitle>
+											<DialogDescription>
+												Fill out the details below to add a new class. Click save when you&apos;re done.
+											</DialogDescription>
+										</DialogHeader>
+										<Form {...classForm}>
+											<form
+												onSubmit={(e) => {
+													e.preventDefault();
+													void classForm.handleSubmit(onClassSubmit)(e);
+												}}
+												className="grid gap-4 py-4">
+												<FormField
+													control={classForm.control}
+													name="name"
+													render={({ field }) => (
+														<FormItem className="grid grid-cols-4 items-center gap-4">
+															<FormLabel className="text-right">Class Name</FormLabel>
+															<FormControl>
+																<Input placeholder="Class Name" className="col-span-3" {...field} />
+															</FormControl>
+															<FormMessage className="col-span-4 col-start-2" />
+														</FormItem>
+													)}
+												/>
+												<DialogFooter>
+													<Button type="submit" disabled={createClass.isPending}>
+														{createClass.isPending ? "Creating..." : "Create Class"}
+													</Button>
+												</DialogFooter>
+											</form>
+										</Form>
+									</DialogContent>
+								</Dialog>
+							</div>
 
-					<DataTable
-						columns={classColumns}
-						data={classes}
-						notVisibleColumns={["dateModified"]}
-						enablePagination={true}
-						manualPagination={true}
-						pageCount={classesData?.meta ? classesData.meta.total_pages : -1}
-						pageIndex={classesPageIndex}
-						pageSize={classesPageSize}
-						defaultPageSize={classesPageSize}
-						manualFiltering={false}
-						onSearchChange={onClassesSearchChange}
-						onPaginationChange={(newPageIndex: number, newPageSize: number) => {
-							setClassesPageIndex(newPageIndex);
-							setClassesPageSize(newPageSize);
-						}}
-						filterSearchPlaceholder="Search classes..."
-						enableSelection={false}
-					/>
+							<DataTable
+								columns={classColumns}
+								data={classes}
+								notVisibleColumns={["dateModified"]}
+								enablePagination={true}
+								manualPagination={true}
+								pageCount={classesData?.meta ? classesData.meta.total_pages : -1}
+								pageIndex={classesPageIndex}
+								pageSize={classesPageSize}
+								defaultPageSize={classesPageSize}
+								manualFiltering={false}
+								onSearchChange={onClassesSearchChange}
+								onPaginationChange={(newPageIndex: number, newPageSize: number) => {
+									setClassesPageIndex(newPageIndex);
+									setClassesPageSize(newPageSize);
+								}}
+								filterSearchPlaceholder="Search classes..."
+								enableSelection={false}
+								onRowClick={(row) => {
+									setClassStudentsView(true);
+									setSelectedClassView({ name: row.name, id: row.id });
+								}}
+							/>
+						</>
+					)}
 				</TabsContent>
 			</Tabs>
 		</div>
