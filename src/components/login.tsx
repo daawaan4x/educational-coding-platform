@@ -26,28 +26,30 @@ const Login = ({ heading = "Login", subheading = "Welcome back", loginText = "Lo
 	const [error, setError] = useState("");
 	const router = useRouter();
 
-	const handleSubmit = async (e: React.FormEvent) => {
+	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		setIsLoading(true);
 		setError("");
 
-		try {
-			const result = await signIn("credentials", {
-				email,
-				password,
-				redirect: false,
-			});
+		void (async () => {
+			try {
+				const result = await signIn("credentials", {
+					email,
+					password,
+					redirect: false,
+				});
 
-			if (result?.error) {
-				setError("Invalid email or password");
-			} else {
-				router.push("/");
+				if (result?.error) {
+					setError("Invalid email or password");
+				} else {
+					router.push("/");
+				}
+			} catch (error) {
+				setError("An error occurred during login");
+			} finally {
+				setIsLoading(false);
 			}
-		} catch (error) {
-			setError("An error occurred during login");
-		} finally {
-			setIsLoading(false);
-		}
+		})();
 	};
 
 	return (

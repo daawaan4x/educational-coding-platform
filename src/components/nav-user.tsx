@@ -26,7 +26,7 @@ export function NavUser({
 	const { isMobile } = useSidebar();
 
 	const handleSignOut = () => {
-		signOut({ callbackUrl: "/auth/login" });
+		void signOut({ callbackUrl: "/auth/login" });
 	};
 
 	return (
