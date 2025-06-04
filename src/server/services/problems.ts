@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { classes, problems, users, users_to_classes } from "@/db/schema";
+import { classes, problems, solutions, users, users_to_classes } from "@/db/schema";
 import { ClassSchema, ProblemSchema } from "@/db/validation";
 import { UserColumns } from "@/db/validation/schemas/user";
 import { pagination } from "@/server/lib/pagination";
@@ -60,45 +60,112 @@ export const list = authed({
 		class_id: ClassSchema.Select.shape.id.optional(),
 
 		search: z.string().optional(),
-		deadline_status: z.enum(["due-soon", "overdue"]).optional(),
+		deadlineStatus: z.enum(["due-soon", "overdue"]).optional(),
+		completionStatus: z.enum(["not-started", "partially-completed", "all-completed"]).optional(),
+		checkCompletion: z.boolean().optional(),
 	}),
 
 	async fn({ ctx, input }) {
 		const { user } = ctx;
 
+		// Define completion count subqueries for reuse
+		const studentsCompletedSubquery = sql<number>`COALESCE((
+			SELECT COUNT(DISTINCT s.author_id)
+			FROM ${solutions} s
+			INNER JOIN ${users} u ON s.author_id = u.id
+			WHERE s.problem_id = ${problems.id}
+			AND s.is_deleted = false
+			AND u.is_deleted = false
+			AND u.role = 'student'
+		), 0)`;
+
+		const totalStudentsSubquery = sql<number>`COALESCE((
+			SELECT COUNT(DISTINCT utc.user_id)
+			FROM ${users_to_classes} utc
+			INNER JOIN ${users} u ON utc.user_id = u.id
+			WHERE utc.class_id = ${problems.class_id}
+			AND u.is_deleted = false
+			AND u.role = 'student'
+		), 0)`;
+
+		// Build completion status filter condition
+		let completionFilter;
+		if (input.completionStatus && input.checkCompletion) {
+			if (input.completionStatus === "not-started") {
+				completionFilter = eq(studentsCompletedSubquery, 0);
+			} else if (input.completionStatus === "partially-completed") {
+				completionFilter = and(gt(studentsCompletedSubquery, 0), lt(studentsCompletedSubquery, totalStudentsSubquery));
+			} else if (input.completionStatus === "all-completed") {
+				completionFilter = and(gt(studentsCompletedSubquery, 0), eq(studentsCompletedSubquery, totalStudentsSubquery));
+			}
+		}
+
 		// Get list of Problems from all Classes where User has access (Optional: for a Class)
-		const records = await pagination(() =>
-			db
-				.select({
-					...getTableColumns(problems),
-					author: UserColumns,
-					class: getTableColumns(classes),
-				})
-				.from(users_to_classes)
-				.innerJoin(problems, eq(users_to_classes.class_id, problems.class_id))
-				.innerJoin(users, eq(problems.author_id, users.id))
-				.innerJoin(classes, eq(problems.class_id, classes.id))
-				.where(
-					and(
-						eq(users_to_classes.user_id, user.id),
-						input.class_id ? eq(users_to_classes.class_id, input.class_id) : undefined,
+		const query = db
+			.select({
+				...getTableColumns(problems),
+				author: UserColumns,
+				class: getTableColumns(classes),
+				...(input.checkCompletion
+					? {
+							studentsCompleted: studentsCompletedSubquery,
+							totalStudents: totalStudentsSubquery,
+						}
+					: {}),
+			})
+			.from(users_to_classes)
+			.innerJoin(problems, eq(users_to_classes.class_id, problems.class_id))
+			.innerJoin(users, eq(problems.author_id, users.id))
+			.innerJoin(classes, eq(problems.class_id, classes.id))
+			.where(
+				and(
+					eq(users_to_classes.user_id, user.id),
+					input.class_id ? eq(users_to_classes.class_id, input.class_id) : undefined,
 
-						input.search
-							? or(ilike(problems.name, `%${input.search}%`), ilike(classes.name, `%${input.search}%`))
-							: undefined,
+					input.search
+						? or(ilike(problems.name, `%${input.search}%`), ilike(classes.name, `%${input.search}%`))
+						: undefined,
 
-						input.deadline_status == "due-soon" ? gt(problems.deadline, new Date()) : undefined,
-						input.deadline_status == "overdue" ? lt(problems.deadline, new Date()) : undefined,
+					input.deadlineStatus == "due-soon" ? gt(problems.deadline, new Date()) : undefined,
+					input.deadlineStatus == "overdue" ? lt(problems.deadline, new Date()) : undefined,
 
-						// If Problem Author | Class is deleted, consider Problem as deleted
-						eq(problems.is_deleted, false),
-						eq(users.is_deleted, false),
-						eq(classes.is_deleted, false),
-					),
-				)
-				.orderBy(desc(problems.date_modified))
-				.$dynamic(),
-		)(input);
+					// If Problem Author | Class is deleted, consider Problem as deleted
+					eq(problems.is_deleted, false),
+					eq(users.is_deleted, false),
+					eq(classes.is_deleted, false),
+
+					// Apply completion status filter
+					completionFilter,
+				),
+			)
+			.groupBy(
+				problems.id,
+				problems.name,
+				problems.description,
+				problems.deadline,
+				problems.class_id,
+				problems.author_id,
+				problems.date_created,
+				problems.date_modified,
+				problems.is_deleted,
+				users.id,
+				users.email,
+				users.first_name,
+				users.last_name,
+				users.role,
+				users.date_created,
+				users.date_modified,
+				users.is_deleted,
+				classes.id,
+				classes.name,
+				classes.date_created,
+				classes.date_modified,
+				classes.is_deleted,
+			)
+			.orderBy(desc(problems.date_modified))
+			.$dynamic();
+
+		const records = await pagination(() => query)(input);
 
 		return records;
 	},

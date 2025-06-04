@@ -15,17 +15,17 @@ export const deadlineStatuses = [
 
 export const completionStatuses = [
 	{
-		value: "Not Started",
+		value: "not-started",
 		label: "Not Started",
 		icon: Circle,
 	},
 	{
-		value: "Partially Completed",
+		value: "partially-completed",
 		label: "Partially Completed",
 		icon: Timer,
 	},
 	{
-		value: "All Completed",
+		value: "all-completed",
 		label: "All Completed",
 		icon: CheckCircle,
 	},
