@@ -160,6 +160,7 @@ export const add_users = authed({
 	}),
 
 	async fn({ ctx, input }) {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { user } = ctx;
 
 		// Check if User has access to Class
