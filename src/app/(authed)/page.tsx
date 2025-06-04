@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-/* eslint-disable @typescript-eslint/require-await */
 import { useAuthStore } from "@/lib/auth/store";
 import { trpc } from "@/lib/trpc";
 import { AccountItem, ProblemItem, ProblemItemWithProgress } from "@/lib/types";
