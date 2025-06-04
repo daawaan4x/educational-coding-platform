@@ -20,6 +20,7 @@ function AuthedLayoutInner({ children, Loading }: { children: React.ReactNode; L
 	// Set user in store when userQuery succeeds
 	useEffect(() => {
 		if (userQuery.data) {
+			console.log("Setting user in store:", userQuery.data);
 			setUser(userQuery.data);
 		}
 	}, [userQuery.data, setUser]);

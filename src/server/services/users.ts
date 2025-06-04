@@ -40,7 +40,7 @@ export const find = authed({
 export const list = authed({
 	require: ["users:read"],
 	input: z.object({
-		size: z.int().gte(1).lte(50).default(1),
+		size: z.int().gte(1).lte(50).default(50),
 		page: z.int().gte(1).default(1),
 		class_id: ClassSchema.Select.shape.id.optional(),
 	}),
