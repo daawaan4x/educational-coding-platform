@@ -2,7 +2,7 @@ import z from "zod/v4";
 import { solutions } from "../../schema";
 import { createInsertSchema, createSelectSchema, metafields } from "../utils";
 
-export const Select = createSelectSchema(solutions);
+export const Select = createSelectSchema(solutions, { id: z.guid() });
 export type Select = z.output<typeof Select>;
 
 export const Insert = createInsertSchema(solutions).omit({

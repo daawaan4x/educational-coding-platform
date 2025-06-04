@@ -9,7 +9,7 @@ export const internals = {
 
 export const UserColumns = pick(users, [...keysof(metafields), "email", "last_name", "first_name", "role"]);
 
-export const Select = createSelectSchema(users).omit(internals);
+export const Select = createSelectSchema(users, { id: z.guid() }).omit(internals);
 export type Select = z.output<typeof Select>;
 
 export const Insert = createInsertSchema(users)

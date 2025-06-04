@@ -21,6 +21,11 @@ declare global {
 			 */
 			ADMIN_EMAIL: string;
 			ADMIN_PASSWORD: string;
+
+			/**
+			 * **FOR DEVELOPMENT ONLY**: Allows logging-in to any user using only email without password
+			 */
+			SKIP_AUTH: boolean;
 		}
 	}
 }

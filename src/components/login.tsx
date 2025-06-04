@@ -82,7 +82,7 @@ const Login = ({ heading = "Login", subheading = "Welcome back", loginText = "Lo
 								placeholder="Enter your password"
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
-								required
+								required={process.env.NODE_ENV != "development" && process.env.SKIP_AUTH}
 							/>
 						</div>
 						<Button type="submit" className="mt-2 w-full" disabled={isLoading}>

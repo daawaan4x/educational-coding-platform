@@ -161,7 +161,7 @@ export async function requireClass(user: UserContext, id: ClassSchema.Select["id
 }
 
 export async function authenticate(email: string, password: string) {
-	const error = new Error("Incorrect Username or Password.");
+	const error = new Error("Incorrect Email or Password.");
 
 	// Get User
 	const query_user = db
@@ -171,6 +171,8 @@ export async function authenticate(email: string, password: string) {
 
 	const [record] = await query_user;
 	if (!record) throw error;
+
+	if (process.env.NODE_ENV == "development" && process.env.SKIP_AUTH) return UserSchema.Select.parse(record);
 
 	const match = await verifyPassword(password, record.password_hash ?? "");
 	if (!match) throw error;
