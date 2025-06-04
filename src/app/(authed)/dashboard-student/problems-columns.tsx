@@ -45,7 +45,7 @@ export const problemColumns: ColumnDef<ProblemItem>[] = [
 		accessorFn: (row) => {
 			const deadline = row.deadline;
 			const now = new Date();
-			return deadline <= now ? "Overdue" : "Due Soon";
+			return deadline <= now ? "overdue" : "due-soon";
 		},
 		cell: ({ row }) => {
 			const { deadline } = row.original;
