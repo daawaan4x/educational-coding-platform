@@ -127,7 +127,11 @@ export function DataTable<TData, TValue>({
 		...(manualPagination && {
 			manualPagination: true,
 			pageCount: pageCount ?? -1,
-			onPaginationChange: (updater: any) => {
+			onPaginationChange: (
+				updater:
+					| ((old: { pageIndex: number; pageSize: number }) => { pageIndex: number; pageSize: number })
+					| { pageIndex: number; pageSize: number },
+			) => {
 				const currentPagination = pagination;
 				const newPagination = typeof updater === "function" ? updater(currentPagination) : updater;
 				onPaginationChange?.(newPagination.pageIndex, newPagination.pageSize);

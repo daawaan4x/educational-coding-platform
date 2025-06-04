@@ -88,7 +88,7 @@ export default function AdminDashboardWrapper() {
 				dateCreated: user.date_created,
 				dateModified: user.date_modified,
 			};
-		}) || [];
+		}) ?? [];
 
 	// Calculate total page count from pagination meta
 	const pageCount = usersData?.meta ? usersData.meta.total_pages : -1;
