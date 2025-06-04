@@ -192,6 +192,14 @@ export default function AdminDashboardWrapper() {
 		);
 	}
 
+	if (isLoading) {
+		return (
+			<div className="flex h-full w-full items-center justify-center">
+				<BanterLoad />
+			</div>
+		);
+	}
+
 	return (
 		<div
 			className={cn("align-items mt-3 flex w-full flex-col justify-center overflow-hidden px-8 pb-8", {
@@ -406,25 +414,19 @@ export default function AdminDashboardWrapper() {
 				</Form>
 			</div>
 
-			{isLoading ? (
-				<div className="flex h-6/10 w-full items-center justify-center">
-					<BanterLoad />
-				</div>
-			) : (
-				<DataTable
-					columns={accountColumns}
-					data={accounts}
-					filterColumn="lastName"
-					notVisibleColumns={["dateCreated", "dateModified", "classes"]}
-					enablePagination={true}
-					manualPagination={true}
-					pageCount={pageCount}
-					pageIndex={pageIndex}
-					pageSize={pageSize}
-					onPaginationChange={handlePaginationChange}
-					defaultPageSize={pageSize}
-				/>
-			)}
+			<DataTable
+				columns={accountColumns}
+				data={accounts}
+				filterColumn="lastName"
+				notVisibleColumns={["dateCreated", "dateModified", "classes"]}
+				enablePagination={true}
+				manualPagination={true}
+				pageCount={pageCount}
+				pageIndex={pageIndex}
+				pageSize={pageSize}
+				onPaginationChange={handlePaginationChange}
+				defaultPageSize={pageSize}
+			/>
 		</div>
 	);
 }
