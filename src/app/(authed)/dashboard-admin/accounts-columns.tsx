@@ -353,19 +353,19 @@ const editAccountSchema = z.object({
 export const accountColumns: ColumnDef<AccountItem>[] = [
 	{
 		accessorKey: "lastName",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Last Name" />,
+		header: "Last Name",
 	},
 	{
 		accessorKey: "firstName",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="First Name" />,
+		header: "First Name",
 	},
 	{
 		accessorKey: "email",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
+		header: "Email",
 	},
 	{
 		accessorKey: "dateCreated",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Date Created" />,
+		header: "Date Created",
 		cell: ({ row }) => {
 			const { dateCreated: date } = row.original;
 			return format(date, "MMM d, yyyy h:mm a");
@@ -373,7 +373,7 @@ export const accountColumns: ColumnDef<AccountItem>[] = [
 	},
 	{
 		accessorKey: "dateModified",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Date Modified" />,
+		header: "Date Modified",
 		cell: ({ row }) => {
 			const { dateModified: date } = row.original;
 			return format(date, "MMM d, yyyy h:mm a");
