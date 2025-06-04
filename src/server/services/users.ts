@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { db } from "@/db";
 import { classes, users, users_to_classes } from "@/db/schema";
 import { ClassSchema, UserSchema } from "@/db/validation";
@@ -71,7 +70,7 @@ export const list = authed({
 								)
 							: undefined,
 
-						input.roles && input.roles.length ? inArray(users.role, input.roles) : undefined,
+						input.roles?.length ? inArray(users.role, input.roles) : undefined,
 					),
 				)
 				.orderBy(users.id) // order-by is required by distinct-on

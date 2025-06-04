@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/rules-of-hooks */
 "use client";
 
@@ -197,8 +196,8 @@ export const classColumns: ColumnDef<ClassItem>[] = [
 								<AlertDialogHeader>
 									<AlertDialogTitle>Are you sure you want to delete this class?</AlertDialogTitle>
 									<AlertDialogDescription>
-										This action cannot be undone. This will permanently delete the class "{classItem.name}" and remove
-										it from our servers.
+										This action cannot be undone. This will permanently delete the class &quot;{classItem.name}&quot;
+										and remove it from our servers.
 									</AlertDialogDescription>
 								</AlertDialogHeader>
 								<AlertDialogFooter>

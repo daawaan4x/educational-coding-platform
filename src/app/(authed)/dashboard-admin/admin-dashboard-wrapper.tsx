@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-misused-promises */
 "use client";
 
 // We need to use this wrapper because the width of the content must vary
@@ -147,8 +146,8 @@ export default function AdminDashboardWrapper() {
 	// Use the query result
 	const usersData = listQuery.data;
 	const classesData = classesQuery.data;
-	const isLoading = listQuery.isLoading || classesQuery.isLoading;
-	const error = listQuery.error || classesQuery.error;
+	const isLoading = listQuery.isLoading ?? classesQuery.isLoading;
+	const error = listQuery.error ?? classesQuery.error;
 
 	// Form definition with react-hook-form
 	const form = useForm<z.infer<typeof addAccountSchema>>({

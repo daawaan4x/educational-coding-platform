@@ -23,8 +23,8 @@ import {
 	useReactTable,
 	VisibilityState,
 } from "@tanstack/react-table";
-import { LucideIcon, X } from "lucide-react";
-import { ComponentType, JSX, useState } from "react";
+import { X } from "lucide-react";
+import { ComponentType, useState } from "react";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { DataTablePagination } from "./data-table-pagination";
 
