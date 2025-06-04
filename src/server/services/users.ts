@@ -170,9 +170,7 @@ export async function authenticate(email: string, password: string) {
 		.where(and(eq(users.email, email), eq(users.is_deleted, false)));
 
 	const [record] = await query_user;
-	if (!record) {
-		if (process.env.NODE_ENV == "development") throw new Error("No Email Found");
-	}
+	if (!record) throw error;
 
 	if (process.env.NODE_ENV == "development" && process.env.SKIP_AUTH) return UserSchema.Select.parse(record);
 
