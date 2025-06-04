@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { db } from "@/db";
 import { classes, users, users_to_classes } from "@/db/schema";
 import { ClassSchema, UserSchema } from "@/db/validation";
 import { UserColumns } from "@/db/validation/schemas/user";
 import { pagination } from "@/server/lib/pagination";
 import { TRPCError } from "@trpc/server";
-import { and, eq, getTableColumns, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, ilike, inArray, or, sql } from "drizzle-orm";
 import { z } from "zod/v4";
 import { t } from "../trpc";
 import { authed, authedProcedure } from "../trpc/auth";
@@ -43,10 +44,34 @@ export const list = authed({
 		size: z.int().gte(1).lte(50).default(50),
 		page: z.int().gte(1).default(1),
 		class_id: ClassSchema.Select.shape.id.optional(),
+		search_key: z.string().optional(),
+		search_type: z.enum(["firstName", "lastName", "email"]).optional(),
+		roles: z.array(z.enum(["student", "teacher", "admin"])).optional(),
 	}),
 
 	async fn({ input }) {
-		// Get list of User (Optional: for a Class)
+		// Build search condition if search_key is provided
+		let searchCondition: ReturnType<typeof ilike> | undefined;
+		if (input.search_key && input.search_key.trim() !== "" && input.search_type) {
+			switch (input.search_type) {
+				case "firstName":
+					searchCondition = ilike(users.first_name, `%${input.search_key}%`);
+					break;
+				case "lastName":
+					searchCondition = ilike(users.last_name, `%${input.search_key}%`);
+					break;
+				case "email":
+					searchCondition = ilike(users.email, `%${input.search_key}%`);
+					break;
+				default:
+					throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid search type" });
+			}
+		}
+
+		// Build role filter condition
+		const roleCondition = input.roles && input.roles.length > 0 ? inArray(users.role, input.roles) : undefined;
+
+		// Get list of User (with optional search and role filters)
 		const query_users = () =>
 			db
 				.selectDistinctOn([users.id], UserColumns)
@@ -58,6 +83,8 @@ export const list = authed({
 						eq(users.is_deleted, false),
 						input.class_id ? eq(users_to_classes.class_id, input.class_id) : undefined,
 						input.class_id ? eq(classes.is_deleted, false) : undefined,
+						searchCondition,
+						roleCondition,
 					),
 				)
 				.orderBy(users.id) // order-by is required by distinct-on
