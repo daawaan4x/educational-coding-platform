@@ -147,7 +147,7 @@ export const accountColumns: ColumnDef<AccountItem>[] = [
 							setEditDialogOpen(false);
 							setDropdownOpen(false);
 							// Refresh the data
-							utils.users.list.invalidate();
+							void utils.users.list.invalidate();
 						},
 						onError: (error) => {
 							toast.error("Failed to update account", { id: "update-account" });
