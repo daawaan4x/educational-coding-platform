@@ -1,4 +1,4 @@
-export type UserRoleString = "admin" | "teacher" | "student";
+export type UserRoleString = "admin" | "teacher" | "student" | null;
 
 export interface AccountItem {
 	id: string;
@@ -8,7 +8,7 @@ export interface AccountItem {
 	dateCreated: Date;
 	dateModified: Date;
 	roles: UserRoleString[];
-	classes?: string[];
+	// classes?: string[];
 }
 
 export interface ProblemItem {

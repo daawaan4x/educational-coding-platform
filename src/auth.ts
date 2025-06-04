@@ -55,3 +55,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 		strategy: "jwt",
 	},
 });
+
+// Make sure to export getServerAuthSession for server components
+export const getServerAuthSession = () => auth();

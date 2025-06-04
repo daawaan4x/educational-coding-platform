@@ -313,7 +313,7 @@ export const participantsColumns: ColumnDef<ParticipantItem>[] = [
 					<span className="flex flex-row flex-wrap gap-2">
 						{roles.map((role) => (
 							<Badge variant="outline" key={role}>
-								{rolesInfo.find((_) => _.value === role)?.icon} {capitalizeFirstLetter(role)}
+								{rolesInfo.find((_) => _.value === role)?.icon} {role && capitalizeFirstLetter(role)}
 							</Badge>
 						))}
 					</span>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { Geist, Geist_Mono } from "next/font/google";
@@ -49,11 +50,12 @@ export default function Page({
 }>) {
 	return (
 		<html lang="en">
-			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+			<body
+				className={`${geistSans.variable} ${geistMono.variable} bg-background text-foreground relative h-screen antialiased`}>
 				<TRPCProvider>
 					<AuthedLayout
 						Loading={
-							<div className="flex h-full w-full items-center justify-center">
+							<div className="absolute inset-0 flex items-center justify-center">
 								<BanterLoad />
 							</div>
 						}>

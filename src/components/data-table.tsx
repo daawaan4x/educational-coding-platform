@@ -52,6 +52,13 @@ interface DataTableProps<TData, TValue> {
 	showRowDialog?: boolean;
 	dialogContent?: (row: TData) => React.ReactNode;
 	showColumnViewControl?: boolean;
+	// Server-side pagination props
+	manualPagination?: boolean;
+	pageCount?: number;
+	onPaginationChange?: (pageIndex: number, pageSize: number) => void;
+	// Add these props for controlled pagination
+	pageIndex?: number;
+	pageSize?: number;
 }
 
 // `filterColumn` is for filtering a specific column with a text input.
@@ -69,12 +76,28 @@ export function DataTable<TData, TValue>({
 	showRowDialog = false,
 	dialogContent,
 	showColumnViewControl = true,
+	manualPagination = false,
+	pageCount,
+	onPaginationChange,
+	pageIndex: controlledPageIndex,
+	pageSize: controlledPageSize,
 }: DataTableProps<TData, TValue>) {
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(listToFalseObject(notVisibleColumns));
 	const [selectedRow, setSelectedRow] = useState<TData | null>(null);
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+	// Use controlled pagination state when manual pagination is enabled
+	const pagination = manualPagination
+		? {
+				pageIndex: controlledPageIndex ?? 0,
+				pageSize: controlledPageSize ?? defaultPageSize ?? 10,
+			}
+		: {
+				pageIndex: 0,
+				pageSize: defaultPageSize ?? 10,
+			};
 
 	const handleRowClick = (row: TData) => {
 		if (showRowDialog) {
@@ -98,8 +121,22 @@ export function DataTable<TData, TValue>({
 			sorting,
 			columnFilters,
 			columnVisibility,
+			pagination,
 		},
-		...(enablePagination && { getPaginationRowModel: getPaginationRowModel() }),
+		...(enablePagination && !manualPagination && { getPaginationRowModel: getPaginationRowModel() }),
+		...(manualPagination && {
+			manualPagination: true,
+			pageCount: pageCount ?? -1,
+			onPaginationChange: (
+				updater:
+					| ((old: { pageIndex: number; pageSize: number }) => { pageIndex: number; pageSize: number })
+					| { pageIndex: number; pageSize: number },
+			) => {
+				const currentPagination = pagination;
+				const newPagination = typeof updater === "function" ? updater(currentPagination) : updater;
+				onPaginationChange?.(newPagination.pageIndex, newPagination.pageSize);
+			},
+		}),
 	};
 
 	const table = useReactTable(reactTableOptions);
