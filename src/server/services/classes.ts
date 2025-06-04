@@ -3,7 +3,7 @@ import { classes, users_to_classes } from "@/db/schema";
 import { ClassSchema } from "@/db/validation";
 import { pagination } from "@/server/lib/pagination";
 import { TRPCError } from "@trpc/server";
-import { and, eq, getTableColumns, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, ilike, or, sql } from "drizzle-orm";
 import { z } from "zod/v4";
 import { t } from "../trpc";
 import { authed, authedProcedure } from "../trpc/auth";
@@ -42,29 +42,45 @@ export const find = authed({
 export const list = authed({
 	require: ["classes:read"],
 	input: z.object({
-		size: z.int().gte(1).lte(50).default(1),
+		size: z.int().gte(1).lte(50).default(50),
 		page: z.int().gte(1).default(1),
+
+		search: z.string().optional(),
 	}),
 
 	async fn({ ctx, input }) {
 		const { user } = ctx;
 
-		// Get list of Classes where User has access
+		// For admin users, show all classes directly
+		if (user.is("admin")) {
+			const records = await pagination(() =>
+				db
+					.select({ ...getTableColumns(classes) })
+					.from(classes)
+					.where(
+						and(eq(classes.is_deleted, false), input.search ? or(ilike(classes.name, `%${input.search}%`)) : undefined),
+					)
+					.orderBy(classes.id)
+					.$dynamic(),
+			)(input);
+
+			return records;
+		}
+
+		// For non-admin users, only show classes they have access to
 		const records = await pagination(() =>
 			db
-				.select({
-					...getTableColumns(classes),
-				})
+				.selectDistinctOn([classes.id], { ...getTableColumns(classes) })
 				.from(users_to_classes)
 				.innerJoin(classes, eq(users_to_classes.class_id, classes.id))
 				.where(
 					and(
 						eq(classes.is_deleted, false),
-
-						// Remove filter if User is Admin
-						user.is("admin") ? undefined : eq(users_to_classes.user_id, user.id),
+						input.search ? or(ilike(classes.name, `%${input.search}%`)) : undefined,
+						eq(users_to_classes.user_id, user.id),
 					),
 				)
+				.orderBy(classes.id)
 				.$dynamic(),
 		)(input);
 

@@ -79,3 +79,10 @@ export interface SolutionsItem {
 	attempts: number;
 	score: number;
 }
+
+export interface ClassItem {
+	id: string;
+	name: string;
+	dateCreated: Date;
+	dateModified: Date;
+}

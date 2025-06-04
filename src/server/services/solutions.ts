@@ -116,7 +116,7 @@ export const list = authed({
 	input: z.object({
 		problem_id: ProblemSchema.Select.shape.id.optional(),
 		author_id: UserSchema.Select.shape.id.optional(),
-		size: z.int().gte(1).lte(50).default(1),
+		size: z.int().gte(1).lte(50).default(50),
 		page: z.int().gte(1).default(1),
 	}),
 
@@ -162,7 +162,7 @@ export const list_latest = authed({
 	require: ["problems.solutions:read", "solutions:read"],
 	input: z.object({
 		problem_id: ProblemSchema.Select.shape.id,
-		size: z.int().gte(1).lte(50).default(1),
+		size: z.int().gte(1).lte(50).default(50),
 		page: z.int().gte(1).default(1),
 	}),
 

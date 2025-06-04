@@ -62,6 +62,8 @@ interface DataTableProps<TData, TValue> {
 	onFilterChange?: (filters: ColumnFiltersState) => void;
 	onSearchChange?: (search: string) => void;
 	filterSearchPlaceholder?: string;
+	enableSelection?: boolean;
+	onSelectionChange?: (selectedRows: TData[]) => void;
 }
 
 // `filterColumn` is for filtering a specific column with a text input.
@@ -87,12 +89,15 @@ export function DataTable<TData, TValue>({
 	manualFiltering = false,
 	onFilterChange,
 	onSearchChange,
-	filterSearchPlaceholder,
+	filterSearchPlaceholder = "Search...",
+	enableSelection = false,
+	onSelectionChange,
 }: DataTableProps<TData, TValue>) {
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(listToFalseObject(notVisibleColumns));
 	const [selectedRow, setSelectedRow] = useState<TData | null>(null);
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [rowSelection, setRowSelection] = useState({});
 
 	// Use controlled pagination state when manual pagination is enabled
 	const pagination = manualPagination
@@ -118,11 +123,22 @@ export function DataTable<TData, TValue>({
 		columns,
 		getCoreRowModel: getCoreRowModel(),
 		onColumnVisibilityChange: setColumnVisibility,
-		enableMultiRowSelection: false,
+		onRowSelectionChange: (newRowSelection) => {
+			const updatedSelection = typeof newRowSelection === "function" ? newRowSelection(rowSelection) : newRowSelection;
+			setRowSelection(updatedSelection);
+
+			if (enableSelection && onSelectionChange) {
+				// Get selected rows using the table instance
+				const selectedRowIndices = Object.keys(updatedSelection).filter((key) => updatedSelection[key]);
+				const selectedRows = selectedRowIndices.map((index) => data[parseInt(index)]);
+				onSelectionChange(selectedRows);
+			}
+		},
 		state: {
 			columnFilters,
 			columnVisibility,
 			pagination,
+			rowSelection: enableSelection ? rowSelection : {},
 		},
 		...(enablePagination && !manualPagination && { getPaginationRowModel: getPaginationRowModel() }),
 		...(manualPagination && {
@@ -176,7 +192,7 @@ export function DataTable<TData, TValue>({
 
 						{onSearchChange ? (
 							<Input
-								placeholder={filterSearchPlaceholder || "Search ..."}
+								placeholder={filterSearchPlaceholder}
 								onChange={(event) => onSearchChange(event.target.value)}
 								className="max-w-sm"
 							/>
@@ -297,6 +313,13 @@ export function DataTable<TData, TValue>({
 						{selectedRow && dialogContent?.(selectedRow)}
 					</DialogContent>
 				</Dialog>
+			)}
+
+			{enableSelection && (
+				<div className="text-muted-foreground flex-1 text-center text-sm">
+					{table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s)
+					selected.
+				</div>
 			)}
 		</div>
 	);
