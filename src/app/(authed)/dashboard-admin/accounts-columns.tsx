@@ -110,12 +110,14 @@ export const accountColumns: ColumnDef<AccountItem>[] = [
 		cell: ({ row }) => {
 			const account = row.original;
 
-			// Add delete user mutation
+			// Add update and delete user mutations
+			const updateUser = trpc.users.update.useMutation();
 			const deleteUser = trpc.users.delete.useMutation();
 			const utils = trpc.useUtils();
 
-			// Add dropdown state control
+			// Add dropdown and dialog state control
 			const [dropdownOpen, setDropdownOpen] = useState(false);
+			const [editDialogOpen, setEditDialogOpen] = useState(false);
 
 			// Add form hook for edit dialog
 			const form = useForm<z.infer<typeof editAccountSchema>>({
@@ -128,8 +130,31 @@ export const accountColumns: ColumnDef<AccountItem>[] = [
 			});
 
 			function onSubmit(values: z.infer<typeof editAccountSchema>) {
-				console.log(values);
-				// Handle form submission - to be implemented
+				toast.loading("Updating account...", { id: "update-account" });
+
+				updateUser.mutate(
+					{
+						id: account.id,
+						data: {
+							first_name: values.firstName,
+							last_name: values.lastName,
+							email: values.email,
+						},
+					},
+					{
+						onSuccess: () => {
+							toast.success("Account updated successfully", { id: "update-account" });
+							setEditDialogOpen(false);
+							setDropdownOpen(false);
+							// Refresh the data
+							utils.users.list.invalidate();
+						},
+						onError: (error) => {
+							toast.error("Failed to update account", { id: "update-account" });
+							console.error("Error updating user:", error);
+						},
+					},
+				);
 			}
 
 			function handleDelete() {
@@ -163,7 +188,7 @@ export const accountColumns: ColumnDef<AccountItem>[] = [
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
-						<Dialog>
+						<Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
 							<DialogTrigger asChild>
 								<DropdownMenuItem onSelect={(event) => event.preventDefault()}>Edit</DropdownMenuItem>
 							</DialogTrigger>
@@ -171,16 +196,11 @@ export const accountColumns: ColumnDef<AccountItem>[] = [
 								<DialogHeader>
 									<DialogTitle>Edit account</DialogTitle>
 									<DialogDescription>
-										Make changes to your account here. Click save when you&apos;re done.
+										Make changes to the account here. Click save when you&apos;re done.
 									</DialogDescription>
 								</DialogHeader>
 								<Form {...form}>
-									<form
-										onSubmit={(e) => {
-											e.preventDefault();
-											void form.handleSubmit(onSubmit)(e);
-										}}
-										className="grid gap-4 py-4">
+									<form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
 										<FormField
 											control={form.control}
 											name="firstName"
@@ -221,7 +241,9 @@ export const accountColumns: ColumnDef<AccountItem>[] = [
 											)}
 										/>
 										<DialogFooter>
-											<Button type="submit">Save changes</Button>
+											<Button type="submit" disabled={updateUser.isPending}>
+												{updateUser.isPending ? "Saving..." : "Save changes"}
+											</Button>
 										</DialogFooter>
 									</form>
 								</Form>
