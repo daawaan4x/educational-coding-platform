@@ -200,7 +200,12 @@ export const accountColumns: ColumnDef<AccountItem>[] = [
 									</DialogDescription>
 								</DialogHeader>
 								<Form {...form}>
-									<form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
+									<form
+										onSubmit={(e) => {
+											e.preventDefault();
+											void form.handleSubmit(onSubmit)(e);
+										}}
+										className="grid gap-4 py-4">
 										<FormField
 											control={form.control}
 											name="firstName"
