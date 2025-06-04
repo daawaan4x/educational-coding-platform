@@ -19,8 +19,7 @@ import {
 	getCoreRowModel,
 	getFilteredRowModel,
 	getPaginationRowModel,
-	getSortedRowModel,
-	SortingState,
+	TableOptions,
 	useReactTable,
 	VisibilityState,
 } from "@tanstack/react-table";
@@ -29,15 +28,15 @@ import { useState } from "react";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { DataTablePagination } from "./data-table-pagination";
 
-interface FilterOptionItem {
-	value: string;
-	label: string;
-	icon: LucideIcon;
+export interface FilterOptionItem {
+	readonly value: string;
+	readonly label: string;
+	readonly icon: LucideIcon;
 }
 
-interface Filter {
+export interface Filter {
 	column: string;
-	options: FilterOptionItem[];
+	options: readonly FilterOptionItem[];
 }
 
 interface DataTableProps<TData, TValue> {
@@ -59,6 +58,9 @@ interface DataTableProps<TData, TValue> {
 	// Add these props for controlled pagination
 	pageIndex?: number;
 	pageSize?: number;
+	manualFiltering?: boolean;
+	onFilterChange?: (filters: ColumnFiltersState) => void;
+	onSearchChange?: (search: string) => void;
 }
 
 // `filterColumn` is for filtering a specific column with a text input.
@@ -81,8 +83,10 @@ export function DataTable<TData, TValue>({
 	onPaginationChange,
 	pageIndex: controlledPageIndex,
 	pageSize: controlledPageSize,
+	manualFiltering = false,
+	onFilterChange,
+	onSearchChange,
 }: DataTableProps<TData, TValue>) {
-	const [sorting, setSorting] = useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(listToFalseObject(notVisibleColumns));
 	const [selectedRow, setSelectedRow] = useState<TData | null>(null);
@@ -107,18 +111,13 @@ export function DataTable<TData, TValue>({
 		onRowClick?.(row);
 	};
 
-	const reactTableOptions = {
+	const reactTableOptions: TableOptions<TData> = {
 		data,
 		columns,
 		getCoreRowModel: getCoreRowModel(),
-		onSortingChange: setSorting,
-		getSortedRowModel: getSortedRowModel(),
-		onColumnFiltersChange: setColumnFilters,
-		getFilteredRowModel: getFilteredRowModel(),
 		onColumnVisibilityChange: setColumnVisibility,
 		enableMultiRowSelection: false,
 		state: {
-			sorting,
 			columnFilters,
 			columnVisibility,
 			pagination,
@@ -137,6 +136,19 @@ export function DataTable<TData, TValue>({
 				onPaginationChange?.(newPagination.pageIndex, newPagination.pageSize);
 			},
 		}),
+		...(manualFiltering
+			? {
+					manualFiltering: true,
+					onColumnFiltersChange: (updater) => {
+						const filters = typeof updater == "function" ? updater(columnFilters) : updater;
+						setColumnFilters(filters);
+						onFilterChange?.(filters);
+					},
+				}
+			: {
+					onColumnFiltersChange: setColumnFilters,
+					getFilteredRowModel: getFilteredRowModel(),
+				}),
 	};
 
 	const table = useReactTable(reactTableOptions);
@@ -146,7 +158,7 @@ export function DataTable<TData, TValue>({
 
 	return (
 		<div className="max-w-full overflow-auto">
-			{(filterColumn ?? filters ?? showColumnViewControl) && (
+			{(filterColumn ?? filters ?? showColumnViewControl ?? onSearchChange) && (
 				<div className="flex items-center justify-between gap-3 py-4">
 					<div className="flex flex-1 flex-row flex-wrap items-center gap-2">
 						{filterColumn ? (
@@ -159,6 +171,17 @@ export function DataTable<TData, TValue>({
 						) : (
 							""
 						)}
+
+						{onSearchChange ? (
+							<Input
+								placeholder={"Search ..."}
+								onChange={(event) => onSearchChange(event.target.value)}
+								className="max-w-sm"
+							/>
+						) : (
+							""
+						)}
+
 						{filters ? (
 							<div
 								className={cn("flex flex-1 flex-row flex-wrap items-center gap-2 sm:flex-nowrap", {
@@ -172,7 +195,7 @@ export function DataTable<TData, TValue>({
 											key={filter.column}
 											column={table.getColumn(filter.column)}
 											title={camelToCapitalizedWords(filter.column)}
-											options={filter.options}
+											options={filter.options as unknown as FilterOptionItem[]}
 										/>
 									);
 								})}
