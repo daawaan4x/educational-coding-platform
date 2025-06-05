@@ -262,7 +262,7 @@ export default function AdminDashboardWrapper() {
 		})) ?? [];
 
 	// Calculate total page count from pagination meta
-	const pageCount = usersData?.meta ? usersData.meta.total_pages : -1;
+	const pageCount = usersData?.meta ? usersData.meta.total_pages : undefined;
 
 	console.log("Current pagination state:", { pageIndex, pageSize, pageCount, hasData: !!usersData });
 

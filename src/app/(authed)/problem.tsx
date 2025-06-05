@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 "use client";
 
@@ -16,20 +15,32 @@ import CodeEditor from "@/components/code-editor";
 import { DescriptionEditor } from "@/components/problem/description-editor";
 import { StudentSubmissionsView } from "@/components/problem/tabs/student-submissions-view";
 import { TeacherSubmissionsView } from "@/components/problem/tabs/teacher-submissions-view";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSubmissions } from "@/hooks/useSubmissions";
 import { useAuth } from "@/lib/auth";
-import { SolutionItem, SolutionsItem } from "@/lib/types";
+import { trpc } from "@/lib/trpc";
+import { SolutionItem } from "@/lib/types";
 import { CodeXml, FolderClock, NotepadText, Play, Save, Terminal, Upload } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
 import type { Delta } from "quill";
+import { toast } from "sonner";
 import {
 	studentOwnSolutionsColumns,
-	studentSolutions,
 	studentSolutionsColumns,
-	studentsSolutions,
 	studentsSolutionsColumns,
 } from "./problems/add/solutions-columns";
 
@@ -49,6 +60,13 @@ export default function Problem({
 	const user = useAuth();
 	const role = user.role;
 
+	const router = useRouter();
+	const params = useParams();
+	const trpcUtils = trpc.useUtils();
+
+	// Get problemId from prop or route param
+	const effectiveProblemId = problemId ?? (params?.problemId as string | undefined);
+
 	const { state, isMobile } = useSidebar();
 	const [tabValue, setTabValue] = useState("description");
 	const [outputTabValue, setOutputTabValue] = useState("output");
@@ -64,10 +82,52 @@ export default function Problem({
 	// Manage maxScore state in parent
 	const [maxScore, setMaxScore] = useState<number>(0);
 
+	// Manage selectedClassId state in parent
+	const [selectedClassId, setSelectedClassId] = useState<string | undefined>();
+
+	// Add deadline state management
+	const [deadline, setDeadline] = useState<Date | undefined>();
+	const [deadlineTime, setDeadlineTime] = useState<string>("23:59");
+
 	const isFirstRender = useRef(true);
 
 	// Use submissions hook
-	const submissions = useSubmissions(role === "teacher" || role === "student" ? role : "student");
+	const submissions = useSubmissions();
+
+	const createSolution = trpc.solutions.create.useMutation({
+		onSuccess: () => {
+			toast.success("Solution created successfully!");
+			// Invalidate queries to refresh data
+			trpcUtils.solutions.invalidate();
+		},
+		onError: (error) => {
+			toast.error(`Failed to submit solution`);
+			console.error("Error creating solution:", error);
+		},
+	});
+
+	const handleSubmitCode = async () => {
+		if (!effectiveProblemId) {
+			toast.error("Failed to submit solution");
+			console.error("Problem ID is not defined");
+			return;
+		}
+
+		try {
+			await createSolution.mutateAsync({
+				data: {
+					problem_id: effectiveProblemId,
+					code: editorCode,
+					status: "pending",
+					score: 0, // Default score
+					submitted: true,
+				},
+			});
+		} catch (error) {
+			toast.error(`Failed to submit solution`);
+			console.error("Error submitting solution:", error);
+		}
+	};
 
 	// Functions to dynamically control code editor
 	const setCodeEditorContent = (code: string, language?: string) => {
@@ -87,50 +147,39 @@ export default function Problem({
 	}, []);
 
 	// Fetch students solutions when submissions tab is accessed
-	useEffect(() => {
-		if (role === "admin") return; // Admins do not have submissions view
+	// useEffect(() => {
+	// 	if (role === "admin") return; // Admins do not have submissions view
 
-		if (
-			tabValue === "submissions" &&
-			showSubmissions &&
-			role === "teacher" &&
-			!submissions.studentSolutionsView &&
-			submissions.studentsSolutionsData.length === 0
-		) {
-			submissions.fetchStudentsSolutions();
-		}
-		if (
-			tabValue === "submissions" &&
-			showSubmissions &&
-			role === "student" &&
-			submissions.studentSolutionsData.length === 0
-		) {
-			submissions.fetchStudentSolutions("current-student-id"); // Replace with actual current student ID
-		}
-	}, [tabValue, showSubmissions, submissions.studentSolutionsView, submissions.studentsSolutionsData.length]);
+	// 	if (
+	// 		tabValue === "submissions" &&
+	// 		showSubmissions &&
+	// 		role === "teacher" &&
+	// 		!submissions.studentSolutionsView &&
+	// 		submissions.studentsSolutionsData.length === 0
+	// 	) {
+	// 		submissions.fetchStudentsSolutions();
+	// 	}
+	// 	if (
+	// 		tabValue === "submissions" &&
+	// 		showSubmissions &&
+	// 		role === "student" &&
+	// 		submissions.studentSolutionsData.length === 0
+	// 	) {
+	// 		submissions.fetchStudentSolutions("current-student-id"); // Replace with actual current student ID
+	// 	}
+	// }, [tabValue, showSubmissions, submissions.studentSolutionsView, submissions.studentsSolutionsData.length]);
 
 	// Fetch individual student solutions when viewing specific student
-	useEffect(() => {
-		if (role === "admin") return; // Admins do not have submissions view
-		if (
-			submissions.studentSolutionsView &&
-			submissions.selectedStudentID &&
-			submissions.studentSolutionsData.length === 0
-		) {
-			submissions.fetchStudentSolutions(submissions.selectedStudentID);
-		}
-	}, [submissions.studentSolutionsView, submissions.selectedStudentID, submissions.studentSolutionsData.length]);
-
-	const handleSave = (data: {
-		title: string;
-		// maxAttempts: number;
-		maxScore: number;
-		deadline: Date;
-		content: Delta;
-	}) => {
-		console.log("Saving problem data:", data);
-		// Here you would typically make an API call to save the data
-	};
+	// useEffect(() => {
+	// 	if (role === "admin") return; // Admins do not have submissions view
+	// 	if (
+	// 		submissions.studentSolutionsView &&
+	// 		submissions.selectedStudentID &&
+	// 		submissions.studentSolutionsData.length === 0
+	// 	) {
+	// 		submissions.fetchStudentSolutions(submissions.selectedStudentID);
+	// 	}
+	// }, [submissions.studentSolutionsView, submissions.selectedStudentID, submissions.studentSolutionsData.length]);
 
 	return (
 		<div
@@ -247,9 +296,15 @@ export default function Problem({
 						})}
 						id="editor-bounds">
 						<DescriptionEditor
+							selectedClassId={selectedClassId}
+							setSelectedClassId={setSelectedClassId}
 							problemId={problemId}
 							maxScore={maxScore}
 							setMaxScore={setMaxScore}
+							deadline={deadline}
+							setDeadline={setDeadline}
+							deadlineTime={deadlineTime}
+							setDeadlineTime={setDeadlineTime}
 							isFirstRender={isFirstRender}
 							descriptionReadonly={descriptionReadonly}
 							isLoading={isDescriptionLoading}
@@ -262,18 +317,12 @@ export default function Problem({
 						{/* Teacher View */}
 						{showSubmissions && role == "teacher" && (
 							<TeacherSubmissionsView
-								studentSolutionsView={submissions.studentSolutionsView}
-								selectedStudentInfo={submissions.selectedStudentInfo}
-								studentSolutionsData={submissions.studentSolutionsData}
-								studentsSolutionsData={submissions.studentsSolutionsData}
-								isLoadingStudentSolutions={submissions.isLoadingStudentSolutions}
-								isLoadingStudentsSolutions={submissions.isLoadingStudentsSolutions}
-								onStudentRowClick={submissions.handleStudentRowClick}
-								onBackToStudentsList={submissions.handleBackToStudentsList}
+								classId={selectedClassId}
+								submissions={submissions}
 								onCodeEditorUpdate={setCodeEditorContent}
-								onScoreUpdate={submissions.updateStudentScore}
 								maxScore={maxScore}
 								studentsSolutionsColumns={studentsSolutionsColumns}
+								problemId={problemId}
 							/>
 						)}
 
@@ -310,17 +359,44 @@ export default function Problem({
 						{/* Action Buttons */}
 						<div className="flex flex-row items-center gap-1">
 							{role === "student" && (
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<Button variant="secondary" className="w-fit" onClick={() => {}}>
-											<Upload />
-											<span className="sr-only">Submit Code</span>
-										</Button>
-									</TooltipTrigger>
-									<TooltipContent>
-										<p>Submit Code</p>
-									</TooltipContent>
-								</Tooltip>
+								<>
+									<Tooltip>
+										<AlertDialog>
+											<AlertDialogTrigger asChild>
+												<TooltipTrigger asChild>
+													<Button
+														variant="secondary"
+														className="w-fit"
+														disabled={createSolution.isPending || !effectiveProblemId}>
+														<Upload />
+														<span className="sr-only">Submit Code</span>
+													</Button>
+												</TooltipTrigger>
+											</AlertDialogTrigger>
+											<AlertDialogContent>
+												<AlertDialogHeader>
+													<AlertDialogTitle>Submit Solution</AlertDialogTitle>
+													<AlertDialogDescription>
+														Are you sure you want to submit your solution? This will be recorded as an official
+														submission.
+													</AlertDialogDescription>
+												</AlertDialogHeader>
+												<AlertDialogFooter>
+													<AlertDialogCancel>Cancel</AlertDialogCancel>
+													<AlertDialogAction
+														onClick={() => void handleSubmitCode()}
+														disabled={createSolution.isPending || !effectiveProblemId}>
+														{createSolution.isPending ? "Submitting..." : "Submit"}
+													</AlertDialogAction>
+												</AlertDialogFooter>
+											</AlertDialogContent>
+										</AlertDialog>
+
+										<TooltipContent>
+											<p>Submit Code</p>
+										</TooltipContent>
+									</Tooltip>
+								</>
 							)}
 							<Tooltip>
 								<TooltipTrigger asChild>
