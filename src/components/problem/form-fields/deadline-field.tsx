@@ -12,7 +12,6 @@ interface DeadlineFieldProps {
 	deadlineTime: string;
 	setDeadlineTime: (time: string) => void;
 	error: boolean;
-	touched?: boolean;
 	readonly?: boolean;
 }
 
@@ -22,11 +21,8 @@ export function DeadlineField({
 	deadlineTime,
 	setDeadlineTime,
 	error,
-	touched = false,
-	readonly = false,
+	readonly,
 }: DeadlineFieldProps) {
-	const shouldShowError = error && touched;
-
 	if (readonly) {
 		return (
 			<div className="flex items-center justify-between py-2">
@@ -40,18 +36,17 @@ export function DeadlineField({
 
 	return (
 		<div className="space-y-2">
-			<Label className="text-sm font-medium">Deadline</Label>
+			<Label>Deadline *</Label>
 			<div className="flex gap-2">
 				<Popover>
 					<PopoverTrigger asChild>
 						<Button
 							variant="outline"
-							className={cn("w-[200px] justify-start text-left font-normal", !deadline && "text-muted-foreground", {
-								"border-red-500": shouldShowError,
-							})}
-							disabled={readonly}>
+							className={cn("w-auto justify-start text-left font-normal", !deadline && "text-muted-foreground", {
+								"border-red-500": error,
+							})}>
 							<CalendarIcon className="mr-2 h-4 w-4" />
-							{deadline ? format(deadline, "PPP") : <span>Pick a date</span>}
+							{deadline ? format(deadline, "PPP") : "Pick a date"}
 						</Button>
 					</PopoverTrigger>
 					<PopoverContent className="w-auto p-0" align="start">
@@ -62,15 +57,11 @@ export function DeadlineField({
 					type="time"
 					value={deadlineTime}
 					onChange={(e) => setDeadlineTime(e.target.value)}
-					className={cn(
-						"placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex h-9 w-fit w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-						{ "border-red-500": shouldShowError },
-					)}
-					disabled={readonly}
+					className="placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex h-9 w-fit w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
 					required
 				/>
 			</div>
-			{shouldShowError && <p className="text-sm text-red-500">Deadline is required</p>}
+			{error && <p className="text-sm text-red-500">Date and time are required</p>}
 		</div>
 	);
 }

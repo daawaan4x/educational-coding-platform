@@ -2,28 +2,21 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ClassSelectorDialog } from "./class-selector-dialog";
 import { DeadlineField } from "./deadline-field";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { MaxAttemptsField } from "./max-attempts-field";
 import { MaxScoreField } from "./max-score-field";
 
 interface ValidationErrors {
 	title: boolean;
-	maxAttempts: boolean;
-	maxScore: boolean;
-	deadline: boolean;
-	classId: boolean;
-}
-
-interface TouchedState {
-	title: boolean;
-	maxAttempts: boolean;
+	// maxAttempts: boolean;
 	maxScore: boolean;
 	deadline: boolean;
 	classId: boolean;
 }
 
 interface ProblemFormFieldsProps {
-	maxAttempts: number;
-	setMaxAttempts: (attempts: number) => void;
+	// maxAttempts: number;
+	// setMaxAttempts: (attempts: number) => void;
 	maxScore: number;
 	setMaxScore: (score: number) => void;
 	deadline?: Date;
@@ -34,13 +27,12 @@ interface ProblemFormFieldsProps {
 	selectedClassName?: string;
 	onClassSelect: (classId: string, className: string) => void;
 	validationErrors: ValidationErrors;
-	touchedState: TouchedState;
 	readonly?: boolean;
 }
 
 export function ProblemFormFields({
-	maxAttempts,
-	setMaxAttempts,
+	// maxAttempts,
+	// setMaxAttempts,
 	maxScore,
 	setMaxScore,
 	deadline,
@@ -51,7 +43,6 @@ export function ProblemFormFields({
 	selectedClassName,
 	onClassSelect,
 	validationErrors,
-	touchedState,
 	readonly = false,
 }: ProblemFormFieldsProps) {
 	if (readonly) {
@@ -59,7 +50,7 @@ export function ProblemFormFields({
 			<>
 				<Separator className="mt-4 mb-1" />
 				<div className="mt-auto space-y-1">
-					<MaxAttemptsField value={maxAttempts} onChange={setMaxAttempts} error={false} readonly />
+					{/* <MaxAttemptsField value={maxAttempts} onChange={setMaxAttempts} error={false} readonly /> */}
 					<Separator />
 					<MaxScoreField value={maxScore} onChange={setMaxScore} error={false} readonly />
 					<Separator />
@@ -90,18 +81,12 @@ export function ProblemFormFields({
 			<Separator className="my-4" />
 			<div className="bg-muted/30 mt-auto space-y-4 rounded-lg border p-4">
 				<div className="grid gap-4 md:grid-cols-2">
-					<MaxAttemptsField
+					{/* <MaxAttemptsField
 						value={maxAttempts}
 						onChange={setMaxAttempts}
 						error={validationErrors.maxAttempts}
-						touched={touchedState.maxAttempts}
-					/>
-					<MaxScoreField
-						value={maxScore}
-						onChange={setMaxScore}
-						error={validationErrors.maxScore}
-						touched={touchedState.maxScore}
-					/>
+					/> */}
+					<MaxScoreField value={maxScore} onChange={setMaxScore} error={validationErrors.maxScore} />
 					<div className="space-y-2">
 						<label className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
 							Class
@@ -109,13 +94,11 @@ export function ProblemFormFields({
 						<ClassSelectorDialog selectedClassId={selectedClassId} onClassSelect={onClassSelect}>
 							<Button
 								variant="outline"
-								className={`w-full justify-start ${validationErrors.classId && touchedState.classId ? "border-red-500" : ""}`}>
+								className={`w-full justify-start ${validationErrors.classId ? "border-red-500" : ""}`}>
 								{selectedClassName ?? "Select Class"}
 							</Button>
 						</ClassSelectorDialog>
-						{validationErrors.classId && touchedState.classId && (
-							<p className="text-sm text-red-500">Please select a class</p>
-						)}
+						{validationErrors.classId && <p className="text-sm text-red-500">Please select a class</p>}
 					</div>
 				</div>
 				<DeadlineField
@@ -124,7 +107,6 @@ export function ProblemFormFields({
 					deadlineTime={deadlineTime}
 					setDeadlineTime={setDeadlineTime}
 					error={validationErrors.deadline}
-					touched={touchedState.deadline}
 				/>
 			</div>
 		</>

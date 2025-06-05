@@ -15,8 +15,6 @@ interface DescriptionEditorProps {
 	problemId?: string; // Make optional to support clean state
 	maxScore: number;
 	setMaxScore: (score: number) => void;
-	maxAttempts: number;
-	setMaxAttempts: (attempts: number) => void;
 	isFirstRender: React.MutableRefObject<boolean>;
 	descriptionReadonly?: boolean;
 	isLoading: boolean;
@@ -27,8 +25,6 @@ export function DescriptionEditor({
 	problemId,
 	maxScore,
 	setMaxScore,
-	maxAttempts,
-	setMaxAttempts,
 	isFirstRender,
 	descriptionReadonly = false,
 	isLoading,
@@ -41,15 +37,6 @@ export function DescriptionEditor({
 	// Add class selection state
 	const [selectedClassId, setSelectedClassId] = useState<string | undefined>();
 	const [selectedClassName, setSelectedClassName] = useState<string | undefined>();
-
-	// Add touched state for form validation
-	const [touchedState, setTouchedState] = useState({
-		title: false,
-		maxAttempts: false,
-		maxScore: false,
-		deadline: false,
-		classId: false,
-	});
 
 	// Fetch problem data if problemId is provided
 	const { problemData, isLoading: isProblemLoading, error, hasProblemId } = useProblemData(problemId);
@@ -68,7 +55,6 @@ export function DescriptionEditor({
 		const formData = {
 			title: problemForm.title,
 			maxScore,
-			maxAttempts,
 			deadline: problemForm.deadline?.toISOString(),
 			deadlineTime: problemForm.deadlineTime,
 			selectedClassId,
@@ -86,7 +72,6 @@ export function DescriptionEditor({
 				const parsedData = JSON.parse(savedFormData) as {
 					title: string;
 					maxScore: number;
-					maxAttempts: number;
 					deadline?: string;
 					deadlineTime?: string;
 					selectedClassId?: string;
@@ -94,7 +79,6 @@ export function DescriptionEditor({
 				};
 				problemForm.setTitle(parsedData.title || "");
 				setMaxScore(parsedData.maxScore || 0);
-				setMaxAttempts(parsedData.maxAttempts || 0);
 				setSelectedClassId(parsedData.selectedClassId);
 				setSelectedClassName(parsedData.selectedClassName);
 				if (parsedData.deadline) {
@@ -107,7 +91,7 @@ export function DescriptionEditor({
 		}
 	};
 
-	// Load problem data to inputs from API
+	// Load problem data from API
 	const loadProblemData = () => {
 		if (!problemData) return;
 
@@ -116,7 +100,6 @@ export function DescriptionEditor({
 		// Set form fields
 		problemForm.setTitle(problemData.name || "");
 		setMaxScore(problemData.max_score || 0);
-		setMaxAttempts(problemData.max_attempt || 0);
 
 		if (problemData.deadline) {
 			const deadline = new Date(problemData.deadline);
@@ -166,7 +149,6 @@ export function DescriptionEditor({
 	const saveToDatabase = async (data: {
 		title: string;
 		maxScore: number;
-		maxAttempts: number;
 		deadline: Date;
 		content: Delta | Op[];
 		classId: string;
@@ -186,7 +168,6 @@ export function DescriptionEditor({
 						name: data.title,
 						description: descriptionContent,
 						max_score: data.maxScore,
-						max_attempts: data.maxAttempts,
 						deadline: data.deadline,
 					},
 				});
@@ -198,7 +179,6 @@ export function DescriptionEditor({
 						name: data.title,
 						description: descriptionContent,
 						max_score: data.maxScore,
-						max_attempts: data.maxAttempts,
 						deadline: data.deadline,
 						class_id: data.classId,
 					},
@@ -228,11 +208,11 @@ export function DescriptionEditor({
 		console.log("Selected class ID:", selectedClassId);
 		console.log("Selected class name:", selectedClassName);
 
-		// // Validate form data including class selection
-		// if (!problemForm.validateForm(maxScore, maxAttempts, selectedClassId, problemForm.deadline?.toISOString())) {
-		// 	toast.error("Please fill in all required fields");
-		// 	return;
-		// }
+		// Validate form data including class selection
+		if (!problemForm.validateForm(maxScore, selectedClassId)) {
+			toast.error("Please fill in all required fields");
+			return;
+		}
 
 		const content = quillEditor.getContent();
 
@@ -266,11 +246,6 @@ export function DescriptionEditor({
 			return;
 		}
 
-		if (maxAttempts <= 0) {
-			toast.error("Max attempts must be greater than 0");
-			return;
-		}
-
 		if (!problemForm.deadline) {
 			toast.error("Deadline is required");
 			return;
@@ -294,7 +269,6 @@ export function DescriptionEditor({
 			const saveData = {
 				title: problemForm.title,
 				maxScore,
-				maxAttempts,
 				deadline: combinedDeadline,
 				content,
 				classId: selectedClassId,
@@ -395,7 +369,7 @@ export function DescriptionEditor({
 				};
 			}
 		}
-	}, [problemForm.title, maxScore, maxAttempts, problemForm.deadline, problemForm.deadlineTime, selectedClassId]);
+	}, [problemForm.title, maxScore, problemForm.deadline, problemForm.deadlineTime, selectedClassId]);
 
 	// Initialize editor with data based on scenario
 	const initializeEditorData = async () => {
@@ -417,7 +391,6 @@ export function DescriptionEditor({
 				console.log("No problemId provided - starting with clean state");
 				problemForm.resetForm();
 				setMaxScore(0);
-				setMaxAttempts(0);
 				setSelectedClassId(undefined);
 				setSelectedClassName(undefined);
 				isFirstRender.current = false;
@@ -509,8 +482,6 @@ export function DescriptionEditor({
 				<ProblemFormFields
 					maxScore={maxScore}
 					setMaxScore={setMaxScore}
-					maxAttempts={maxAttempts}
-					setMaxAttempts={setMaxAttempts}
 					deadline={problemForm.deadline}
 					setDeadline={problemForm.setDeadline}
 					deadlineTime={problemForm.deadlineTime}
@@ -521,10 +492,8 @@ export function DescriptionEditor({
 					validationErrors={{
 						...problemForm.validationErrors,
 						classId: !selectedClassId,
-						maxAttempts: maxAttempts <= 0,
 					}}
 					readonly={descriptionReadonly}
-					touchedState={touchedState}
 				/>
 			)}
 		</div>

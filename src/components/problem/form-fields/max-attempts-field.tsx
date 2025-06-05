@@ -6,11 +6,10 @@ interface MaxAttemptsFieldProps {
 	value: number;
 	onChange: (value: number) => void;
 	error: boolean;
-	touched?: boolean;
 	readonly?: boolean;
 }
 
-export function MaxAttemptsField({ value, onChange, error, touched = false, readonly = false }: MaxAttemptsFieldProps) {
+export function MaxAttemptsField({ value, onChange, error, readonly }: MaxAttemptsFieldProps) {
 	if (readonly) {
 		return (
 			<div className="flex items-center justify-between py-2">
@@ -20,13 +19,9 @@ export function MaxAttemptsField({ value, onChange, error, touched = false, read
 		);
 	}
 
-	const shouldShowError = error && touched;
-
 	return (
 		<div className="space-y-2">
-			<Label htmlFor="maxAttempts" className="text-sm font-medium">
-				Max Attempts
-			</Label>
+			<Label htmlFor="maxAttempts">Max Attempts *</Label>
 			<Input
 				id="maxAttempts"
 				type="number"
@@ -34,10 +29,10 @@ export function MaxAttemptsField({ value, onChange, error, touched = false, read
 				placeholder="e.g. 5"
 				value={value || ""}
 				onChange={(e) => onChange(Number(e.target.value) || 0)}
-				className={cn({ "border-red-500": shouldShowError })}
+				className={cn({ "border-red-500": error })}
 				required
 			/>
-			{shouldShowError && <p className="text-sm text-red-500">Max attempts is required</p>}
+			{error && <p className="text-sm text-red-500">Max attempts is required</p>}
 		</div>
 	);
 }

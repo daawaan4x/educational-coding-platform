@@ -1,1 +1,0 @@
-ALTER TABLE "problems" ADD COLUMN "max_attempt" integer DEFAULT 0 NOT NULL;

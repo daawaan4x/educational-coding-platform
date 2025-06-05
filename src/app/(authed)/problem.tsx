@@ -63,8 +63,6 @@ export default function Problem({
 
 	// Manage maxScore state in parent
 	const [maxScore, setMaxScore] = useState<number>(0);
-	// Manage maxAttempts state in parent
-	const [maxAttempts, setMaxAttempts] = useState<number>(0);
 
 	const isFirstRender = useRef(true);
 
@@ -122,6 +120,17 @@ export default function Problem({
 			submissions.fetchStudentSolutions(submissions.selectedStudentID);
 		}
 	}, [submissions.studentSolutionsView, submissions.selectedStudentID, submissions.studentSolutionsData.length]);
+
+	const handleSave = (data: {
+		title: string;
+		// maxAttempts: number;
+		maxScore: number;
+		deadline: Date;
+		content: Delta;
+	}) => {
+		console.log("Saving problem data:", data);
+		// Here you would typically make an API call to save the data
+	};
 
 	return (
 		<div
@@ -241,8 +250,6 @@ export default function Problem({
 							problemId={problemId}
 							maxScore={maxScore}
 							setMaxScore={setMaxScore}
-							maxAttempts={maxAttempts}
-							setMaxAttempts={setMaxAttempts}
 							isFirstRender={isFirstRender}
 							descriptionReadonly={descriptionReadonly}
 							isLoading={isDescriptionLoading}

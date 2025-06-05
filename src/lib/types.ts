@@ -29,8 +29,8 @@ export interface ProblemItemStudent {
 	score: number;
 	maxScore: number;
 	submitted: boolean;
-	attempts: number;
-	maxAttempts: number;
+	// attempts: number;
+	// maxAttempts: number;
 }
 
 export interface ProblemItemWithProgress extends ProblemItem {
@@ -56,7 +56,7 @@ export interface ParticipantItem {
 	role: UserRoleString;
 }
 
-export type solutionStatus = "accepted" | "wrong-answer" | "error" | "timeout" | "pending";
+type solutionStatus = "accepted" | "wrong-answer" | "error" | "timeout" | "pending";
 
 // For student view of solutions
 export interface SolutionItem {
