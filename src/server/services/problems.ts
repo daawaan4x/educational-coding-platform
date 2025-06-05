@@ -174,7 +174,9 @@ export const list = authed({
 export const create = authed({
 	require: ["problems:create"],
 	input: z.object({
-		data: ProblemSchema.Insert,
+		data: ProblemSchema.Insert.extend({
+			max_attempts: z.number().optional(),
+		}),
 	}),
 
 	async fn({ ctx, input }) {
@@ -199,7 +201,9 @@ export const update = authed({
 	require: ["problems:update"],
 	input: z.object({
 		id: ProblemSchema.Select.shape.id,
-		data: ProblemSchema.Update,
+		data: ProblemSchema.Update.extend({
+			max_attempts: z.number().optional(),
+		}),
 	}),
 
 	async fn({ ctx, input }) {

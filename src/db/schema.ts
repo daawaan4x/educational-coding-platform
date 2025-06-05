@@ -1,4 +1,5 @@
 import { roles } from "@/lib/roles";
+import { statuses } from "@/lib/solutions";
 import { relations } from "drizzle-orm";
 import { boolean, integer, pgEnum, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 
@@ -10,6 +11,7 @@ const baseFields = {
 };
 
 export const rolesEnum = pgEnum("roles", roles);
+export const statusesEnum = pgEnum("statuses", statuses);
 
 // MARK: TABLES
 
@@ -42,6 +44,7 @@ export const problems = pgTable("problems", {
 	description: text().notNull(),
 	deadline: timestamp().notNull(),
 	max_score: integer().notNull().default(0),
+	max_attempt: integer().notNull().default(0),
 	class_id: uuid()
 		.notNull()
 		.references(() => classes.id),
@@ -54,7 +57,9 @@ export const solutions = pgTable("solutions", {
 	...baseFields,
 	submitted: boolean().notNull().default(false),
 	code: text().notNull().default(""),
+	status: statusesEnum().default("pending"),
 	score: integer(),
+	attempt: integer(),
 	problem_id: uuid()
 		.notNull()
 		.references(() => problems.id),

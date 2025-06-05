@@ -6,10 +6,11 @@ interface MaxScoreFieldProps {
 	value: number;
 	onChange: (value: number) => void;
 	error: boolean;
+	touched?: boolean;
 	readonly?: boolean;
 }
 
-export function MaxScoreField({ value, onChange, error, readonly }: MaxScoreFieldProps) {
+export function MaxScoreField({ value, onChange, error, touched = false, readonly = false }: MaxScoreFieldProps) {
 	if (readonly) {
 		return (
 			<div className="flex items-center justify-between py-2">
@@ -18,6 +19,8 @@ export function MaxScoreField({ value, onChange, error, readonly }: MaxScoreFiel
 			</div>
 		);
 	}
+
+	const shouldShowError = error && touched;
 
 	return (
 		<div className="space-y-2">
@@ -29,10 +32,10 @@ export function MaxScoreField({ value, onChange, error, readonly }: MaxScoreFiel
 				placeholder="e.g. 100"
 				value={value || ""}
 				onChange={(e) => onChange(Number(e.target.value) || 0)}
-				className={cn({ "border-red-500": error })}
+				className={cn({ "border-red-500": shouldShowError })}
 				required
 			/>
-			{error && <p className="text-sm text-red-500">Max score is required</p>}
+			{shouldShowError && <p className="text-sm text-red-500">Max score is required</p>}
 		</div>
 	);
 }
