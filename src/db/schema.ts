@@ -1,3 +1,4 @@
+import { languages } from "@/lib/languages";
 import { roles } from "@/lib/roles";
 import { relations } from "drizzle-orm";
 import { boolean, integer, pgEnum, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
@@ -10,6 +11,7 @@ const baseFields = {
 };
 
 export const rolesEnum = pgEnum("roles", roles);
+export const languagesEnum = pgEnum("languages", languages);
 
 // MARK: TABLES
 
@@ -53,6 +55,7 @@ export const problems = pgTable("problems", {
 export const solutions = pgTable("solutions", {
 	...baseFields,
 	submitted: boolean().notNull().default(false),
+	language: languagesEnum().notNull().default("js"),
 	code: text().notNull().default(""),
 	score: integer(),
 	problem_id: uuid()
