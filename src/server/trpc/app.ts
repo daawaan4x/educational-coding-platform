@@ -1,4 +1,3 @@
-import readline from "readline";
 import { t } from ".";
 import { ClassService } from "../services/classes";
 import { CodeRunnerService } from "../services/code-runner";
