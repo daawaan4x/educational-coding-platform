@@ -28,6 +28,7 @@ import { ColumnFiltersState } from "@tanstack/react-table";
 import { inferProcedureInput, inferProcedureOutput } from "@trpc/server";
 import { CirclePlus, FolderKanban } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDebounce, useDebouncedCallback, useThrottledCallback } from "use-debounce";
 import { completionStatuses, deadlineStatuses } from "../data";
@@ -37,6 +38,7 @@ import { problemColumns } from "./problems-columns";
 export default function TeacherDashboardWrapper() {
 	const { state, isMobile } = useSidebar();
 	const { data: session, status } = useSession();
+	const router = useRouter();
 
 	const [search, setSearchValue] = useState<string | undefined>(undefined);
 	const [deadlineStatus, setDeadlineStatus] = useState<(typeof deadlineStatuses)[number]["value"] | undefined>(
@@ -149,7 +151,7 @@ export default function TeacherDashboardWrapper() {
 							)}
 						</DialogContent>
 					</Dialog>
-					<Button variant="outline">
+					<Button variant="outline" onClick={() => (window.location.href = "/problems/add")}>
 						<CirclePlus /> Add Problem
 					</Button>
 				</div>
@@ -181,6 +183,9 @@ export default function TeacherDashboardWrapper() {
 					},
 				]}
 				onFilterChange={onFilterChange}
+				onRowClick={(row) => {
+					router.push(`/problems/${row.id}`);
+				}}
 			/>
 		</div>
 	);

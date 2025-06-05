@@ -25,7 +25,7 @@ const data = {
 	navMain: [
 		{
 			title: "Playground",
-			url: "playground/",
+			url: "/playground/",
 			icon: SquareTerminal,
 			isActive: true,
 			// items: [

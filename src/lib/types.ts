@@ -29,8 +29,8 @@ export interface ProblemItemStudent {
 	score: number;
 	maxScore: number;
 	submitted: boolean;
-	attempts: number;
-	maxAttempts: number;
+	// attempts: number;
+	// maxAttempts: number;
 }
 
 export interface ProblemItemWithProgress extends ProblemItem {

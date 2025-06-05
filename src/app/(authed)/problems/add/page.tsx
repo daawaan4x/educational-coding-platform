@@ -1,7 +1,8 @@
+"use client";
+
 import Problem from "@/app/(authed)/problem";
 
-// Remove static import of Quill to avoid SSR issues
-
 export default function Page() {
-	return <Problem showSubmissions={true} descriptionReadonly={false} />;
+	// No problemId provided - start with clean state
+	return <Problem showSubmissions={false} descriptionReadonly={false} />;
 }
