@@ -66,11 +66,9 @@ export default function TeacherDashboardWrapper() {
 		size: pageSize,
 		page: pageIndex + 1,
 		search,
-		deadlineStatus,
-		completionStatus: completionStatus
-			? (completionStatus as "not-started" | "partially-completed" | "all-completed")
-			: undefined,
-		checkCompletion: true,
+		deadline_status: deadlineStatus,
+		completion_status: completionStatus,
+		show_completion: true,
 	});
 
 	const problems: ProblemItemWithProgress[] =
@@ -81,8 +79,8 @@ export default function TeacherDashboardWrapper() {
 			dateModified: problem.date_modified,
 			title: problem.name,
 			deadline: problem.deadline,
-			studentsCompleted: problem.studentsCompleted ?? 0,
-			totalStudents: problem.totalStudents ?? 0,
+			studentsCompleted: problem.completed_students ?? 0,
+			totalStudents: problem.total_students ?? 0,
 		})) ?? [];
 
 	const pageCount = data?.meta?.total_pages ?? -1;
