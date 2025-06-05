@@ -356,8 +356,8 @@ export const problemsForStudent: ProblemItemStudent[] = [
 		score: 10,
 		maxScore: 10,
 		submitted: true,
-		attempts: 1,
-		maxAttempts: 3,
+		// attempts: 1,
+		// maxAttempts: 3,
 	},
 	{
 		id: "550e8400-e29b-41d4-a716-446655440002",
@@ -368,8 +368,8 @@ export const problemsForStudent: ProblemItemStudent[] = [
 		score: 8,
 		maxScore: 10,
 		submitted: true,
-		attempts: 2,
-		maxAttempts: 3,
+		// attempts: 2,
+		// maxAttempts: 3,
 	},
 	{
 		id: "550e8400-e29b-41d4-a716-446655440003",
@@ -380,8 +380,8 @@ export const problemsForStudent: ProblemItemStudent[] = [
 		score: 0,
 		maxScore: 10,
 		submitted: false,
-		attempts: 0,
-		maxAttempts: 3,
+		// attempts: 0,
+		// maxAttempts: 3,
 	},
 	{
 		id: "550e8400-e29b-41d4-a716-446655440004",
@@ -392,8 +392,8 @@ export const problemsForStudent: ProblemItemStudent[] = [
 		score: 10,
 		maxScore: 10,
 		submitted: true,
-		attempts: 1,
-		maxAttempts: 3,
+		// attempts: 1,
+		// maxAttempts: 3,
 	},
 	{
 		id: "550e8400-e29b-41d4-a716-446655440005",
@@ -404,8 +404,8 @@ export const problemsForStudent: ProblemItemStudent[] = [
 		score: 7,
 		maxScore: 10,
 		submitted: true,
-		attempts: 3,
-		maxAttempts: 3,
+		// attempts: 3,
+		// maxAttempts: 3,
 	},
 	{
 		id: "550e8400-e29b-41d4-a716-446655440006",
@@ -416,8 +416,8 @@ export const problemsForStudent: ProblemItemStudent[] = [
 		score: 10,
 		maxScore: 10,
 		submitted: true,
-		attempts: 1,
-		maxAttempts: 2,
+		// attempts: 1,
+		// maxAttempts: 2,
 	},
 	{
 		id: "550e8400-e29b-41d4-a716-446655440007",
@@ -428,8 +428,8 @@ export const problemsForStudent: ProblemItemStudent[] = [
 		score: 6,
 		maxScore: 10,
 		submitted: true,
-		attempts: 2,
-		maxAttempts: 3,
+		// attempts: 2,
+		// maxAttempts: 3,
 	},
 	{
 		id: "550e8400-e29b-41d4-a716-446655440008",
@@ -440,8 +440,8 @@ export const problemsForStudent: ProblemItemStudent[] = [
 		score: 0,
 		maxScore: 10,
 		submitted: false,
-		attempts: 0,
-		maxAttempts: 3,
+		// attempts: 0,
+		// maxAttempts: 3,
 	},
 	{
 		id: "550e8400-e29b-41d4-a716-446655440009",
@@ -452,8 +452,8 @@ export const problemsForStudent: ProblemItemStudent[] = [
 		score: 9,
 		maxScore: 10,
 		submitted: true,
-		attempts: 1,
-		maxAttempts: 2,
+		// attempts: 1,
+		// maxAttempts: 2,
 	},
 	{
 		id: "550e8400-e29b-41d4-a716-446655440010",
@@ -464,8 +464,8 @@ export const problemsForStudent: ProblemItemStudent[] = [
 		score: 5,
 		maxScore: 10,
 		submitted: true,
-		attempts: 3,
-		maxAttempts: 3,
+		// attempts: 3,
+		// maxAttempts: 3,
 	},
 	{
 		id: "550e8400-e29b-41d4-a716-446655440011",
@@ -476,8 +476,8 @@ export const problemsForStudent: ProblemItemStudent[] = [
 		score: 0,
 		maxScore: 10,
 		submitted: false,
-		attempts: 0,
-		maxAttempts: 3,
+		// attempts: 0,
+		// maxAttempts: 3,
 	},
 	{
 		id: "550e8400-e29b-41d4-a716-446655440012",
@@ -488,8 +488,8 @@ export const problemsForStudent: ProblemItemStudent[] = [
 		score: 8,
 		maxScore: 10,
 		submitted: true,
-		attempts: 2,
-		maxAttempts: 3,
+		// attempts: 2,
+		// maxAttempts: 3,
 	},
 	{
 		id: "550e8400-e29b-41d4-a716-446655440013",
@@ -500,8 +500,8 @@ export const problemsForStudent: ProblemItemStudent[] = [
 		score: 10,
 		maxScore: 10,
 		submitted: true,
-		attempts: 1,
-		maxAttempts: 2,
+		// attempts: 1,
+		// maxAttempts: 2,
 	},
 	{
 		id: "550e8400-e29b-41d4-a716-446655440014",
@@ -512,8 +512,8 @@ export const problemsForStudent: ProblemItemStudent[] = [
 		score: 6,
 		maxScore: 10,
 		submitted: true,
-		attempts: 2,
-		maxAttempts: 3,
+		// attempts: 2,
+		// maxAttempts: 3,
 	},
 	{
 		id: "550e8400-e29b-41d4-a716-446655440015",
@@ -524,8 +524,8 @@ export const problemsForStudent: ProblemItemStudent[] = [
 		score: 0,
 		maxScore: 10,
 		submitted: false,
-		attempts: 0,
-		maxAttempts: 3,
+		// attempts: 0,
+		// maxAttempts: 3,
 	},
 ];
 
@@ -615,23 +615,23 @@ export const problemColumnsForStudent: ColumnDef<ProblemItemStudent>[] = [
 			);
 		},
 	},
-	{
-		accessorKey: "attempts",
-		header: "Attempts",
-		cell: ({ row }) => {
-			const { attempts, maxAttempts, submitted } = row.original as {
-				attempts: number;
-				maxAttempts: number;
-				submitted: boolean;
-			};
-			if (!submitted) {
-				return <span className="text-muted-foreground">...</span>;
-			}
-			return (
-				<div className="flex items-center">
-					<sup>{attempts}</sup>&frasl;<sub>{maxAttempts}</sub>
-				</div>
-			);
-		},
-	},
+	// {
+	// 	accessorKey: "attempts",
+	// 	header: "Attempts",
+	// 	cell: ({ row }) => {
+	// 		const { attempts, maxAttempts, submitted } = row.original as {
+	// 			attempts: number;
+	// 			maxAttempts: number;
+	// 			submitted: boolean;
+	// 		};
+	// 		if (!submitted) {
+	// 			return <span className="text-muted-foreground">...</span>;
+	// 		}
+	// 		return (
+	// 			<div className="flex items-center">
+	// 				<sup>{attempts}</sup>&frasl;<sub>{maxAttempts}</sub>
+	// 			</div>
+	// 		);
+	// 	},
+	// },
 ];

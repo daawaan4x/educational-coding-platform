@@ -182,6 +182,9 @@ export const remove = authed({
 			if (users.data.length > 0) throw new TRPCError({ code: "CONFLICT", message: "Class still has users" });
 		}
 
+		// Remove all users from the class first
+		await db.delete(users_to_classes).where(eq(users_to_classes.class_id, input.id));
+
 		// Soft-delete Class
 		await db.update(classes).set({ is_deleted: true }).where(eq(classes.id, input.id));
 		record.is_deleted = true;
