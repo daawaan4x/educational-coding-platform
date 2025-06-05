@@ -7,6 +7,7 @@ import { java } from "@codemirror/lang-java";
 import { javascript } from "@codemirror/lang-javascript";
 import { php } from "@codemirror/lang-php";
 import { python } from "@codemirror/lang-python";
+import { indentUnit } from "@codemirror/language";
 import { basicSetup } from "codemirror";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
@@ -82,7 +83,7 @@ export default function CodeEditor({
 		}
 	};
 
-	const extensions = [basicSetup, ...(languageExtensions[language] ?? [])];
+	const extensions = [basicSetup, indentUnit.of("    "), ...(languageExtensions[language] ?? [])];
 	return (
 		<CodeMirror
 			value={currentValue}
