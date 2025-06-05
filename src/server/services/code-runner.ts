@@ -62,7 +62,7 @@ export const run = authed({
 		}
 
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-		if (json.stdout || json.stderr || json.compile_output) {
+		if (json.stdout || json.stderr || json.compile_output || json.message) {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			const result: {
 				stdout: string | null;
@@ -85,7 +85,7 @@ export const run = authed({
 				memory: result.memory,
 				stderr: decode(result.stderr),
 				compile_output: decode(result.compile_output),
-				message: result.message,
+				message: decode(result.message),
 			} as const;
 		}
 
