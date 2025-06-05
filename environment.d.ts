@@ -26,6 +26,16 @@ declare global {
 			 * **FOR DEVELOPMENT ONLY**: Allows logging-in to any user using only email without password
 			 */
 			SKIP_AUTH: boolean;
+
+			/**
+			 * URL for Judge0 API
+			 */
+			JUDGE0_URL: string;
+
+			/**
+			 * **PUBLIC:** Enable Judge0
+			 */
+			NEXT_PUBLIC_JUDGE0: boolean;
 		}
 	}
 }

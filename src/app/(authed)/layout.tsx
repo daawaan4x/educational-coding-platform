@@ -75,7 +75,7 @@ export default function Page({
 											<BreadcrumbList>
 												{pathname === "/playground" && (
 													<BreadcrumbItem className="hidden md:block">
-														<BreadcrumbLink href="#">Playground</BreadcrumbLink>
+														<BreadcrumbLink href="/playground">Playground</BreadcrumbLink>
 													</BreadcrumbItem>
 												)}
 												{pathname === "/" && (
