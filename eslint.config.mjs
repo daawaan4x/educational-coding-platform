@@ -35,6 +35,7 @@ export default tseslint.config(
 			"eslint.config.mjs",
 			"commitlint.config.mjs",
 			".prettierrc.js",
+			"static",
 		],
 	},
 	prettiereslint,

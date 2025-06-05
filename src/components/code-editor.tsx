@@ -1,8 +1,12 @@
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 "use client";
 
-// Mark as client component for Next.js App Router
+import { Language } from "@/lib/languages";
+import { cpp } from "@codemirror/lang-cpp";
+import { java } from "@codemirror/lang-java";
 import { javascript } from "@codemirror/lang-javascript";
+import { php } from "@codemirror/lang-php";
+import { python } from "@codemirror/lang-python";
 import { basicSetup } from "codemirror";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
@@ -27,29 +31,33 @@ const basicSetupOptions = {
 	searchKeymap: true,
 };
 
+const languageExtensions = {
+	c: [cpp()],
+	cpp: [cpp()],
+	java: [java()],
+	php: [php()],
+	py: [python()],
+	js: [javascript()],
+	ts: [javascript({ typescript: true })],
+	plain: [],
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+} satisfies Record<Language | "plain", any>;
+
 export default function CodeEditor({
 	language = "plain",
-	placeholder,
 	className,
 	value,
 	onChange,
 	readOnly = false,
 }: {
-	language: string;
+	language: Language | "plain";
 	placeholder?: string;
 	className?: string;
 	value?: string;
 	onChange?: (value: string) => void;
 	readOnly?: boolean;
 }) {
-	const defaultPlaceholder =
-		language == "javascript"
-			? `// Write JavaScript code here\nconsole.log("Hello, Mighty!");`
-			: placeholder
-				? placeholder
-				: `// Write ${language} code here`;
-
-	const [internalCode, setInternalCode] = useState(value || defaultPlaceholder);
+	const [internalCode, setInternalCode] = useState(value);
 
 	// Use controlled value if provided, otherwise use internal state
 	const currentValue = value !== undefined ? value : internalCode;
@@ -74,31 +82,16 @@ export default function CodeEditor({
 		}
 	};
 
-	if (language == "javascript") {
-		return (
-			<CodeMirror
-				value={currentValue}
-				className={className}
-				extensions={[basicSetup, javascript({ jsx: true })]}
-				onChange={handleChange}
-				theme={theme}
-				basicSetup={basicSetupOptions}
-				readOnly={readOnly}
-			/>
-		);
-	} else if (language == "plain") {
-		return (
-			<CodeMirror
-				value={currentValue}
-				className={className}
-				extensions={[basicSetup]}
-				onChange={handleChange}
-				theme={theme}
-				basicSetup={basicSetupOptions}
-				readOnly={readOnly}
-			/>
-		);
-	} else {
-		return <div className="text-red-500">Unsupported language: {language}</div>;
-	}
+	const extensions = [basicSetup, ...(languageExtensions[language] ?? [])];
+	return (
+		<CodeMirror
+			value={currentValue}
+			className={className}
+			extensions={extensions}
+			onChange={handleChange}
+			theme={theme}
+			basicSetup={basicSetupOptions}
+			readOnly={readOnly}
+		/>
+	);
 }
