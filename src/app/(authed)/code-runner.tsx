@@ -29,6 +29,7 @@ export default function CodeRunner({ onSubmitCode }: { onSubmitCode?: (submissio
 
 	// When language changes, reset code only if fresh
 	useEffect(() => {
+		if (!process.env.NEXT_PUBLIC_JUDGE0) return;
 		const template = languageTemplates[language];
 		if (isFresh) {
 			setCode(template);
