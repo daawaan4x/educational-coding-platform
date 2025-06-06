@@ -1,6 +1,5 @@
 "use client";
 
-import { DataTableColumnHeader } from "@/components/data-table-column-header";
 import { ProblemItem } from "@/lib/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
@@ -9,11 +8,11 @@ import { deadlineStatuses } from "../data";
 export const problemColumns: ColumnDef<ProblemItem>[] = [
 	{
 		accessorKey: "title",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Title" />,
+		header: "Title",
 	},
 	{
 		accessorKey: "class",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Class" />,
+		header: "Class",
 	},
 	{
 		accessorKey: "deadline",

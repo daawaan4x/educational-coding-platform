@@ -1,7 +1,6 @@
 "use client";
 
 import { rolesInfo } from "@/app/(authed)/data";
-import { DataTableColumnHeader } from "@/components/data-table-column-header";
 import { Badge } from "@/components/ui/badge";
 import { ParticipantItem } from "@/lib/types";
 import { capitalizeFirstLetter } from "@/lib/utils";
@@ -294,19 +293,19 @@ export const participants: ParticipantItem[] = [
 export const participantsColumns: ColumnDef<ParticipantItem>[] = [
 	{
 		accessorKey: "lastName",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Last Name" />,
+		header: "Last Name",
 	},
 	{
 		accessorKey: "firstName",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="First Name" />,
+		header: "First Name",
 	},
 	{
 		accessorKey: "email",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
+		header: "Email",
 	},
 	{
 		accessorKey: "role",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
+		header: "Role",
 		cell: ({ row }) => {
 			const { role } = row.original;
 			if (role) {
