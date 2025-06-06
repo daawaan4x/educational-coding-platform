@@ -25,6 +25,7 @@ import {
 } from "@tanstack/react-table";
 import { X } from "lucide-react";
 import { ComponentType, useState } from "react";
+import BanterLoad from "./banter-load";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { DataTablePagination } from "./data-table-pagination";
 
@@ -66,6 +67,7 @@ interface DataTableProps<TData, TValue> {
 	singleSelection?: boolean; // Add single selection mode
 	onSelectionChange?: (selectedRows: TData[]) => void;
 	className?: string;
+	isLoading?: boolean;
 }
 
 // `filterColumn` is for filtering a specific column with a text input.
@@ -96,6 +98,7 @@ export function DataTable<TData, TValue>({
 	singleSelection = false,
 	onSelectionChange,
 	className = "",
+	isLoading = false,
 }: DataTableProps<TData, TValue>) {
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(listToFalseObject(notVisibleColumns));
@@ -307,7 +310,7 @@ export function DataTable<TData, TValue>({
 						) : (
 							<TableRow>
 								<TableCell colSpan={columns.length} className="h-24 text-center">
-									No results.
+									{isLoading ? <BanterLoad /> : "No Results"}
 								</TableCell>
 							</TableRow>
 						)}

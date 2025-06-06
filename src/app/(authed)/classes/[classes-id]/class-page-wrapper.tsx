@@ -126,6 +126,7 @@ export default function ClassPageWrapper() {
 								},
 							]}
 							defaultPageSize={30}
+							isLoading={isLoading}
 						/>
 					)}
 					{role === "student" && (
@@ -141,6 +142,7 @@ export default function ClassPageWrapper() {
 								},
 							]}
 							defaultPageSize={30}
+							isLoading={isLoading}
 						/>
 					)}
 				</TabsContent>
@@ -152,6 +154,7 @@ export default function ClassPageWrapper() {
 						notVisibleColumns={["dateCreated", "dateModified", "classes"]}
 						enablePagination={true}
 						defaultPageSize={50}
+						isLoading={isLoading}
 					/>
 				</TabsContent>
 			</Tabs>

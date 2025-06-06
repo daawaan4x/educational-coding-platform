@@ -60,6 +60,7 @@ export function ClassSelector({ onSelectionChange }: ClassSelectorProps) {
 			}}
 			showColumnViewControl={false}
 			className="py-0"
+			isLoading={classesQuery.isLoading}
 		/>
 	);
 }
