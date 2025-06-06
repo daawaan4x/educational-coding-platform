@@ -61,22 +61,18 @@ type solutionStatus = "accepted" | "wrong-answer" | "error" | "timeout" | "pendi
 // For student view of solutions
 export interface SolutionItem {
 	id: string;
-	problemId: string;
-	authorId: string;
 	dateCreated: Date;
-	attempt: number;
+	// attempt: number;
 	code: string;
-	feedback?: string;
 	status: solutionStatus;
 }
 
 // For teacher view of solutions
 export interface SolutionsItem {
-	problemId: string;
 	authorId: string;
 	authorFirstName: string;
 	authorLastName: string;
-	attempts: number;
+	// attempts: number;
 	score: number;
 }
 

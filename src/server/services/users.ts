@@ -1,6 +1,6 @@
 import { db } from "@/db";
-import { classes, users, users_to_classes } from "@/db/schema";
-import { ClassSchema, UserSchema } from "@/db/validation";
+import { classes, solutions, users, users_to_classes } from "@/db/schema";
+import { ClassSchema, ProblemSchema, UserSchema } from "@/db/validation";
 import { UserColumns } from "@/db/validation/schemas/user";
 import { pagination } from "@/server/lib/pagination";
 import { TRPCError } from "@trpc/server";
@@ -46,13 +46,32 @@ export const list = authed({
 
 		search: z.string().optional(),
 		roles: z.array(z.enum(["student", "teacher", "admin"])).optional(),
+		with_scores: z.boolean().default(false),
+		problem_id: ProblemSchema.Select.shape.id.optional(),
 	}),
 
 	async fn({ input }) {
+		// Define score subquery for when with_scores and problem_id are provided
+		const scoreSubquery =
+			input.with_scores && input.problem_id
+				? sql<number | null>`(
+                SELECT s.score
+                FROM ${solutions} s
+                WHERE s.author_id = ${users.id}
+                AND s.problem_id = ${input.problem_id}
+                AND s.is_deleted = false
+                ORDER BY s.date_created DESC
+                LIMIT 1
+            )`
+				: sql<null>`NULL`;
+
 		// Get list of User (with optional search and role filters)
 		const query_users = () =>
 			db
-				.selectDistinctOn([users.id], UserColumns)
+				.selectDistinctOn([users.id], {
+					...UserColumns,
+					...(input.with_scores && input.problem_id ? { score: scoreSubquery } : {}),
+				})
 				.from(users)
 				.leftJoin(users_to_classes, eq(users.id, users_to_classes.user_id))
 				.leftJoin(classes, eq(users_to_classes.class_id, classes.id))

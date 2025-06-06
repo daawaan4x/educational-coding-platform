@@ -48,7 +48,6 @@ export function ProblemFormFields({
 	if (readonly) {
 		return (
 			<>
-				<Separator className="mt-4 mb-1" />
 				<div className="mt-auto space-y-1">
 					{/* <MaxAttemptsField value={maxAttempts} onChange={setMaxAttempts} error={false} readonly /> */}
 					<Separator />
@@ -78,7 +77,6 @@ export function ProblemFormFields({
 
 	return (
 		<>
-			<Separator className="my-4" />
 			<div className="bg-muted/30 mt-auto space-y-4 rounded-lg border p-4">
 				<div className="grid gap-4 md:grid-cols-2">
 					{/* <MaxAttemptsField

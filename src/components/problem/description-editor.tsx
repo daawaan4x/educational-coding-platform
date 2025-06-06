@@ -12,9 +12,15 @@ import { toast } from "sonner";
 import { ProblemFormFields } from "./form-fields/problem-form-fields";
 
 interface DescriptionEditorProps {
-	problemId?: string; // Make optional to support clean state
+	selectedClassId?: string;
+	setSelectedClassId: (classId?: string) => void;
+	problemId?: string;
 	maxScore: number;
 	setMaxScore: (score: number) => void;
+	deadline?: Date;
+	setDeadline: (date?: Date) => void;
+	deadlineTime: string;
+	setDeadlineTime: (time: string) => void;
 	isFirstRender: React.MutableRefObject<boolean>;
 	descriptionReadonly?: boolean;
 	isLoading: boolean;
@@ -22,9 +28,15 @@ interface DescriptionEditorProps {
 }
 
 export function DescriptionEditor({
+	selectedClassId,
+	setSelectedClassId,
 	problemId,
 	maxScore,
 	setMaxScore,
+	deadline,
+	setDeadline,
+	deadlineTime,
+	setDeadlineTime,
 	isFirstRender,
 	descriptionReadonly = false,
 	isLoading,
@@ -35,7 +47,6 @@ export function DescriptionEditor({
 	const quillEditor = useQuillEditor(containerRef);
 
 	// Add class selection state
-	const [selectedClassId, setSelectedClassId] = useState<string | undefined>();
 	const [selectedClassName, setSelectedClassName] = useState<string | undefined>();
 
 	// Fetch problem data if problemId is provided
@@ -55,8 +66,8 @@ export function DescriptionEditor({
 		const formData = {
 			title: problemForm.title,
 			maxScore,
-			deadline: problemForm.deadline?.toISOString(),
-			deadlineTime: problemForm.deadlineTime,
+			deadline: deadline?.toISOString(),
+			deadlineTime: deadlineTime,
 			selectedClassId,
 			selectedClassName,
 		};
@@ -78,12 +89,11 @@ export function DescriptionEditor({
 					selectedClassName?: string;
 				};
 				problemForm.setTitle(parsedData.title || "");
-				setMaxScore(parsedData.maxScore || 0);
 				setSelectedClassId(parsedData.selectedClassId);
 				setSelectedClassName(parsedData.selectedClassName);
 				if (parsedData.deadline) {
-					problemForm.setDeadline(new Date(parsedData.deadline));
-					problemForm.setDeadlineTime(parsedData.deadlineTime ?? "23:59");
+					setDeadline(new Date(parsedData.deadline));
+					setDeadlineTime(parsedData.deadlineTime ?? "23:59");
 				}
 			} catch (error) {
 				console.warn("Failed to parse saved form data:", error);
@@ -91,7 +101,7 @@ export function DescriptionEditor({
 		}
 	};
 
-	// Load problem data from API
+	// Load problem data to inputs from API
 	const loadProblemData = () => {
 		if (!problemData) return;
 
@@ -103,11 +113,11 @@ export function DescriptionEditor({
 
 		if (problemData.deadline) {
 			const deadline = new Date(problemData.deadline);
-			problemForm.setDeadline(deadline);
+			setDeadline(deadline);
 			// Extract time from deadline
 			const hours = deadline.getHours().toString().padStart(2, "0");
 			const minutes = deadline.getMinutes().toString().padStart(2, "0");
-			problemForm.setDeadlineTime(`${hours}:${minutes}`);
+			setDeadlineTime(`${hours}:${minutes}`);
 		}
 
 		// Set class information
@@ -191,8 +201,8 @@ export function DescriptionEditor({
 			// Invalidate problems list to refresh any cached data
 			await utils.problems.list.invalidate();
 
-			// Redirect to home page after successful save
-			window.location.href = "/";
+			// // Redirect to home page after successful save
+			// window.location.href = "/";
 
 			return result;
 		} catch (error) {
@@ -208,11 +218,11 @@ export function DescriptionEditor({
 		console.log("Selected class ID:", selectedClassId);
 		console.log("Selected class name:", selectedClassName);
 
-		// Validate form data including class selection
-		if (!problemForm.validateForm(maxScore, selectedClassId)) {
-			toast.error("Please fill in all required fields");
-			return;
-		}
+		// // Validate form data including class selection
+		// if (!problemForm.validateForm(maxScore, selectedClassId, deadline?.toISOString())) {
+		// 	toast.error("Please fill in all required fields");
+		// 	return;
+		// }
 
 		const content = quillEditor.getContent();
 
@@ -246,7 +256,7 @@ export function DescriptionEditor({
 			return;
 		}
 
-		if (!problemForm.deadline) {
+		if (!deadline) {
 			toast.error("Deadline is required");
 			return;
 		}
@@ -256,8 +266,8 @@ export function DescriptionEditor({
 			toast.loading("Saving problem...", { id: "save-problem" });
 
 			// Combine date and time for database save
-			const [hours, minutes] = problemForm.deadlineTime.split(":").map(Number);
-			const combinedDeadline = new Date(problemForm.deadline);
+			const [hours, minutes] = deadlineTime.split(":").map(Number);
+			const combinedDeadline = new Date(deadline);
 			combinedDeadline.setHours(hours, minutes, 0, 0);
 
 			// Validate that deadline is in the future
@@ -369,11 +379,11 @@ export function DescriptionEditor({
 				};
 			}
 		}
-	}, [problemForm.title, maxScore, problemForm.deadline, problemForm.deadlineTime, selectedClassId]);
+	}, [problemForm.title, maxScore, deadline, deadlineTime, selectedClassId]);
 
 	// Initialize editor with data based on scenario
 	const initializeEditorData = async () => {
-		await quillEditor.initializeEditor();
+		await quillEditor.initializeEditor(descriptionReadonly);
 
 		if (isFirstRender.current) {
 			// Only clear localStorage on the very first render
@@ -482,10 +492,10 @@ export function DescriptionEditor({
 				<ProblemFormFields
 					maxScore={maxScore}
 					setMaxScore={setMaxScore}
-					deadline={problemForm.deadline}
-					setDeadline={problemForm.setDeadline}
-					deadlineTime={problemForm.deadlineTime}
-					setDeadlineTime={problemForm.setDeadlineTime}
+					deadline={deadline}
+					setDeadline={setDeadline}
+					deadlineTime={deadlineTime}
+					setDeadlineTime={setDeadlineTime}
 					selectedClassId={selectedClassId}
 					selectedClassName={selectedClassName}
 					onClassSelect={handleClassSelect}
