@@ -28,21 +28,21 @@ import { useEffect, useRef, useState } from "react";
 export default function CodeRunner({
 	language: inputLanguage,
 	code: inputCode,
-	enableSubmit,
+	enableSubmit = false,
 	onSubmitCode,
 }: {
-	language: Language;
-	code: string;
-	enableSubmit: boolean;
+	language?: Language;
+	code?: string;
+	enableSubmit?: boolean;
 	onSubmitCode?: () => void;
 }) {
 	const { state, isMobile } = useSidebar();
 
-	const [language, setLanguage] = useState<Language>("js");
-	useEffect(() => setLanguage(inputLanguage), [inputLanguage]);
+	const [language, setLanguage] = useState<Language>(inputLanguage ?? "js");
+	useEffect(() => setLanguage(inputLanguage ?? "js"), [inputLanguage]);
 
-	const [code, setCode] = useState(inputCode);
-	useEffect(() => setCode(inputCode), [inputCode]);
+	const [code, setCode] = useState(inputCode ?? "");
+	useEffect(() => setCode(inputCode ?? ""), [inputCode]);
 
 	const [isFresh, setIsFresh] = useState(true);
 	const initialCodeRef = useRef(code);
