@@ -2,13 +2,14 @@ import { studentOwnSolutionsColumns } from "@/app/(authed)/problems/add/solution
 import BanterLoader from "@/components/banter-load";
 import { DataTable } from "@/components/data-table";
 import { useAuth } from "@/lib/auth";
+import { Language } from "@/lib/languages";
 import { trpc } from "@/lib/trpc";
 import { SolutionItem } from "@/lib/types";
 import { useState } from "react";
 
 interface StudentSubmissionsViewProps {
 	isLoadingStudentSolutions: boolean;
-	onCodeEditorUpdate: (code: string) => void;
+	onCodeEditorUpdate: (code: string, language: Language) => void;
 	problemId?: string;
 }
 
@@ -46,6 +47,7 @@ export function StudentSubmissionsView({
 				id: solution.id,
 				dateCreated: solution.date_created,
 				code: solution.code,
+				language: solution.language,
 				status: solution.status,
 			};
 		}) ?? [];
@@ -69,7 +71,7 @@ export function StudentSubmissionsView({
 					enablePagination={true}
 					showColumnViewControl={true}
 					onRowClick={(row) => {
-						onCodeEditorUpdate(row.code);
+						onCodeEditorUpdate(row.code, row.language);
 					}}
 					manualPagination={true}
 					pageIndex={pageIndex}

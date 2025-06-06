@@ -1,11 +1,12 @@
 import { studentSolutionsColumns } from "@/app/(authed)/problems/add/solutions-columns";
 import { DataTable } from "@/components/data-table";
+import { Language } from "@/lib/languages";
 import { trpc } from "@/lib/trpc";
 import { SolutionItem } from "@/lib/types";
 import { useEffect, useState } from "react";
 
 interface TeacherStudentSubmissionsViewProps {
-	onCodeEditorUpdate: (code: string) => void;
+	onCodeEditorUpdate: (code: string, language: Language) => void;
 	problemId: string;
 	selectedStudentInfo: { firstName: string; lastName: string; score: number; id: string };
 }
@@ -50,6 +51,7 @@ export default function TeacherStudentSubmissionsView({
 				id: solution.id,
 				dateCreated: solution.date_created,
 				code: solution.code,
+				language: solution.language,
 				status: solution.status,
 			};
 		}) ?? [];
@@ -67,7 +69,7 @@ export default function TeacherStudentSubmissionsView({
 			enablePagination={false}
 			showColumnViewControl={false}
 			onRowClick={(row) => {
-				onCodeEditorUpdate(row.code);
+				onCodeEditorUpdate(row.code, row.language);
 			}}
 			manualPagination={true}
 			pageIndex={solutionsPageIndex}

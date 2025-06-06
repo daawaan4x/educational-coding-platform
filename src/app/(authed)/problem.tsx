@@ -131,15 +131,9 @@ export default function Problem({
 	};
 
 	// Functions to dynamically control code editor
-	const setCodeEditorContent = (code: string, language?: Language) => {
+	const setCodeEditorContent = (code: string, language: Language) => {
 		setEditorCode(code);
-		if (language) {
-			setEditorLanguage(language);
-		}
-	};
-
-	const resetCodeEditor = () => {
-		setCodeEditorContent("");
+		setEditorLanguage(language);
 	};
 
 	// Fetch students solutions when submissions tab is accessed
@@ -337,7 +331,9 @@ export default function Problem({
 			{/* Code Editor and Output Section */}
 			<CodeRunner
 				language={editorLanguage}
+				onLanguageChange={setEditorLanguage}
 				code={editorCode}
+				onCodeChange={setEditorCode}
 				enableSubmit={!!effectiveProblemId && !createSolution.isPending}
 				onSubmitCode={handleSubmitCode}
 			/>

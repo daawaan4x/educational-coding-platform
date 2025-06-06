@@ -1,3 +1,5 @@
+import { Language } from "./languages";
+
 export type UserRoleString = "admin" | "teacher" | "student" | null;
 
 export interface AccountItem {
@@ -64,6 +66,7 @@ export interface SolutionItem {
 	dateCreated: Date;
 	// attempt: number;
 	code: string;
+	language: Language;
 	status: solutionStatus;
 }
 
