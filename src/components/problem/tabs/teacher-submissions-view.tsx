@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Language } from "@/lib/languages";
 import { trpc } from "@/lib/trpc";
 import { SolutionItem, SolutionsItem } from "@/lib/types";
 import { ColumnDef } from "@tanstack/react-table";
@@ -16,7 +17,7 @@ import TeacherStudentSubmissionsView from "./teacher-student-submissions-view";
 interface TeacherSubmissionsViewProps {
 	classId?: string;
 	submissions: Submission;
-	onCodeEditorUpdate: (code: string) => void;
+	onCodeEditorUpdate: (code: string, language: Language) => void;
 	studentsSolutionsColumns: ColumnDef<SolutionsItem>[];
 	problemId?: string;
 	maxScore: number;

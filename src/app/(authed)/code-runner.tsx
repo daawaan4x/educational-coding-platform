@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import BanterLoad from "@/components/banter-load";
@@ -26,23 +27,21 @@ import { CodeXml, Play, Terminal, TextCursorInput, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 export default function CodeRunner({
-	language: inputLanguage,
-	code: inputCode,
+	language = "js",
+	onLanguageChange,
+	code = "",
+	onCodeChange,
 	enableSubmit = false,
 	onSubmitCode,
 }: {
 	language?: Language;
+	onLanguageChange?: (language: Language) => void;
 	code?: string;
+	onCodeChange?: (code: string) => void;
 	enableSubmit?: boolean;
 	onSubmitCode?: () => void;
 }) {
 	const { state, isMobile } = useSidebar();
-
-	const [language, setLanguage] = useState<Language>(inputLanguage ?? "js");
-	useEffect(() => setLanguage(inputLanguage ?? "js"), [inputLanguage]);
-
-	const [code, setCode] = useState(inputCode ?? "");
-	useEffect(() => setCode(inputCode ?? ""), [inputCode]);
 
 	const [isFresh, setIsFresh] = useState(true);
 	const initialCodeRef = useRef(code);
@@ -52,10 +51,9 @@ export default function CodeRunner({
 		if (!process.env.NEXT_PUBLIC_JUDGE0) return;
 		const template = languageTemplates[language];
 		if (isFresh) {
-			setCode(template);
+			onCodeChange?.(template);
 			initialCodeRef.current = template;
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [language]);
 
 	// When user types, check if code is no longer fresh
@@ -135,7 +133,7 @@ export default function CodeRunner({
 					{/* Action Buttons */}
 					<div className="flex flex-row items-center gap-1">
 						{process.env.NEXT_PUBLIC_JUDGE0 && (
-							<Select value={language} onValueChange={(value) => setLanguage(value as Language)}>
+							<Select value={language} onValueChange={(value) => onLanguageChange?.(value as Language)}>
 								<SelectTrigger>
 									<SelectValue />
 								</SelectTrigger>
@@ -204,7 +202,7 @@ export default function CodeRunner({
 				<CodeEditor
 					language={language}
 					value={code}
-					onChange={(value) => setCode(value.trim())}
+					onChange={(value) => onCodeChange?.(value)}
 					className="h-full min-h-0"
 				/>
 			</Card>
