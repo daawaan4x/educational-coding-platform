@@ -305,11 +305,11 @@ export const problemColumns: ColumnDef<ProblemItemWithProgress>[] = [
 			const { totalStudents, studentsCompleted } = row.original;
 			let status;
 			if (studentsCompleted === totalStudents) {
-				status = completionStatuses.find((completionObj) => completionObj.value === "All Completed");
+				status = completionStatuses.find((completionObj) => completionObj.value === "all-completed");
 			} else if (studentsCompleted > 0) {
-				status = completionStatuses.find((completionObj) => completionObj.value === "Partially Completed");
+				status = completionStatuses.find((completionObj) => completionObj.value === "partially-completed");
 			} else {
-				status = completionStatuses.find((completionObj) => completionObj.value === "Not Started");
+				status = completionStatuses.find((completionObj) => completionObj.value === "not-started");
 			}
 			return (
 				<div className="flex items-center">

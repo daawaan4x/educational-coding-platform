@@ -304,7 +304,7 @@ export const problemColumns: ColumnDef<ProblemItemWithProgress>[] = [
 		cell: ({ row }) => {
 			const { totalStudents, studentsCompleted } = row.original;
 			if (studentsCompleted === totalStudents) {
-				const status = completionStatuses.find((completionObj) => completionObj.value === "All Completed");
+				const status = completionStatuses.find((completionObj) => completionObj.value === "all-completed");
 				return (
 					<div className="flex items-center">
 						{status?.icon && <status.icon className="text-muted-foreground mr-2 h-4 w-4" />}
@@ -312,7 +312,7 @@ export const problemColumns: ColumnDef<ProblemItemWithProgress>[] = [
 					</div>
 				);
 			} else if (studentsCompleted > 0) {
-				const status = completionStatuses.find((completionObj) => completionObj.value === "Partially Completed");
+				const status = completionStatuses.find((completionObj) => completionObj.value === "partially-completed");
 				return (
 					<div className="flex items-center">
 						{status?.icon && <status.icon className="text-muted-foreground mr-2 h-4 w-4" />}
@@ -320,7 +320,7 @@ export const problemColumns: ColumnDef<ProblemItemWithProgress>[] = [
 					</div>
 				);
 			} else {
-				const status = completionStatuses.find((completionObj) => completionObj.value === "Not Started");
+				const status = completionStatuses.find((completionObj) => completionObj.value === "not-started");
 				return (
 					<div className="flex items-center">
 						{status?.icon && <status.icon className="text-muted-foreground mr-2 h-4 w-4" />}

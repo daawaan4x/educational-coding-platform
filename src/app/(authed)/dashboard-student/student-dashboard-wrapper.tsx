@@ -55,7 +55,7 @@ export default function StudentDashboardWrapper() {
 		size: pageSize,
 		page: pageIndex + 1,
 		search,
-		deadlineStatus,
+		deadline_status: deadlineStatus,
 	});
 
 	const problems: ProblemItem[] =

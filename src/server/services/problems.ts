@@ -4,7 +4,7 @@ import { ClassSchema, ProblemSchema } from "@/db/validation";
 import { UserColumns } from "@/db/validation/schemas/user";
 import { pagination } from "@/server/lib/pagination";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, getTableColumns, gt, ilike, lt, or, sql } from "drizzle-orm";
+import { and, countDistinct, desc, eq, getTableColumns, gt, gte, ilike, lt, lte, or, sql } from "drizzle-orm";
 import { z } from "zod/v4";
 import { t } from "../trpc";
 import { authed, authedProcedure } from "../trpc/auth";
@@ -60,45 +60,40 @@ export const list = authed({
 		class_id: ClassSchema.Select.shape.id.optional(),
 
 		search: z.string().optional(),
-		deadlineStatus: z.enum(["due-soon", "overdue"]).optional(),
-		completionStatus: z.enum(["not-started", "partially-completed", "all-completed"]).optional(),
-		checkCompletion: z.boolean().optional(),
+		deadline_status: z.enum(["due-soon", "overdue"]).optional(),
+		completion_status: z.enum(["not-started", "partially-completed", "all-completed"]).optional(),
+		show_completion: z.boolean().optional(),
 	}),
 
 	async fn({ ctx, input }) {
 		const { user } = ctx;
 
-		// Define completion count subqueries for reuse
-		const studentsCompletedSubquery = sql<number>`COALESCE((
-			SELECT COUNT(DISTINCT s.author_id)
-			FROM ${solutions} s
-			INNER JOIN ${users} u ON s.author_id = u.id
-			WHERE s.problem_id = ${problems.id}
-			AND s.is_deleted = false
-			AND u.is_deleted = false
-			AND u.role = 'student'
-		), 0)`;
+		if (!user.can("problems.solutions:read") && (input.completion_status || input.show_completion))
+			throw new TRPCError({ code: "FORBIDDEN", message: "User is not allowed to check completion status." });
 
-		const totalStudentsSubquery = sql<number>`COALESCE((
-			SELECT COUNT(DISTINCT utc.user_id)
-			FROM ${users_to_classes} utc
-			INNER JOIN ${users} u ON utc.user_id = u.id
-			WHERE utc.class_id = ${problems.class_id}
-			AND u.is_deleted = false
-			AND u.role = 'student'
-		), 0)`;
+		// Count completed students for each Problem
+		const completed_students_query = db
+			.select({
+				problem_id: solutions.problem_id,
+				completed_students: countDistinct(solutions.author_id).as("completed_students"),
+			})
+			.from(solutions)
+			.innerJoin(users, eq(solutions.author_id, users.id))
+			.where(and(eq(solutions.is_deleted, false), eq(users.is_deleted, false), eq(users.role, "student")))
+			.groupBy(solutions.problem_id)
+			.as("completed_students_query");
 
-		// Build completion status filter condition
-		let completionFilter;
-		if (input.completionStatus && input.checkCompletion) {
-			if (input.completionStatus === "not-started") {
-				completionFilter = eq(studentsCompletedSubquery, 0);
-			} else if (input.completionStatus === "partially-completed") {
-				completionFilter = and(gt(studentsCompletedSubquery, 0), lt(studentsCompletedSubquery, totalStudentsSubquery));
-			} else if (input.completionStatus === "all-completed") {
-				completionFilter = and(gt(studentsCompletedSubquery, 0), eq(studentsCompletedSubquery, totalStudentsSubquery));
-			}
-		}
+		// Count total students for each Problem
+		const total_students_query = db
+			.select({
+				class_id: users_to_classes.class_id,
+				total_students: countDistinct(users.id).as("total_students"),
+			})
+			.from(users_to_classes)
+			.innerJoin(users, eq(users_to_classes.user_id, users.id))
+			.where(and(eq(users.is_deleted, false), eq(users.role, "student")))
+			.groupBy(users_to_classes.class_id)
+			.as("total_students_query");
 
 		// Get list of Problems from all Classes where User has access (Optional: for a Class)
 		const query = db
@@ -106,17 +101,17 @@ export const list = authed({
 				...getTableColumns(problems),
 				author: UserColumns,
 				class: getTableColumns(classes),
-				...(input.checkCompletion
-					? {
-							studentsCompleted: studentsCompletedSubquery,
-							totalStudents: totalStudentsSubquery,
-						}
-					: {}),
+				...(input.show_completion && {
+					completed_students: completed_students_query.completed_students,
+					total_students: total_students_query.total_students,
+				}),
 			})
 			.from(users_to_classes)
 			.innerJoin(problems, eq(users_to_classes.class_id, problems.class_id))
 			.innerJoin(users, eq(problems.author_id, users.id))
 			.innerJoin(classes, eq(problems.class_id, classes.id))
+			.leftJoin(completed_students_query, eq(problems.id, completed_students_query.problem_id))
+			.leftJoin(total_students_query, eq(problems.class_id, total_students_query.class_id))
 			.where(
 				and(
 					eq(users_to_classes.user_id, user.id),
@@ -126,41 +121,28 @@ export const list = authed({
 						? or(ilike(problems.name, `%${input.search}%`), ilike(classes.name, `%${input.search}%`))
 						: undefined,
 
-					input.deadlineStatus == "due-soon" ? gt(problems.deadline, new Date()) : undefined,
-					input.deadlineStatus == "overdue" ? lt(problems.deadline, new Date()) : undefined,
+					input.deadline_status == "due-soon" ? gt(problems.deadline, new Date()) : undefined,
+					input.deadline_status == "overdue" ? lt(problems.deadline, new Date()) : undefined,
 
 					// If Problem Author | Class is deleted, consider Problem as deleted
 					eq(problems.is_deleted, false),
 					eq(users.is_deleted, false),
 					eq(classes.is_deleted, false),
-
-					// Apply completion status filter
-					completionFilter,
+				),
+			)
+			.having((row) =>
+				and(
+					input.completion_status == "not-started" ? lte(row.completed_students!, 0) : undefined,
+					input.completion_status == "partially-completed" ? gt(row.completed_students!, 0) : undefined,
+					input.completion_status == "all-completed" ? gte(row.completed_students!, row.total_students!) : undefined,
 				),
 			)
 			.groupBy(
 				problems.id,
-				problems.name,
-				problems.description,
-				problems.deadline,
-				problems.class_id,
-				problems.author_id,
-				problems.date_created,
-				problems.date_modified,
-				problems.is_deleted,
+				completed_students_query.completed_students,
+				total_students_query.total_students,
 				users.id,
-				users.email,
-				users.first_name,
-				users.last_name,
-				users.role,
-				users.date_created,
-				users.date_modified,
-				users.is_deleted,
 				classes.id,
-				classes.name,
-				classes.date_created,
-				classes.date_modified,
-				classes.is_deleted,
 			)
 			.orderBy(desc(problems.date_modified))
 			.$dynamic();

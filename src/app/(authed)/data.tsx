@@ -29,7 +29,7 @@ export const completionStatuses = [
 		label: "All Completed",
 		icon: CheckCircle,
 	},
-];
+] as const;
 
 export const rolesInfo = [
 	{
