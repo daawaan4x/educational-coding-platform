@@ -1,6 +1,18 @@
 "use client";
 
+import BanterLoad from "@/components/banter-load";
 import CodeEditor from "@/components/code-editor";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,17 +25,25 @@ import { cn } from "@/lib/utils";
 import { CodeXml, Play, Terminal, TextCursorInput, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-export interface Submission {
+export default function CodeRunner({
+	language: inputLanguage,
+	code: inputCode,
+	enableSubmit,
+	onSubmitCode,
+}: {
 	language: Language;
-	input: string;
 	code: string;
-}
-
-export default function CodeRunner({ onSubmitCode }: { onSubmitCode?: (submission: Submission) => void }) {
+	enableSubmit: boolean;
+	onSubmitCode?: () => void;
+}) {
 	const { state, isMobile } = useSidebar();
 
 	const [language, setLanguage] = useState<Language>("js");
-	const [code, setCode] = useState("");
+	useEffect(() => setLanguage(inputLanguage), [inputLanguage]);
+
+	const [code, setCode] = useState(inputCode);
+	useEffect(() => setCode(inputCode), [inputCode]);
+
 	const [isFresh, setIsFresh] = useState(true);
 	const initialCodeRef = useRef(code);
 
@@ -45,11 +65,10 @@ export default function CodeRunner({ onSubmitCode }: { onSubmitCode?: (submissio
 
 	const [input, setInput] = useState("");
 	const [output, setOutput] = useState("");
-	const getCode = (): Submission => ({ language, input, code });
 
 	const [IOTabValue, setIOTabValue] = useState("input");
 
-	const evalRunner = (submission: Submission) => {
+	const evalRunner = () => {
 		let output = "";
 
 		const log = console.log;
@@ -59,10 +78,9 @@ export default function CodeRunner({ onSubmitCode }: { onSubmitCode?: (submissio
 		};
 
 		try {
-			const input = submission.input;
-			const code = `(function() { ${submission.code} return typeof main === 'function' ? main : null; })()`;
+			const fncode = `(function() { ${code} return typeof main === 'function' ? main : null; })()`;
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-			const fn = eval(code);
+			const fn = eval(fncode);
 			if (typeof fn !== "function") throw new Error("No 'main' function found in provided code.");
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
 			const result = fn(input);
@@ -83,17 +101,17 @@ export default function CodeRunner({ onSubmitCode }: { onSubmitCode?: (submissio
 			else setOutput(data.value);
 		},
 	});
-	const codeRunner = (submission: Submission) => {
+	const codeRunner = () => {
 		codeRunnerMutation.mutate({
-			language: submission.language,
-			source_code: submission.code,
-			stdin: submission.input,
+			language: language,
+			source_code: code,
+			stdin: input,
 		});
 	};
 
-	const onRunCode = (submission: Submission) => {
-		if (process.env.NEXT_PUBLIC_JUDGE0) codeRunner(submission);
-		else evalRunner(submission);
+	const onRunCode = () => {
+		if (process.env.NEXT_PUBLIC_JUDGE0) codeRunner();
+		else evalRunner();
 	};
 
 	return (
@@ -132,12 +150,31 @@ export default function CodeRunner({ onSubmitCode }: { onSubmitCode?: (submissio
 						)}
 						{onSubmitCode && (
 							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button variant="secondary" className="w-fit" onClick={() => onSubmitCode?.(getCode())}>
-										<Upload />
-										<span className="sr-only">Submit Code</span>
-									</Button>
-								</TooltipTrigger>
+								<AlertDialog>
+									<AlertDialogTrigger asChild>
+										<TooltipTrigger asChild>
+											<Button variant="secondary" className="w-fit" disabled={!enableSubmit}>
+												<Upload />
+												<span className="sr-only">Submit Code</span>
+											</Button>
+										</TooltipTrigger>
+									</AlertDialogTrigger>
+									<AlertDialogContent>
+										<AlertDialogHeader>
+											<AlertDialogTitle>Submit Solution</AlertDialogTitle>
+											<AlertDialogDescription>
+												Are you sure you want to submit your solution? This will be recorded as an official submission.
+											</AlertDialogDescription>
+										</AlertDialogHeader>
+										<AlertDialogFooter>
+											<AlertDialogCancel>Cancel</AlertDialogCancel>
+											<AlertDialogAction onClick={() => onSubmitCode?.()} disabled={!enableSubmit}>
+												Submit
+											</AlertDialogAction>
+										</AlertDialogFooter>
+									</AlertDialogContent>
+								</AlertDialog>
+
 								<TooltipContent>
 									<p>Submit Code</p>
 								</TooltipContent>
@@ -150,7 +187,7 @@ export default function CodeRunner({ onSubmitCode }: { onSubmitCode?: (submissio
 									className="w-fit"
 									onClick={() => {
 										setIOTabValue("output");
-										onRunCode(getCode());
+										onRunCode();
 									}}>
 									<Play />
 									<span className="sr-only">Run Code</span>
@@ -195,7 +232,11 @@ export default function CodeRunner({ onSubmitCode }: { onSubmitCode?: (submissio
 						<CodeEditor language="plain" value={input} onChange={setInput} className="h-full min-h-0" />
 					</TabsContent>
 					<TabsContent value="output" className="overflow-auto">
-						{!output ? (
+						{codeRunnerMutation.isPending ? (
+							<div className="flex h-full w-full items-center justify-center rounded-sm border">
+								<BanterLoad />
+							</div>
+						) : !output ? (
 							<div className="flex h-full w-full items-center justify-center">
 								<p className="text-muted-foreground">No output yet. Run your code to see the output.</p>
 							</div>
