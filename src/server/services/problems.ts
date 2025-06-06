@@ -79,14 +79,7 @@ export const list = authed({
 			})
 			.from(solutions)
 			.innerJoin(users, eq(solutions.author_id, users.id))
-			.where(
-				and(
-					eq(solutions.submitted, true),
-					eq(solutions.is_deleted, false),
-					eq(users.is_deleted, false),
-					eq(users.role, "student"),
-				),
-			)
+			.where(and(eq(solutions.is_deleted, false), eq(users.is_deleted, false), eq(users.role, "student")))
 			.groupBy(solutions.problem_id)
 			.as("completed_students_query");
 
