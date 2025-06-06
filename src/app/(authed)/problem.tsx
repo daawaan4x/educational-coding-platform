@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 "use client";
@@ -38,6 +37,7 @@ import { CodeXml, FolderClock, NotepadText, Play, Save, Terminal, Upload } from 
 import { useParams, useRouter } from "next/navigation";
 import type { Delta } from "quill";
 import { toast } from "sonner";
+import CodeRunner from "./code-runner";
 import {
 	studentOwnSolutionsColumns,
 	studentSolutionsColumns,
@@ -106,27 +106,28 @@ export default function Problem({
 		},
 	});
 
-	const handleSubmitCode = async () => {
+	const handleSubmitCode = () => {
 		if (!effectiveProblemId) {
 			toast.error("Failed to submit solution");
 			console.error("Problem ID is not defined");
 			return;
 		}
 
-		try {
-			await createSolution.mutateAsync({
+		createSolution
+			.mutateAsync({
 				data: {
 					problem_id: effectiveProblemId,
+					language: editorLanguage,
 					code: editorCode,
 					status: "pending",
 					score: 0, // Default score
 					submitted: true,
 				},
+			})
+			.catch((error) => {
+				toast.error(`Failed to submit solution`);
+				console.error("Error submitting solution:", error);
 			});
-		} catch (error) {
-			toast.error(`Failed to submit solution`);
-			console.error("Error submitting solution:", error);
-		}
 	};
 
 	// Functions to dynamically control code editor
@@ -140,11 +141,6 @@ export default function Problem({
 	const resetCodeEditor = () => {
 		setCodeEditorContent("");
 	};
-
-	// Initialize with starter code on component mount
-	useEffect(() => {
-		setCodeEditorContent(`// Write your code here\nconsole.log("Hello, Mighty!");`, "js");
-	}, []);
 
 	// Fetch students solutions when submissions tab is accessed
 	// useEffect(() => {
@@ -339,113 +335,12 @@ export default function Problem({
 			</Card>
 
 			{/* Code Editor and Output Section */}
-			<div className="flex h-full w-full flex-col gap-2">
-				{/* Code Editor Card */}
-				<Card
-					className={cn(
-						"flex min-h-[15rem] w-full flex-col gap-2 px-2 py-[8px] lg:max-h-[60vh] lg:min-h-auto lg:flex-auto lg:flex-grow-[5] lg:overflow-hidden",
-						{
-							"md:max-h-[60vh] md:min-h-auto md:flex-auto md:flex-grow-[5] md:overflow-hidden":
-								state != "expanded" && !isMobile,
-						},
-					)}>
-					{/* Code Editor Header */}
-					<div className="flex w-full flex-wrap items-center justify-between gap-1 lg:flex-nowrap">
-						<span className="inline-flex w-fit flex-row items-center justify-center gap-1 rounded-md border px-2 py-1 text-sm shadow-sm">
-							<CodeXml />
-							<span>Code</span>
-						</span>
-
-						{/* Action Buttons */}
-						<div className="flex flex-row items-center gap-1">
-							{role === "student" && (
-								<>
-									<Tooltip>
-										<AlertDialog>
-											<AlertDialogTrigger asChild>
-												<TooltipTrigger asChild>
-													<Button
-														variant="secondary"
-														className="w-fit"
-														disabled={createSolution.isPending || !effectiveProblemId}>
-														<Upload />
-														<span className="sr-only">Submit Code</span>
-													</Button>
-												</TooltipTrigger>
-											</AlertDialogTrigger>
-											<AlertDialogContent>
-												<AlertDialogHeader>
-													<AlertDialogTitle>Submit Solution</AlertDialogTitle>
-													<AlertDialogDescription>
-														Are you sure you want to submit your solution? This will be recorded as an official
-														submission.
-													</AlertDialogDescription>
-												</AlertDialogHeader>
-												<AlertDialogFooter>
-													<AlertDialogCancel>Cancel</AlertDialogCancel>
-													<AlertDialogAction
-														onClick={() => void handleSubmitCode()}
-														disabled={createSolution.isPending || !effectiveProblemId}>
-														{createSolution.isPending ? "Submitting..." : "Submit"}
-													</AlertDialogAction>
-												</AlertDialogFooter>
-											</AlertDialogContent>
-										</AlertDialog>
-
-										<TooltipContent>
-											<p>Submit Code</p>
-										</TooltipContent>
-									</Tooltip>
-								</>
-							)}
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button variant="secondary" className="w-fit" onClick={() => {}}>
-										<Play />
-										<span className="sr-only">Run Code</span>
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent>
-									<p>Run Code</p>
-								</TooltipContent>
-							</Tooltip>
-						</div>
-					</div>
-
-					{/* Code Editor */}
-					<div className="min-h-0 flex-1 overflow-auto">
-						<CodeEditor language={editorLanguage} value={editorCode} onChange={setEditorCode} />
-					</div>
-				</Card>
-
-				{/* Output Card */}
-				<Card
-					className={cn(
-						"min-h-[15rem] w-full px-2 py-[8px] lg:max-h-[28.4vh] lg:min-h-auto lg:flex-auto lg:flex-grow-[2] lg:overflow-auto",
-						{
-							"px-2 py-[8px] md:max-h-[28.4vh] md:min-h-auto md:flex-auto md:flex-grow-[2] md:overflow-auto":
-								state != "expanded" && !isMobile,
-						},
-					)}>
-					<Tabs value={outputTabValue} onValueChange={setOutputTabValue} className="h-full w-full">
-						<TabsList>
-							<TabsTrigger value="output">
-								<Terminal /> Output
-							</TabsTrigger>
-						</TabsList>
-
-						<TabsContent value="output">
-							{!codeOutput || codeOutput == null ? (
-								<div className="flex h-full w-full items-center justify-center">
-									<p className="text-muted-foreground">No output yet. Run your code to see the output.</p>
-								</div>
-							) : (
-								<div>Code output</div>
-							)}
-						</TabsContent>
-					</Tabs>
-				</Card>
-			</div>
+			<CodeRunner
+				language={editorLanguage}
+				code={editorCode}
+				enableSubmit={!!effectiveProblemId && !createSolution.isPending}
+				onSubmitCode={handleSubmitCode}
+			/>
 		</div>
 	);
 }
