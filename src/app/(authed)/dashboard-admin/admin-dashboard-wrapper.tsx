@@ -262,7 +262,7 @@ export default function AdminDashboardWrapper() {
 		})) ?? [];
 
 	// Calculate total page count from pagination meta
-	const pageCount = usersData?.meta ? usersData.meta.total_pages : -1;
+	const pageCount = usersData?.meta ? usersData.meta.total_pages : undefined;
 
 	console.log("Current pagination state:", { pageIndex, pageSize, pageCount, hasData: !!usersData });
 
@@ -528,6 +528,7 @@ export default function AdminDashboardWrapper() {
 						filterSearchPlaceholder="Search by name or email..."
 						enableSelection={true}
 						onSelectionChange={setSelectedAccounts}
+						isLoading={isLoading}
 					/>
 				</TabsContent>
 				<TabsContent value="classes">
@@ -608,6 +609,7 @@ export default function AdminDashboardWrapper() {
 									setClassStudentsView(true);
 									setSelectedClassView({ name: row.name, id: row.id });
 								}}
+								isLoading={isLoading}
 							/>
 						</>
 					)}

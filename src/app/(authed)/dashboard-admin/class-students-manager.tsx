@@ -204,6 +204,7 @@ export function ClassStudentsManager({ classId, className, onBack }: ClassStuden
 				filterSearchPlaceholder="Search by name or email..."
 				enableSelection={true}
 				onSelectionChange={setSelectedUsers}
+				isLoading={usersQuery.isLoading}
 			/>
 		</>
 	);

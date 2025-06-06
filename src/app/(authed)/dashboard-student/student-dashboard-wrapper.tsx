@@ -25,12 +25,14 @@ import { AppRouter } from "@/server/trpc/app";
 import { ColumnFiltersState } from "@tanstack/react-table";
 import { inferProcedureInput, inferProcedureOutput } from "@trpc/server";
 import { CirclePlus, FolderKanban } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDebounce, useDebouncedCallback, useThrottledCallback } from "use-debounce";
 import { deadlineStatuses } from "../data";
 import { problemColumns } from "./problems-columns";
 
 export default function StudentDashboardWrapper() {
+	const router = useRouter();
 	const { state, isMobile } = useSidebar();
 
 	const [search, setSearchValue] = useState<string | undefined>(undefined);
@@ -107,6 +109,10 @@ export default function StudentDashboardWrapper() {
 					},
 				]}
 				onFilterChange={onFilterChange}
+				onRowClick={(row) => {
+					router.push(`/problems/${row.id}`);
+				}}
+				isLoading={isLoading}
 			/>
 		</div>
 	);

@@ -123,9 +123,13 @@ export const list = authed({
 	async fn({ ctx, input }) {
 		const { user } = ctx;
 
-		// Error if User cannot read all Solutions of Problems AND is not the Author
-		if (!user.can("problems.solutions:read") && user.id != input.author_id)
-			throw new TRPCError({ code: "FORBIDDEN", message: "User cannot read other's solutions." });
+		console.log("input", input);
+
+		// Commented out, because teachers has to view the solutions
+		// of his/her student to give score to each.
+		// // Error if User cannot read all Solutions of Problems AND is not the Author
+		// if (!user.can("problems.solutions:read") && user.id != input.author_id)
+		// 	throw new TRPCError({ code: "FORBIDDEN", message: "User cannot read other's solutions." });
 
 		// List Authored Solutions w/ Class (Optional: for a Problem)
 		const records = await pagination(() =>
@@ -221,6 +225,45 @@ export const create = authed({
 	},
 });
 
+export const update_score = authed({
+	require: ["solutions:update"],
+	input: z.object({
+		problem_id: ProblemSchema.Select.shape.id,
+		author_id: UserSchema.Select.shape.id,
+		score: z.number().min(0).max(100),
+	}),
+
+	async fn({ ctx, input }) {
+		// const { user } = ctx;
+
+		// Check if User has access to Problem (must be teacher or admin)
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const problem = await ProblemService.find({ ctx, input: { id: input.problem_id } });
+
+		// Update all solutions for this user and problem with the new score
+		const updatedSolutions = await db
+			.update(solutions)
+			.set({
+				score: input.score,
+				date_modified: new Date(),
+			})
+			.where(
+				and(
+					eq(solutions.problem_id, input.problem_id),
+					eq(solutions.author_id, input.author_id),
+					eq(solutions.is_deleted, false),
+				),
+			)
+			.returning();
+
+		if (updatedSolutions.length === 0) {
+			throw new TRPCError({ code: "NOT_FOUND", message: "No solutions found for this user and problem" });
+		}
+
+		return { updated_count: updatedSolutions.length, solutions: updatedSolutions };
+	},
+});
+
 /*
 IMPORTANT: Solutions are meant to be immutable
 
@@ -254,4 +297,5 @@ export const routers = t.router({
 	list: authedProcedure().input(list.input).query(list),
 	list_latest: authedProcedure().input(list_latest.input).query(list_latest),
 	create: authedProcedure().input(create.input).mutation(create),
+	update_score: authedProcedure().input(update_score.input).mutation(update_score),
 });

@@ -22,8 +22,8 @@
 			"@/*": ["./src/*"]
 		}
 	},
-	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-	"exclude": ["node_modules"]
+	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/scripts/export-templates.js"],
+	"exclude": ["node_modules", "static"]
 }
 
 // This `tsconfig.json` configures the TypeScript compiler for a Next.js project. Below is a clear explanation of each setting, including possible values for `compilerOptions` attributes.

@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 "use client";
 
@@ -16,20 +14,33 @@ import CodeEditor from "@/components/code-editor";
 import { DescriptionEditor } from "@/components/problem/description-editor";
 import { StudentSubmissionsView } from "@/components/problem/tabs/student-submissions-view";
 import { TeacherSubmissionsView } from "@/components/problem/tabs/teacher-submissions-view";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSubmissions } from "@/hooks/useSubmissions";
 import { useAuth } from "@/lib/auth";
-import { SolutionItem, SolutionsItem } from "@/lib/types";
+import { Language } from "@/lib/languages";
+import { trpc } from "@/lib/trpc";
 import { CodeXml, FolderClock, NotepadText, Play, Save, Terminal, Upload } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
 import type { Delta } from "quill";
+import { toast } from "sonner";
+import CodeRunner from "./code-runner";
 import {
 	studentOwnSolutionsColumns,
-	studentSolutions,
 	studentSolutionsColumns,
-	studentsSolutions,
 	studentsSolutionsColumns,
 } from "./problems/add/solutions-columns";
 
@@ -49,6 +60,13 @@ export default function Problem({
 	const user = useAuth();
 	const role = user.role;
 
+	const router = useRouter();
+	const params = useParams();
+	const trpcUtils = trpc.useUtils();
+
+	// Get problemId from prop or route param
+	const effectiveProblemId = problemId ?? (params?.problemId as string | undefined);
+
 	const { state, isMobile } = useSidebar();
 	const [tabValue, setTabValue] = useState("description");
 	const [outputTabValue, setOutputTabValue] = useState("output");
@@ -56,7 +74,7 @@ export default function Problem({
 
 	// Code editor state management
 	const [editorCode, setEditorCode] = useState("");
-	const [editorLanguage, setEditorLanguage] = useState("javascript");
+	const [editorLanguage, setEditorLanguage] = useState<Language>("js");
 
 	// Description editor loading state
 	const [isDescriptionLoading, setIsDescriptionLoading] = useState(true);
@@ -64,13 +82,56 @@ export default function Problem({
 	// Manage maxScore state in parent
 	const [maxScore, setMaxScore] = useState<number>(0);
 
+	// Manage selectedClassId state in parent
+	const [selectedClassId, setSelectedClassId] = useState<string | undefined>();
+
+	// Add deadline state management
+	const [deadline, setDeadline] = useState<Date | undefined>();
+	const [deadlineTime, setDeadlineTime] = useState<string>("23:59");
+
 	const isFirstRender = useRef(true);
 
 	// Use submissions hook
-	const submissions = useSubmissions(role === "teacher" || role === "student" ? role : "student");
+	const submissions = useSubmissions();
+
+	const createSolution = trpc.solutions.create.useMutation({
+		onSuccess: () => {
+			toast.success("Solution created successfully!");
+			// Invalidate queries to refresh data
+			trpcUtils.solutions.invalidate();
+		},
+		onError: (error) => {
+			toast.error(`Failed to submit solution`);
+			console.error("Error creating solution:", error);
+		},
+	});
+
+	const handleSubmitCode = () => {
+		if (!effectiveProblemId) {
+			toast.error("Failed to submit solution");
+			console.error("Problem ID is not defined");
+			return;
+		}
+
+		createSolution
+			.mutateAsync({
+				data: {
+					problem_id: effectiveProblemId,
+					language: editorLanguage,
+					code: editorCode,
+					status: "pending",
+					score: 0, // Default score
+					submitted: true,
+				},
+			})
+			.catch((error) => {
+				toast.error(`Failed to submit solution`);
+				console.error("Error submitting solution:", error);
+			});
+	};
 
 	// Functions to dynamically control code editor
-	const setCodeEditorContent = (code: string, language?: string) => {
+	const setCodeEditorContent = (code: string, language?: Language) => {
 		setEditorCode(code);
 		if (language) {
 			setEditorLanguage(language);
@@ -81,56 +142,40 @@ export default function Problem({
 		setCodeEditorContent("");
 	};
 
-	// Initialize with starter code on component mount
-	useEffect(() => {
-		setCodeEditorContent(`// Write your code here\nconsole.log("Hello, Mighty!");`, "javascript");
-	}, []);
-
 	// Fetch students solutions when submissions tab is accessed
-	useEffect(() => {
-		if (role === "admin") return; // Admins do not have submissions view
+	// useEffect(() => {
+	// 	if (role === "admin") return; // Admins do not have submissions view
 
-		if (
-			tabValue === "submissions" &&
-			showSubmissions &&
-			role === "teacher" &&
-			!submissions.studentSolutionsView &&
-			submissions.studentsSolutionsData.length === 0
-		) {
-			submissions.fetchStudentsSolutions();
-		}
-		if (
-			tabValue === "submissions" &&
-			showSubmissions &&
-			role === "student" &&
-			submissions.studentSolutionsData.length === 0
-		) {
-			submissions.fetchStudentSolutions("current-student-id"); // Replace with actual current student ID
-		}
-	}, [tabValue, showSubmissions, submissions.studentSolutionsView, submissions.studentsSolutionsData.length]);
+	// 	if (
+	// 		tabValue === "submissions" &&
+	// 		showSubmissions &&
+	// 		role === "teacher" &&
+	// 		!submissions.studentSolutionsView &&
+	// 		submissions.studentsSolutionsData.length === 0
+	// 	) {
+	// 		submissions.fetchStudentsSolutions();
+	// 	}
+	// 	if (
+	// 		tabValue === "submissions" &&
+	// 		showSubmissions &&
+	// 		role === "student" &&
+	// 		submissions.studentSolutionsData.length === 0
+	// 	) {
+	// 		submissions.fetchStudentSolutions("current-student-id"); // Replace with actual current student ID
+	// 	}
+	// }, [tabValue, showSubmissions, submissions.studentSolutionsView, submissions.studentsSolutionsData.length]);
 
 	// Fetch individual student solutions when viewing specific student
-	useEffect(() => {
-		if (role === "admin") return; // Admins do not have submissions view
-		if (
-			submissions.studentSolutionsView &&
-			submissions.selectedStudentID &&
-			submissions.studentSolutionsData.length === 0
-		) {
-			submissions.fetchStudentSolutions(submissions.selectedStudentID);
-		}
-	}, [submissions.studentSolutionsView, submissions.selectedStudentID, submissions.studentSolutionsData.length]);
-
-	const handleSave = (data: {
-		title: string;
-		// maxAttempts: number;
-		maxScore: number;
-		deadline: Date;
-		content: Delta;
-	}) => {
-		console.log("Saving problem data:", data);
-		// Here you would typically make an API call to save the data
-	};
+	// useEffect(() => {
+	// 	if (role === "admin") return; // Admins do not have submissions view
+	// 	if (
+	// 		submissions.studentSolutionsView &&
+	// 		submissions.selectedStudentID &&
+	// 		submissions.studentSolutionsData.length === 0
+	// 	) {
+	// 		submissions.fetchStudentSolutions(submissions.selectedStudentID);
+	// 	}
+	// }, [submissions.studentSolutionsView, submissions.selectedStudentID, submissions.studentSolutionsData.length]);
 
 	return (
 		<div
@@ -247,9 +292,15 @@ export default function Problem({
 						})}
 						id="editor-bounds">
 						<DescriptionEditor
+							selectedClassId={selectedClassId}
+							setSelectedClassId={setSelectedClassId}
 							problemId={problemId}
 							maxScore={maxScore}
 							setMaxScore={setMaxScore}
+							deadline={deadline}
+							setDeadline={setDeadline}
+							deadlineTime={deadlineTime}
+							setDeadlineTime={setDeadlineTime}
 							isFirstRender={isFirstRender}
 							descriptionReadonly={descriptionReadonly}
 							isLoading={isDescriptionLoading}
@@ -262,27 +313,21 @@ export default function Problem({
 						{/* Teacher View */}
 						{showSubmissions && role == "teacher" && (
 							<TeacherSubmissionsView
-								studentSolutionsView={submissions.studentSolutionsView}
-								selectedStudentInfo={submissions.selectedStudentInfo}
-								studentSolutionsData={submissions.studentSolutionsData}
-								studentsSolutionsData={submissions.studentsSolutionsData}
-								isLoadingStudentSolutions={submissions.isLoadingStudentSolutions}
-								isLoadingStudentsSolutions={submissions.isLoadingStudentsSolutions}
-								onStudentRowClick={submissions.handleStudentRowClick}
-								onBackToStudentsList={submissions.handleBackToStudentsList}
+								classId={selectedClassId}
+								submissions={submissions}
 								onCodeEditorUpdate={setCodeEditorContent}
-								onScoreUpdate={submissions.updateStudentScore}
 								maxScore={maxScore}
 								studentsSolutionsColumns={studentsSolutionsColumns}
+								problemId={problemId}
 							/>
 						)}
 
 						{/* Student View */}
 						{showSubmissions && role == "student" && (
 							<StudentSubmissionsView
-								studentSolutionsData={submissions.studentSolutionsData}
 								isLoadingStudentSolutions={submissions.isLoadingStudentSolutions}
 								onCodeEditorUpdate={setCodeEditorContent}
+								problemId={problemId}
 							/>
 						)}
 					</TabsContent>
@@ -290,86 +335,12 @@ export default function Problem({
 			</Card>
 
 			{/* Code Editor and Output Section */}
-			<div className="flex h-full w-full flex-col gap-2">
-				{/* Code Editor Card */}
-				<Card
-					className={cn(
-						"flex min-h-[15rem] w-full flex-col gap-2 px-2 py-[8px] lg:max-h-[60vh] lg:min-h-auto lg:flex-auto lg:flex-grow-[5] lg:overflow-hidden",
-						{
-							"md:max-h-[60vh] md:min-h-auto md:flex-auto md:flex-grow-[5] md:overflow-hidden":
-								state != "expanded" && !isMobile,
-						},
-					)}>
-					{/* Code Editor Header */}
-					<div className="flex w-full flex-wrap items-center justify-between gap-1 lg:flex-nowrap">
-						<span className="inline-flex w-fit flex-row items-center justify-center gap-1 rounded-md border px-2 py-1 text-sm shadow-sm">
-							<CodeXml />
-							<span>Code</span>
-						</span>
-
-						{/* Action Buttons */}
-						<div className="flex flex-row items-center gap-1">
-							{role === "student" && (
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<Button variant="secondary" className="w-fit" onClick={() => {}}>
-											<Upload />
-											<span className="sr-only">Submit Code</span>
-										</Button>
-									</TooltipTrigger>
-									<TooltipContent>
-										<p>Submit Code</p>
-									</TooltipContent>
-								</Tooltip>
-							)}
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button variant="secondary" className="w-fit" onClick={() => {}}>
-										<Play />
-										<span className="sr-only">Run Code</span>
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent>
-									<p>Run Code</p>
-								</TooltipContent>
-							</Tooltip>
-						</div>
-					</div>
-
-					{/* Code Editor */}
-					<div className="min-h-0 flex-1 overflow-auto">
-						<CodeEditor language={editorLanguage} value={editorCode} onChange={setEditorCode} />
-					</div>
-				</Card>
-
-				{/* Output Card */}
-				<Card
-					className={cn(
-						"min-h-[15rem] w-full px-2 py-[8px] lg:max-h-[28.4vh] lg:min-h-auto lg:flex-auto lg:flex-grow-[2] lg:overflow-auto",
-						{
-							"px-2 py-[8px] md:max-h-[28.4vh] md:min-h-auto md:flex-auto md:flex-grow-[2] md:overflow-auto":
-								state != "expanded" && !isMobile,
-						},
-					)}>
-					<Tabs value={outputTabValue} onValueChange={setOutputTabValue} className="h-full w-full">
-						<TabsList>
-							<TabsTrigger value="output">
-								<Terminal /> Output
-							</TabsTrigger>
-						</TabsList>
-
-						<TabsContent value="output">
-							{!codeOutput || codeOutput == null ? (
-								<div className="flex h-full w-full items-center justify-center">
-									<p className="text-muted-foreground">No output yet. Run your code to see the output.</p>
-								</div>
-							) : (
-								<div>Code output</div>
-							)}
-						</TabsContent>
-					</Tabs>
-				</Card>
-			</div>
+			<CodeRunner
+				language={editorLanguage}
+				code={editorCode}
+				enableSubmit={!!effectiveProblemId && !createSolution.isPending}
+				onSubmitCode={handleSubmitCode}
+			/>
 		</div>
 	);
 }

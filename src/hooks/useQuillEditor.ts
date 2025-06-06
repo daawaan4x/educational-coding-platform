@@ -49,7 +49,7 @@ export function useQuillEditor(containerRef: RefObject<HTMLDivElement | null>) {
 		return quillInstanceRef.current?.getContents() ?? null;
 	};
 
-	const initializeEditor = async () => {
+	const initializeEditor = async (descriptionReadonly: boolean) => {
 		if (!containerRef.current || initializationAttempted.current) return;
 
 		setIsLoading(true);
@@ -86,18 +86,20 @@ export function useQuillEditor(containerRef: RefObject<HTMLDivElement | null>) {
 				if (editorDiv?.parentNode && !quillInstanceRef.current && containerRef.current?.contains(editorDiv)) {
 					console.log("Creating new Quill instance...");
 					quillInstanceRef.current = new Quill(editorDiv, {
-						readOnly: false,
+						readOnly: descriptionReadonly,
 						modules: {
 							syntax: true,
-							toolbar: [
-								["bold", "italic", "underline", "strike", "code", { script: "sub" }, { script: "super" }],
-								["blockquote", "code-block"],
-								[{ header: 1 }, { header: 2 }, { header: 3 }],
-								[{ color: [] }, { background: [] }],
-								[{ list: "ordered" }, { list: "bullet" }],
-								[{ align: [] }, { indent: "-1" }, { indent: "+1" }],
-								["link", "image", "video", "formula"],
-							],
+							toolbar: !descriptionReadonly
+								? [
+										["bold", "italic", "underline", "strike", "code", { script: "sub" }, { script: "super" }],
+										["blockquote", "code-block"],
+										[{ header: 1 }, { header: 2 }, { header: 3 }],
+										[{ color: [] }, { background: [] }],
+										[{ list: "ordered" }, { list: "bullet" }],
+										[{ align: [] }, { indent: "-1" }, { indent: "+1" }],
+										["link", "image", "video", "formula"],
+									]
+								: false,
 						},
 						placeholder: "Start typing here...",
 						theme: "snow",
