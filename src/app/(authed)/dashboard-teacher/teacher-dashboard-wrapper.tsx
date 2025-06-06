@@ -186,6 +186,7 @@ export default function TeacherDashboardWrapper() {
 				onRowClick={(row) => {
 					router.push(`/problems/${row.id}`);
 				}}
+				isLoading={isLoading}
 			/>
 		</div>
 	);

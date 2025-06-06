@@ -112,6 +112,7 @@ export default function StudentDashboardWrapper() {
 				onRowClick={(row) => {
 					router.push(`/problems/${row.id}`);
 				}}
+				isLoading={isLoading}
 			/>
 		</div>
 	);

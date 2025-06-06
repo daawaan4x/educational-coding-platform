@@ -528,6 +528,7 @@ export default function AdminDashboardWrapper() {
 						filterSearchPlaceholder="Search by name or email..."
 						enableSelection={true}
 						onSelectionChange={setSelectedAccounts}
+						isLoading={isLoading}
 					/>
 				</TabsContent>
 				<TabsContent value="classes">
@@ -608,6 +609,7 @@ export default function AdminDashboardWrapper() {
 									setClassStudentsView(true);
 									setSelectedClassView({ name: row.name, id: row.id });
 								}}
+								isLoading={isLoading}
 							/>
 						</>
 					)}
