@@ -7,7 +7,6 @@ import { SolutionItem } from "@/lib/types";
 import { useState } from "react";
 
 interface StudentSubmissionsViewProps {
-	studentSolutionsData: SolutionItem[];
 	isLoadingStudentSolutions: boolean;
 	onCodeEditorUpdate: (code: string) => void;
 	problemId?: string;
@@ -29,7 +28,6 @@ export function StudentSubmissionsView({
 		isLoading: solutionsIsLoading,
 		isError: solutionsIsError,
 		error: solutionsError,
-		refetch: refetchSolutions,
 	} = trpc.solutions.list.useQuery(
 		{
 			problem_id: problemId,
