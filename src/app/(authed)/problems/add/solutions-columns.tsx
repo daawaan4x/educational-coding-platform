@@ -51,11 +51,11 @@ import { z } from "zod";
 export const studentsSolutionsColumns: ColumnDef<SolutionsItem>[] = [
 	{
 		accessorKey: "authorLastName",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Last Name" />,
+		header: "Last Name",
 	},
 	{
 		accessorKey: "authorFirstName",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="First Name" />,
+		header: "First Name",
 	},
 	// {
 	// 	accessorKey: "attempts",
@@ -75,7 +75,7 @@ export const studentSolutionsColumns: ColumnDef<SolutionItem>[] = [
 	// },
 	{
 		accessorKey: "status",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+		header: "Status",
 		cell: ({ row }) => {
 			const { status } = row.original;
 			if (status === "accepted") {
@@ -115,7 +115,7 @@ export const studentSolutionsColumns: ColumnDef<SolutionItem>[] = [
 	},
 	{
 		accessorKey: "dateCreated",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Date Submitted" />,
+		header: "Date Submitted",
 		cell: ({ row }) => {
 			const { dateCreated: date } = row.original;
 			return format(date, "MMM d, yyyy h:mm a");
@@ -198,7 +198,7 @@ export const studentOwnSolutionsColumns: ColumnDef<SolutionItem>[] = [
 	// },
 	{
 		accessorKey: "status",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+		header: "Status",
 		cell: ({ row }) => {
 			const { status } = row.original;
 			if (status === "accepted") {
@@ -238,7 +238,7 @@ export const studentOwnSolutionsColumns: ColumnDef<SolutionItem>[] = [
 	},
 	{
 		accessorKey: "dateCreated",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Date Submitted" />,
+		header: "Date Submitted",
 		cell: ({ row }) => {
 			const { dateCreated: date } = row.original;
 			return format(date, "MMM d, yyyy h:mm a");

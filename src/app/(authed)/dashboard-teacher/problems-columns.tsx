@@ -1,6 +1,5 @@
 "use client";
 
-import { DataTableColumnHeader } from "@/components/data-table-column-header";
 import { Progress } from "@/components/ui/progress";
 import { ProblemItemWithProgress } from "@/lib/types";
 import { ColumnDef } from "@tanstack/react-table";
@@ -213,11 +212,11 @@ export const problemsForTeacher: ProblemItemWithProgress[] = [
 export const problemColumns: ColumnDef<ProblemItemWithProgress>[] = [
 	{
 		accessorKey: "title",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Title" />,
+		header: "Title",
 	},
 	{
 		accessorKey: "class",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Class" />,
+		header: "Class",
 	},
 	{
 		accessorKey: "deadline",

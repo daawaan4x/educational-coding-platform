@@ -88,11 +88,11 @@ const editClassSchema = z.object({
 export const classColumns: ColumnDef<ClassItem>[] = [
 	{
 		accessorKey: "name",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+		header: "Name",
 	},
 	{
 		accessorKey: "dateCreated",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Date Created" />,
+		header: "Date Created",
 		cell: ({ row }) => {
 			const { dateCreated: date } = row.original;
 			return format(date, "MMM d, yyyy h:mm a");
@@ -100,7 +100,7 @@ export const classColumns: ColumnDef<ClassItem>[] = [
 	},
 	{
 		accessorKey: "dateModified",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Date Modified" />,
+		header: "Date Modified",
 		cell: ({ row }) => {
 			const { dateModified: date } = row.original;
 			return format(date, "MMM d, yyyy h:mm a");
