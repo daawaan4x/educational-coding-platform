@@ -1,3 +1,5 @@
+import CodeRunner from "../code-runner";
+
 export const metadata = {
 	title: "Playground",
 };
@@ -5,7 +7,7 @@ export const metadata = {
 export default function Page() {
 	return (
 		<div className="flex h-screen w-full items-center justify-center">
-			<div className="text-2xl font-bold">Playground</div>
+			<CodeRunner />
 		</div>
 	);
 }

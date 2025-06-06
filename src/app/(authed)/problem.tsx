@@ -32,8 +32,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSubmissions } from "@/hooks/useSubmissions";
 import { useAuth } from "@/lib/auth";
+import { Language } from "@/lib/languages";
 import { trpc } from "@/lib/trpc";
-import { SolutionItem } from "@/lib/types";
 import { CodeXml, FolderClock, NotepadText, Play, Save, Terminal, Upload } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import type { Delta } from "quill";
@@ -74,7 +74,7 @@ export default function Problem({
 
 	// Code editor state management
 	const [editorCode, setEditorCode] = useState("");
-	const [editorLanguage, setEditorLanguage] = useState("javascript");
+	const [editorLanguage, setEditorLanguage] = useState<Language>("js");
 
 	// Description editor loading state
 	const [isDescriptionLoading, setIsDescriptionLoading] = useState(true);
@@ -130,7 +130,7 @@ export default function Problem({
 	};
 
 	// Functions to dynamically control code editor
-	const setCodeEditorContent = (code: string, language?: string) => {
+	const setCodeEditorContent = (code: string, language?: Language) => {
 		setEditorCode(code);
 		if (language) {
 			setEditorLanguage(language);
@@ -143,7 +143,7 @@ export default function Problem({
 
 	// Initialize with starter code on component mount
 	useEffect(() => {
-		setCodeEditorContent(`// Write your code here\nconsole.log("Hello, Mighty!");`, "javascript");
+		setCodeEditorContent(`// Write your code here\nconsole.log("Hello, Mighty!");`, "js");
 	}, []);
 
 	// Fetch students solutions when submissions tab is accessed

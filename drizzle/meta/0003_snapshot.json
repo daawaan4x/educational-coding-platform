@@ -1,6 +1,6 @@
 {
-	"id": "b1d176e0-142d-4a2c-8c72-ccace56ff7ba",
-	"prevId": "cd6631e4-5a10-4394-9c35-4942a9897429",
+	"id": "886d0a38-d5c1-4600-8d41-5939219bcd4f",
+	"prevId": "b1d176e0-142d-4a2c-8c72-ccace56ff7ba",
 	"version": "7",
 	"dialect": "postgresql",
 	"tables": {
@@ -202,6 +202,14 @@
 					"notNull": true,
 					"default": "''"
 				},
+				"status": {
+					"name": "status",
+					"type": "statuses",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'pending'"
+				},
 				"score": {
 					"name": "score",
 					"type": "integer",
@@ -381,6 +389,11 @@
 			"name": "roles",
 			"schema": "public",
 			"values": ["admin", "teacher", "student"]
+		},
+		"public.statuses": {
+			"name": "statuses",
+			"schema": "public",
+			"values": ["accepted", "wrong-answer", "error", "timeout", "pending"]
 		}
 	},
 	"schemas": {},
