@@ -325,9 +325,9 @@ export default function Problem({
 						{/* Student View */}
 						{showSubmissions && role == "student" && (
 							<StudentSubmissionsView
-								studentSolutionsData={submissions.studentSolutionsData}
 								isLoadingStudentSolutions={submissions.isLoadingStudentSolutions}
 								onCodeEditorUpdate={setCodeEditorContent}
+								problemId={problemId}
 							/>
 						)}
 					</TabsContent>
