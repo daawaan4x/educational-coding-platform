@@ -94,6 +94,7 @@ This project uses the following tools to enforce consistent coding conventions, 
 ## Contributors
 
 In alphabetical order:
+
 - Adrian Labasan (@lukexodus)
 - Ajay Lopez (@borzwick)
 - Theone Eclarin (@daawaan4x)
