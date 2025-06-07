@@ -1,4 +1,7 @@
-# Educational Coding Platform
+<div align="center">
+    <img src="public/codemight-logo.png" width=72 height=72 />
+    <h1 align="center"> 🤖 Codemight 📚 </h1>
+</div>
 
 ## Development
 
@@ -87,3 +90,10 @@ This project uses the following tools to enforce consistent coding conventions, 
 ### Automation
 
 - [Github Actions](https://github.com/features/actions): Automates CI workflows, including formatting & linting.
+
+## Contributors
+
+In alphabetical order:
+- Adrian Labasan (@lukexodus)
+- Ajay Lopez (@borzwick)
+- Theone Eclarin (@daawaan4x)
