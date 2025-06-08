@@ -86,16 +86,10 @@ export default function TeacherDashboardWrapper() {
 	const pageCount = data?.meta?.total_pages ?? -1;
 
 	// Fetch classes for the current user
-	const { data: classesData, isLoading: isLoadingClasses } = trpc.classes.list_by_user.useQuery(
-		{
-			user_id: session?.user?.id ?? "",
-			size: 50,
-			page: 1,
-		},
-		{
-			enabled: !!session?.user?.id,
-		},
-	);
+	const { data: classesData, isLoading: isLoadingClasses } = trpc.classes.list.useQuery({
+		size: 50,
+		page: 1,
+	});
 
 	const userClasses =
 		classesData?.data.map((classItem) => ({
