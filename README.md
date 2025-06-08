@@ -95,6 +95,6 @@ This project uses the following tools to enforce consistent coding conventions, 
 
 In alphabetical order:
 
-- Adrian Labasan (@lukexodus)
-- Ajay Lopez (@borzwick)
-- Theone Eclarin (@daawaan4x)
+- [Adrian Labasan](https://github.com/lukexodus) (**@lukexodus**)
+- [Ajay Lopez](https://github.com/borzwick) (**@borzwick**)
+- [Theone Eclarin](https://github.com/daawaan4x) (**@daawaan4x**)
