@@ -20,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useSidebar } from "@/components/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useStateProp } from "@/hooks/use-state-prop";
 import { Language, languageLabels, languages, languageTemplates } from "@/lib/languages";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
@@ -27,9 +28,9 @@ import { CodeXml, Play, Terminal, TextCursorInput, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 export default function CodeRunner({
-	language = "js",
+	language: languageProp = "js",
 	onLanguageChange,
-	code = "",
+	code: codeProp = "",
 	onCodeChange,
 	enableSubmit = false,
 	onSubmitCode,
@@ -43,6 +44,9 @@ export default function CodeRunner({
 }) {
 	const { state, isMobile } = useSidebar();
 
+	const [code, setCode] = useStateProp(codeProp, onCodeChange);
+	const [language, setLanguage] = useStateProp(languageProp, onLanguageChange);
+
 	const [isFresh, setIsFresh] = useState(true);
 	const initialCodeRef = useRef(code);
 
@@ -51,7 +55,7 @@ export default function CodeRunner({
 		if (!process.env.NEXT_PUBLIC_JUDGE0) return;
 		const template = languageTemplates[language];
 		if (isFresh) {
-			onCodeChange?.(template);
+			setCode(template);
 			initialCodeRef.current = template;
 		}
 	}, [language]);
@@ -133,7 +137,7 @@ export default function CodeRunner({
 					{/* Action Buttons */}
 					<div className="flex flex-row items-center gap-1">
 						{process.env.NEXT_PUBLIC_JUDGE0 && (
-							<Select value={language} onValueChange={(value) => onLanguageChange?.(value as Language)}>
+							<Select value={language} onValueChange={(value) => setLanguage(value as Language)}>
 								<SelectTrigger>
 									<SelectValue />
 								</SelectTrigger>
@@ -199,12 +203,7 @@ export default function CodeRunner({
 				</div>
 
 				{/* Code Editor */}
-				<CodeEditor
-					language={language}
-					value={code}
-					onChange={(value) => onCodeChange?.(value)}
-					className="h-full min-h-0"
-				/>
+				<CodeEditor language={language} value={code} onChange={setCode} className="h-full min-h-0" />
 			</Card>
 
 			{/* Input / Output Card */}
