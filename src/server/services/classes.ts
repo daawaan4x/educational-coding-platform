@@ -44,7 +44,6 @@ export const list = authed({
 	input: z.object({
 		size: z.int().gte(1).lte(50).default(50),
 		page: z.int().gte(1).default(1),
-
 		search: z.string().optional(),
 	}),
 
@@ -52,21 +51,6 @@ export const list = authed({
 		const { user } = ctx;
 
 		// For admin users, show all classes directly
-		if (user.is("admin")) {
-			const records = await pagination(() =>
-				db
-					.select({ ...getTableColumns(classes) })
-					.from(classes)
-					.where(
-						and(eq(classes.is_deleted, false), input.search ? or(ilike(classes.name, `%${input.search}%`)) : undefined),
-					)
-					.orderBy(classes.id)
-					.$dynamic(),
-			)(input);
-
-			return records;
-		}
-
 		// For non-admin users, only show classes they have access to
 		const records = await pagination(() =>
 			db
@@ -77,45 +61,7 @@ export const list = authed({
 					and(
 						eq(classes.is_deleted, false),
 						input.search ? or(ilike(classes.name, `%${input.search}%`)) : undefined,
-						eq(users_to_classes.user_id, user.id),
-					),
-				)
-				.orderBy(classes.id)
-				.$dynamic(),
-		)(input);
-
-		return records;
-	},
-});
-
-export const list_by_user = authed({
-	require: ["classes:read"],
-	input: z.object({
-		user_id: UserSchema.Select.shape.id,
-		size: z.int().gte(1).lte(50).default(50),
-		page: z.int().gte(1).default(1),
-		search: z.string().optional(),
-	}),
-
-	async fn({ ctx, input }) {
-		const { user } = ctx;
-
-		// Only allow admin users or the user themselves to view their classes
-		if (!user.is("admin") && user.id !== input.user_id) {
-			throw new TRPCError({ code: "FORBIDDEN", message: "Cannot view other user's classes" });
-		}
-
-		// Get classes for the specified user
-		const records = await pagination(() =>
-			db
-				.selectDistinctOn([classes.id], { ...getTableColumns(classes) })
-				.from(users_to_classes)
-				.innerJoin(classes, eq(users_to_classes.class_id, classes.id))
-				.where(
-					and(
-						eq(classes.is_deleted, false),
-						input.search ? or(ilike(classes.name, `%${input.search}%`)) : undefined,
-						eq(users_to_classes.user_id, input.user_id),
+						user.is("admin") ? undefined : eq(users_to_classes.user_id, user.id),
 					),
 				)
 				.orderBy(classes.id)
@@ -294,7 +240,6 @@ export const remove_users = authed({
 export const routers = t.router({
 	find: authedProcedure().input(find.input).query(find),
 	list: authedProcedure().input(list.input).query(list),
-	list_by_user: authedProcedure().input(list_by_user.input).query(list_by_user),
 	create: authedProcedure().input(create.input).mutation(create),
 	update: authedProcedure().input(update.input).mutation(update),
 	remove: authedProcedure().input(remove.input).mutation(remove),

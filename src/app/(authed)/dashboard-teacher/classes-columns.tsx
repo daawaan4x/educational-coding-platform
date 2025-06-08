@@ -121,7 +121,7 @@ export const classColumns: ColumnDef<ClassItem>[] = [
 					toast.success("Class updated successfully");
 					setIsEditDialogOpen(false);
 					setIsDropdownOpen(false);
-					utils.classes.list_by_user.invalidate();
+					utils.classes.list.invalidate();
 				},
 				onError: (error) => {
 					toast.error(`Failed to update class: ${error.message}`);
@@ -133,7 +133,7 @@ export const classColumns: ColumnDef<ClassItem>[] = [
 					toast.success("Class deleted successfully");
 					setIsDeleteDialogOpen(false);
 					setIsDropdownOpen(false);
-					utils.classes.list_by_user.invalidate();
+					utils.classes.list.invalidate();
 				},
 				onError: (error) => {
 					toast.error(`Failed to delete class: ${error.message}`);
